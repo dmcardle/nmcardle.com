@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Squirrel Repellent</title>
+
+    <script>
+      window.onload = function() {
+          let isPlaying = false;
+          
+          const audioCtx = new AudioContext();
+          const oscillator = audioCtx.createOscillator();
+          oscillator.type = 'square'; // For maximum annoyance.
+          oscillator.frequency.setValueAtTime(110, audioCtx.currentTime);
+          oscillator.connect(audioCtx.destination);
+
+          const playButton = document.querySelector("#play-btn");
+          playButton.addEventListener('click', (evt) => {
+              if (isPlaying)
+                  oscillator.stop();
+              else
+                  oscillator.start();
+
+              isPlaying = !isPlaying;
+
+              function randomlyModify() {
+                  oscillator.frequency.value = Math.random() * 500 + 15000;
+                  window.setTimeout(randomlyModify, Math.random() * 10 * 1000);
+              }
+              randomlyModify();
+          });
+      };
+    </script>
+  </head>
+  <body>
+    <button id="play-btn">Go away!</button>
+  </body>
+</html>
