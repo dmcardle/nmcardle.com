@@ -30,8 +30,8 @@ function buildThunks() {
             return;
         }
 
-        const kMaxNumStars = 128;
-        if (blobs.length < kMaxNumStars && Math.random() < 0.25) {
+        const kMaxNumStars = 10;
+        if (blobs.length < kMaxNumStars && Math.random() < 0.05) {
             let circle = document.createElementNS(kSvgNs, 'circle');
             let star = newStar(circle);
             circle.setAttributeNS(null, 'stroke-width', '0.1%');
@@ -45,10 +45,28 @@ function buildThunks() {
             blob.x += blob.vx;
             blob.y += blob.vy;
 
-            blob.vx *= 1.05;
-            blob.vy *= 1.02;
+            blobs.forEach((otherBlob, j, arr) => {
+                // Assume objects do not interact with themselves.
+                if (i === j) {
+                    return;
+                }
 
-            blob.r *= 1.005;
+                // Assume mass is proportional to radius.
+                const kGravConstant = 0.7;
+                const distSquared = Math.pow(blob.x - otherBlob.x, 2) +
+                      Math.pow(blob.y - otherBlob.y, 2);
+                const force = kGravConstant * blob.r * otherBlob.r / distSquared;
+
+                // Force is symmetric, so apply to both blobs.
+                const angle = Math.atan2(otherBlob.y - blob.y, otherBlob.x - blob.x);
+                blob.vx += Math.cos(angle) * force;
+                blob.vy += Math.sin(angle) * force;
+            });
+
+            //blob.vx *= 1.05;
+            //blob.vy *= 1.02;
+
+            //blob.r *= 1.005;
 
             const x = blob.x;
             const y = blob.y;
@@ -71,10 +89,10 @@ function buildThunks() {
     thunks.onkeydown = (event) => {
         if (event.code === "Space") {
             animationPaused = !animationPaused;
-        }
 
-        if (!animationPaused) {
-            window.requestAnimationFrame(animate);
+            if (!animationPaused) {
+                window.requestAnimationFrame(animate);
+            }
         }
     };
 
