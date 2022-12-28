@@ -50,7 +50,8 @@ function buildThunks() {
             // Pop the blob if it gets too big.
             console.log("Pop!", biggestBlob);
 
-            const kSplit = 5;
+            const kSplit = 15;
+            let newRadius = Math.sqrt(biggestBlob.r * biggestBlob.r / kSplit);
 
             for (let i=1; i<kSplit; ++i) {
                 let circle = document.createElementNS(kSvgNs, 'circle');
@@ -59,14 +60,22 @@ function buildThunks() {
                 circle.setAttributeNS(null, 'fill', randColor());
                 svg.appendChild(circle);
 
-                let newBlob = newStar(circle);
-                newBlob.x = biggestBlob.x + 10 * (Math.random() - 0.5);
-                newBlob.y = biggestBlob.y + 10 * (Math.random() - 0.5);
-                newBlob.r = biggestBlob.r / kSplit;
-                blobs.unshift(newBlob);
-
+                // Avoid adding new blobs by always replacing the smallest one.
+                let victim = blobs.reduce((acc, curr) => {
+                    if (!acc || curr.r > acc.r)
+                        return curr;
+                    return acc;
+                }, null);
+                if (victim == null || victim === mouseBlob) {
+                    return;
+                }
+                victim.x = biggestBlob.x + (Math.random() - 0.5);
+                victim.y = biggestBlob.y + (Math.random() - 0.5);
+                victim.vx *= 0.2;
+                victim.vy *= 0.2;
+                victim.r = newRadius;
             }
-            biggestBlob.r /= kSplit;
+            biggestBlob.r = newRadius;
         }
     }
 
@@ -141,7 +150,7 @@ function buildThunks() {
                     arr[j] = otherBlob;
                 }
 
-                const force = kGravConstant * blob.r * otherBlob.r / distSquared;
+                const force = kGravConstant * blob.r * blob.r * otherBlob.r * otherBlob.r / distSquared;
 
                 // Force is symmetric, so apply to both blobs.
                 const angle = Math.atan2(otherBlob.y - blob.y, otherBlob.x - blob.x);
