@@ -1,11 +1,4 @@
 function buildThunks() {
-    let thunks = {};
-
-    let animationPaused = false;
-    const kSvgNs = "http://www.w3.org/2000/svg";
-    let svg = document.getElementById("gameSvg");
-    let blobs = [];
-
     function newStar(elem) {
         return {
             x: 50,
@@ -16,6 +9,24 @@ function buildThunks() {
             elem: elem,
         };
     }
+
+    let thunks = {};
+
+    let animationPaused = false;
+    const kSvgNs = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById("gameSvg");
+
+
+    let mouseCircle = document.createElementNS(kSvgNs, 'circle');
+    mouseCircle.setAttributeNS(null, 'stroke-width', '0.1%');
+    mouseCircle.setAttributeNS(null, 'stroke', '#fff');
+    mouseCircle.setAttributeNS(null, 'fill', '#f00');
+    svg.appendChild(mouseCircle);
+    const mouseBlob = newStar(mouseCircle);
+    mouseBlob.r = 0;
+    let mouseEnabled = false;
+
+    let blobs = [ mouseBlob ];
 
     function randColor() {
         let s = "#";
@@ -33,7 +44,6 @@ function buildThunks() {
         const kMaxNumStars = 10;
         if (blobs.length < kMaxNumStars && Math.random() < 0.05) {
             let circle = document.createElementNS(kSvgNs, 'circle');
-            let star = newStar(circle);
             circle.setAttributeNS(null, 'stroke-width', '0.1%');
             circle.setAttributeNS(null, 'stroke', '#fff');
             circle.setAttributeNS(null, 'fill', randColor());
@@ -42,6 +52,15 @@ function buildThunks() {
         }
 
         blobs.forEach((blob, i, arr) => {
+            // Never apply forces to the mouse.
+            if (blob === mouseBlob) {
+                blob.elem.setAttributeNS(null, 'cx', blob.x);
+                blob.elem.setAttributeNS(null, 'cy', blob.y);
+                // The mouse blob is 10 times denser than other blobs.
+                blob.elem.setAttributeNS(null, 'r', blob.r / 10);
+                return;
+            }
+
             blob.x += blob.vx;
             blob.y += blob.vy;
 
@@ -63,15 +82,11 @@ function buildThunks() {
                 blob.vy += Math.sin(angle) * force;
             });
 
-            //blob.vx *= 1.05;
-            //blob.vy *= 1.02;
-
-            //blob.r *= 1.005;
-
             const x = blob.x;
             const y = blob.y;
             const r = blob.r;
             if (x + r < 0 || x - r > 100 || y - r < 0 || y + r > 100) {
+                console.assert(blob != mouseBlob);
                 arr[i] = newStar(blob.elem);
             }
 
@@ -87,14 +102,41 @@ function buildThunks() {
     };
 
     thunks.onkeydown = (event) => {
+        console.log(event);
         if (event.code === "Space") {
             animationPaused = !animationPaused;
 
             if (!animationPaused) {
                 window.requestAnimationFrame(animate);
             }
+        } else if (event.code === "KeyM") {
+            // TODO: Apply mass to the cursor.
+            mouseEnabled = !mouseEnabled;
+            console.log("mouse enabled? " + mouseEnabled);
+
+            if (mouseEnabled) {
+                mouseBlob.r = 10;
+            } else {
+                mouseBlob.r = 5;
+            }
         }
     };
+
+    // Transform mouse coordinates into SVG coordinates.
+    function transformMouseToSvgCoordinates(x, y, svg) {
+        let point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        return point.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    thunks.onmousemove = (event) => {
+        let mousePoint = transformMouseToSvgCoordinates(event.clientX,
+                                                        event.clientY,
+                                                        svg);
+        mouseBlob.x = mousePoint.x;
+        mouseBlob.y = mousePoint.y;
+    }
 
     return thunks;
 }
@@ -102,3 +144,4 @@ function buildThunks() {
 let thunks = buildThunks();
 window.onload = thunks.onload;
 window.onkeydown = thunks.onkeydown;
+window.onmousemove = thunks.onmousemove;
