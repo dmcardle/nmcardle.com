@@ -37,6 +37,39 @@ function buildThunks() {
         return s;
     }
 
+    function popLargestBlob(threshold) {
+        let biggestBlob = blobs.reduce((acc, curr) => {
+            if (curr.r > acc.r)
+                return curr;
+            return acc;
+        }, blobs[0]);
+        if (biggestBlob === mouseBlob) {
+            return;
+        }
+        if (!threshold || biggestBlob.r >= threshold) {
+            // Pop the blob if it gets too big.
+            console.log("Pop!", biggestBlob);
+
+            const kSplit = 5;
+
+            for (let i=1; i<kSplit; ++i) {
+                let circle = document.createElementNS(kSvgNs, 'circle');
+                circle.setAttributeNS(null, 'stroke-width', '0.1%');
+                circle.setAttributeNS(null, 'stroke', '#fff');
+                circle.setAttributeNS(null, 'fill', randColor());
+                svg.appendChild(circle);
+
+                let newBlob = newStar(circle);
+                newBlob.x = biggestBlob.x + 10 * (Math.random() - 0.5);
+                newBlob.y = biggestBlob.y + 10 * (Math.random() - 0.5);
+                newBlob.r = biggestBlob.r / kSplit;
+                blobs.unshift(newBlob);
+
+            }
+            biggestBlob.r /= kSplit;
+        }
+    }
+
     function animate() {
         if (animationPaused) {
             return;
@@ -52,6 +85,8 @@ function buildThunks() {
             blobs.unshift(newStar(circle));
         }
 
+        popLargestBlob(/*threshold=*/ 15);
+
         blobs.forEach((blob, i, arr) => {
             // Never apply forces to the mouse.
             if (blob === mouseBlob) {
@@ -61,6 +96,13 @@ function buildThunks() {
                 blob.elem.setAttributeNS(null, 'r', blob.r / 10);
                 return;
             }
+
+            if (!isFinite(blob.x) || !isFinite(blob.y) || !isFinite(blob.vx) || !isFinite(blob.vy)) {
+                blob = newStar(blob.elem);
+                arr[i] = blob;
+            }
+
+            console.assert(blob.r >= 0);
 
             blob.x += blob.vx;
             blob.y += blob.vy;
@@ -110,34 +152,31 @@ function buildThunks() {
             const x = blob.x;
             const y = blob.y;
             const r = blob.r;
-            // if (x + r < 0 || x - r > 100) {
-            //     console.assert(blob != mouseBlob);
-            //     arr[i] = newStar(blob.elem);
-            // }
             if (x + r < 0) {
                 blob.x = r;
-                blob.vx *= -1;
+                blob.vx *= -.9;
             }
             if (x - r > 100) {
-                if (Math.random() < 0.5) {
-                    blob.x = 100 - blob.r;
-                    blob.vx *= -1;
-                } else {
-                    arr[i] = newStar(blob.elem);
-                }
+                blob.x = 100 - blob.r;
+                blob.vx *= -.9;
             }
             if (y - r < 0) {
                 blob.y = blob.r;
-                blob.vy *= -1;
+                blob.vy *= -.9;
             }
             if (y + r > 100) {
                 blob.y = 100 - blob.r;
-                blob.vy *= -1;
+                blob.vy *= -.9;
             }
 
-            blob.elem.setAttributeNS(null, 'cx', x);
-            blob.elem.setAttributeNS(null, 'cy', y);
-            blob.elem.setAttributeNS(null, 'r', r);
+            if (isNaN(blob.x))
+                debugger;
+            if (isNaN(blob.y))
+                debugger;
+
+            blob.elem.setAttributeNS(null, 'cx', blob.x);
+            blob.elem.setAttributeNS(null, 'cy', blob.y);
+            blob.elem.setAttributeNS(null, 'r', blob.r);
         });
         window.requestAnimationFrame(animate);
     }
@@ -164,6 +203,8 @@ function buildThunks() {
             } else {
                 mouseBlob.r = 0;
             }
+        } else if (event.code === "KeyP") {
+            popLargestBlob(0);
         }
     };
 
@@ -179,6 +220,9 @@ function buildThunks() {
         let mousePoint = transformMouseToSvgCoordinates(event.clientX,
                                                         event.clientY,
                                                         svg);
+        if (!isFinite(mousePoint.x) || !isFinite(mousePoint.y)) {
+            return;
+        }
         mouseBlob.x = mousePoint.x;
         mouseBlob.y = mousePoint.y;
     }
