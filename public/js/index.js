@@ -1,13 +1,14 @@
 function buildThunks() {
     function newStar(elem) {
-        return {
-            x: 50,
-            y: 50,
+        let star = {
+            x: Math.random() * 100,
+            y: Math.random() * 100,
             r: Math.random()/2 + 0.1,
             vx: Math.random() - 0.5,
             vy: Math.random() - 0.5,
             elem: elem,
         };
+        return star;
     }
 
     let thunks = {};
@@ -41,7 +42,7 @@ function buildThunks() {
             return;
         }
 
-        const kMaxNumStars = 10;
+        const kMaxNumStars = 50;
         if (blobs.length < kMaxNumStars && Math.random() < 0.05) {
             let circle = document.createElementNS(kSvgNs, 'circle');
             circle.setAttributeNS(null, 'stroke-width', '0.1%');
@@ -74,6 +75,30 @@ function buildThunks() {
                 const kGravConstant = 0.7;
                 const distSquared = Math.pow(blob.x - otherBlob.x, 2) +
                       Math.pow(blob.y - otherBlob.y, 2);
+
+                if (distSquared < Math.pow(blob.r + otherBlob.r, 2) && blob.r > otherBlob.r) {
+                    let p1x = blob.r * blob.vx;
+                    let p1y = blob.r * blob.vy;
+
+                    let p2x = otherBlob.r * otherBlob.vx;
+                    let p2y = otherBlob.r * otherBlob.vy;
+
+                    let px = p1x + p2x;
+                    let py = p1y + p2y;
+
+                    let vx = px / (blob.r + otherBlob.r);
+                    let vy = py / (blob.r + otherBlob.r);
+
+                    blob.r = Math.sqrt(blob.r * blob.r + otherBlob.r * otherBlob.r);
+
+                    const kFudge = 0.8;
+                    blob.vx = kFudge * vx;
+                    blob.vy = kFudge * vy;
+
+                    otherBlob = newStar(otherBlob.elem);
+                    arr[j] = otherBlob;
+                }
+
                 const force = kGravConstant * blob.r * otherBlob.r / distSquared;
 
                 // Force is symmetric, so apply to both blobs.
@@ -85,9 +110,29 @@ function buildThunks() {
             const x = blob.x;
             const y = blob.y;
             const r = blob.r;
-            if (x + r < 0 || x - r > 100 || y - r < 0 || y + r > 100) {
-                console.assert(blob != mouseBlob);
-                arr[i] = newStar(blob.elem);
+            // if (x + r < 0 || x - r > 100) {
+            //     console.assert(blob != mouseBlob);
+            //     arr[i] = newStar(blob.elem);
+            // }
+            if (x + r < 0) {
+                blob.x = r;
+                blob.vx *= -1;
+            }
+            if (x - r > 100) {
+                if (Math.random() < 0.5) {
+                    blob.x = 100 - blob.r;
+                    blob.vx *= -1;
+                } else {
+                    arr[i] = newStar(blob.elem);
+                }
+            }
+            if (y - r < 0) {
+                blob.y = blob.r;
+                blob.vy *= -1;
+            }
+            if (y + r > 100) {
+                blob.y = 100 - blob.r;
+                blob.vy *= -1;
             }
 
             blob.elem.setAttributeNS(null, 'cx', x);
@@ -117,7 +162,7 @@ function buildThunks() {
             if (mouseEnabled) {
                 mouseBlob.r = 10;
             } else {
-                mouseBlob.r = 5;
+                mouseBlob.r = 0;
             }
         }
     };
@@ -130,13 +175,16 @@ function buildThunks() {
         return point.matrixTransform(svg.getScreenCTM().inverse());
     }
 
-    thunks.onmousemove = (event) => {
+    function handleMouseOrTouchMove(event) {
         let mousePoint = transformMouseToSvgCoordinates(event.clientX,
                                                         event.clientY,
                                                         svg);
         mouseBlob.x = mousePoint.x;
         mouseBlob.y = mousePoint.y;
     }
+
+    thunks.onmousemove = handleMouseOrTouchMove;
+    thunks.ontouchmove = handleMouseOrTouchMove;
 
     return thunks;
 }
@@ -145,3 +193,4 @@ let thunks = buildThunks();
 window.onload = thunks.onload;
 window.onkeydown = thunks.onkeydown;
 window.onmousemove = thunks.onmousemove;
+window.ontouchmove = thunks.ontouchmove;
