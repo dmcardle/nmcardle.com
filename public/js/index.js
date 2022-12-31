@@ -3,7 +3,7 @@ function buildThunks() {
         let star = {
             x: Math.random() * 100,
             y: Math.random() * 100,
-            r: Math.random()/2 + 0.1,
+            r: Math.random()/10 + 0.1,
             vx: Math.random() - 0.5,
             vy: Math.random() - 0.5,
             elem: elem,
@@ -76,6 +76,8 @@ function buildThunks() {
                 victim.r = newRadius;
             }
             biggestBlob.r = newRadius;
+            biggestBlob.vx = Math.random() - 0.5;
+            biggestBlob.vy = Math.random() - 0.5;
         }
     }
 
@@ -85,6 +87,8 @@ function buildThunks() {
         }
 
         const kMaxNumStars = 50;
+        const kGravConstant = 0.5;
+
         if (blobs.length < kMaxNumStars && Math.random() < 0.05) {
             let circle = document.createElementNS(kSvgNs, 'circle');
             circle.setAttributeNS(null, 'stroke-width', '0.1%');
@@ -123,7 +127,6 @@ function buildThunks() {
                 }
 
                 // Assume mass is proportional to radius.
-                const kGravConstant = 0.7;
                 const distSquared = Math.pow(blob.x - otherBlob.x, 2) +
                       Math.pow(blob.y - otherBlob.y, 2);
 
@@ -150,22 +153,24 @@ function buildThunks() {
                     arr[j] = otherBlob;
                 }
 
-                const force = kGravConstant * blob.r * blob.r * otherBlob.r * otherBlob.r / distSquared;
+                const m1 = blob.r * blob.r;  // Mass is proportional to area.
+                const m2 = otherBlob.r * otherBlob.r;
+                const force = kGravConstant * m1 * m2 / distSquared;
+                const accel = force / m1;
 
-                // Force is symmetric, so apply to both blobs.
                 const angle = Math.atan2(otherBlob.y - blob.y, otherBlob.x - blob.x);
-                blob.vx += Math.cos(angle) * force;
-                blob.vy += Math.sin(angle) * force;
+                blob.vx += Math.cos(angle) * accel;
+                blob.vy += Math.sin(angle) * accel;
             });
 
             const x = blob.x;
             const y = blob.y;
             const r = blob.r;
-            if (x + r < 0) {
+            if (x - r < 0) {
                 blob.x = r;
                 blob.vx *= -.9;
             }
-            if (x - r > 100) {
+            if (x + r > 100) {
                 blob.x = 100 - blob.r;
                 blob.vx *= -.9;
             }
