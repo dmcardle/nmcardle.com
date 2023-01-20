@@ -16,6 +16,9 @@ body > h3 {
 body a {
     color: green;
 }
+body todo {
+    background-color: yellow;
+}
 </style>
 
 <title>Dan McArdle</title>
@@ -32,21 +35,26 @@ Software Engineer | Cambridge, MA | October 2018 - January 2023
     * Developed tooling for end-to-end chip tests.
         * Splicing OTP images into FPGA bitstreams saved hours per test run.
         * Created a new capability: JTAG-based tests defined with GDB and OpenOCD.
-    * Developed a handful of e2e tests for the chip, e.g. [PR #16169](https://github.com/lowRISC/opentitan/pull/16169), [PR #16139](https://github.com/lowRISC/opentitan/pull/16139), [PR #15798](https://github.com/lowRISC/opentitan/pull/15798).
+    * Developed a handful of end-to-end tests for the chip, e.g. [PR #16169](https://github.com/lowRISC/opentitan/pull/16169), [PR #16139](https://github.com/lowRISC/opentitan/pull/16139), [PR #15798](https://github.com/lowRISC/opentitan/pull/15798).
     * Optimized memory functions and achieved a 1.5-5x speedup. [PR #14243](https://github.com/lowRISC/opentitan/pull/14243).
     * Enabled *semantic* codesearch features for C/C++ sources, e.g. [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c).
     * Designed and added tool for rapid bisecting. [PR #16701](https://github.com/lowRISC/opentitan/pull/16701).
 * **Chrome**
     * Developed prototypes of *TLS Encrypted Client Hello* (ECH) in the BoringSSL library.
         * Server prototype in [CL 45285](https://boringssl-review.googlesource.com/c/boringssl/+/45285)
+        * <todo>More CLs of prototypes?</todo>
     * Developed prototypes of Hybrid Public Key Encryption (HPKE) in BoringSSL.
         * draft-irtf-cfrg-hpke-04 in [CL 41304](https://boringssl-review.googlesource.com/c/boringssl/+/41304)
         * draft-irtf-cfrg-hpke-07 in [CL 44904](https://boringssl-review.googlesource.com/c/boringssl/+/44904)
     * Contributed to specification for [SVCB/HTTPS](https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/), a new DNS resource record. 
         * Ran a Chrome experiment to study the impact of new resource records on the DNS ecosystem: [design doc](https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing).
+        * <todo>Add crbug?</todo>
     * Developed many fuzzers for Chrome.
         * Discovered and fixed tons of security bugs.
+        * <todo>Link to a few specific bugs.</todo>
     * Hosted an intern developing Extended DNS Errors.
+        * <todo>Link to crbug for EDE</todo>
+        * <todo>Link to IETF spec</todo>
     
 ### Draper Laboratory 
 
@@ -105,3 +113,6 @@ State University of New York at Geneseo | Geneseo, NY | 2013
 
 * Directed Studies focused on Document Image Analysis
 * Presented *Stompbox* framework for real-time simulation of analog audio effects at GREAT Day (Geneseo Recognizing Excellence, Achievement, and Talent)
+
+
+## <todo>Skills</todo>
