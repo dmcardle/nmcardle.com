@@ -1,29 +1,57 @@
 <style>
 body {
     font-family: sans-serif;
+    padding: 5em;
+    width: 50em;
 }
-body h1,h2,h3 {
+h1,h2,h3 {
     font-family: monospace;
 }
-body {
-    padding: 5em;
-    width: 80em; 
+
+/* Fancy horizontal line over h2 */
+h2 {
+    display: flex;
+    flex-direction: row;
 }
-body > h3 {
+h2:before, h2:after {
+    content: "";
+    flex: 1 1;
+    border-bottom: 1px solid;
+    margin: auto;
+}
+h2:before {
+    margin-right: 10px;
+}
+h2:after {
+    margin-left: 10px;
+}
+
+h3 {
     font-weight: bold;
     color: darkred;
 }
-body a {
+a {
     color: green;
 }
-body todo {
+todo {
     background-color: yellow;
+}
+.justify {
+    text-align: justify;
 }
 </style>
 
 <title>Dan McArdle</title>
 
 # Dan McArdle
+
+<div class="justify">
+I am a software engineer with over 8 years of experience in security, systems software, and cryptography.
+I enjoy searching for security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection.
+Recently, I developed infrastructure for end-to-end verification of OpenTitan, an open-source silicon root-of-trust chip.
+I've contributed to IETF specifications and developed prototypes of draft revisions to gain insight into their feasibility and correctness.
+In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I had some exposure to formal verification with Coq.
+</div>
 
 ## Experience
 
@@ -55,8 +83,8 @@ Software Engineer | Cambridge, MA | October 2018 - January 2023
     * Hosted an intern developing Extended DNS Errors.
         * <todo>Link to crbug for EDE.</todo>
         * <todo>Link to IETF spec.</todo>
-    
-### Draper Laboratory 
+
+### Draper Laboratory
 
 Member of Technical Staff | Cambridge, MA | March 2018 - October 2018
 
@@ -89,7 +117,7 @@ Graduate Teaching Assistant | Syracuse, NY | August 2013 - May 2014
     * Graded papers, held weekly office hours, and led two lab sessions per week in Haskell language.
 * CIS 275: Discrete Math (Fall 2013)
     * Graded papers, held office hours, and led a weekly recitation.
-  
+
 ### Metis Consulting Group
 
 Intern & Software Engineer | Syracuse, NY | May 2011 - August 2014
@@ -105,7 +133,7 @@ Intern & Software Engineer | Syracuse, NY | May 2011 - August 2014
 
 State University of New York at Buffalo | Buffalo, NY | 2015
 
-* Published research on adding real-time capabilities to a functional programming language.
+* Contributed to published research on adding real-time capabilities to Standard ML, a functional programming language.
 
 ### Bachelor of Arts | Computer Science
 
