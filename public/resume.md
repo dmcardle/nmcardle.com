@@ -1,11 +1,11 @@
 <style>
 body {
     font-family: sans-serif;
-    padding: 5em;
+    padding: 2em 5em;
     width: 50em;
 }
-h1,h2,h3 {
-    font-family: monospace;
+h1 {
+    text-align: center;
 }
 
 /* Fancy horizontal line over h2 */
@@ -47,10 +47,10 @@ todo {
 
 <div class="justify">
 I am a software engineer with over 8 years of experience in security, systems software, and cryptography.
-I enjoy searching for security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection.
-Recently, I developed infrastructure for end-to-end verification of OpenTitan, an open-source silicon root-of-trust chip.
-I've contributed to IETF specifications and developed prototypes of draft revisions to gain insight into their feasibility and correctness.
-In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I had some exposure to formal verification with Coq.
+I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection.
+Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
+I've contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness.
+In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I had some exposure to formal verification with the Coq proof assistant.
 </div>
 
 ## Experience
@@ -59,30 +59,33 @@ In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I had some ex
 
 Software Engineer | Cambridge, MA | October 2018 - January 2023
 
-* **OpenTitan**
-    * Developed tooling for end-to-end chip tests.
-        * Splicing OTP images into FPGA bitstreams saved hours per test run.
-        * Created a new capability: JTAG-based tests defined with GDB and OpenOCD.
-    * Developed a handful of end-to-end tests for the chip, e.g. [PR #16169](https://github.com/lowRISC/opentitan/pull/16169), [PR #16139](https://github.com/lowRISC/opentitan/pull/16139), [PR #15798](https://github.com/lowRISC/opentitan/pull/15798).
-    * Optimized memory functions and achieved a 1.5-5x speedup. [PR #14243](https://github.com/lowRISC/opentitan/pull/14243).
-    * Enabled *semantic* codesearch features for C/C++ sources, e.g. [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c).
-    * Designed and added tool for rapid bisecting. [PR #16701](https://github.com/lowRISC/opentitan/pull/16701).
-* **Chrome**
-    * Developed prototypes of *TLS Encrypted Client Hello* (ECH) in the BoringSSL library.
-        * Server prototype in [CL 45285](https://boringssl-review.googlesource.com/c/boringssl/+/45285).
-        * <todo>More CLs of prototypes?</todo>
-    * Developed prototypes of Hybrid Public Key Encryption (HPKE) in BoringSSL.
-        * draft-irtf-cfrg-hpke-04 in [CL 41304](https://boringssl-review.googlesource.com/c/boringssl/+/41304).
-        * draft-irtf-cfrg-hpke-07 in [CL 44904](https://boringssl-review.googlesource.com/c/boringssl/+/44904).
-    * Contributed to specification for [SVCB/HTTPS](https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/), a new DNS resource record.
-        * Ran a Chrome experiment to study the impact of new resource records on the DNS ecosystem: [design doc](https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing).
-        * <todo>Add crbug?</todo>
-    * Developed many fuzzers for Chrome.
-        * Discovered and fixed tons of security bugs.
-        * <todo>Link to a few specific bugs.</todo>
-    * Hosted an intern developing Extended DNS Errors.
-        * <todo>Link to crbug for EDE.</todo>
-        * <todo>Link to IETF spec.</todo>
+**OpenTitan**
+
+* Developed tooling to splice OTP images into pre-built FPGA bitstreams.
+    This enabled comprehensive end-to-end tests and saved >1 hour per test.
+* Created infrastructure for JTAG-based tests defined with GDB and OpenOCD.
+* Wrote end-to-end tests for the chip, e.g. [PR #16169](https://github.com/lowRISC/opentitan/pull/16169), [PR #16139](https://github.com/lowRISC/opentitan/pull/16139), [PR #15798](https://github.com/lowRISC/opentitan/pull/15798).
+* Optimized memory functions and achieved a 1.5-5x speedup. [PR #14243](https://github.com/lowRISC/opentitan/pull/14243).
+* Enabled *semantic* codesearch features for C/C++ sources, e.g. [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c).
+* Designed and added tool for rapid bisecting. [PR #16701](https://github.com/lowRISC/opentitan/pull/16701).
+
+**Chrome**
+
+* Developed prototypes of *TLS Encrypted Client Hello* (ECH) in the BoringSSL library.
+    * Server prototype in [CL 45285](https://boringssl-review.googlesource.com/c/boringssl/+/45285).
+    * <todo>More CLs of prototypes?</todo>
+* Developed prototypes of Hybrid Public Key Encryption (HPKE) in BoringSSL.
+    * draft-irtf-cfrg-hpke-04 in [CL 41304](https://boringssl-review.googlesource.com/c/boringssl/+/41304).
+    * draft-irtf-cfrg-hpke-07 in [CL 44904](https://boringssl-review.googlesource.com/c/boringssl/+/44904).
+* Contributed to specification for [SVCB/HTTPS](https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/), a new DNS resource record.
+    * Ran a Chrome experiment to study the impact of new resource records on the DNS ecosystem: [design doc](https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing).
+    * <todo>Add crbug?</todo>
+* Developed many fuzzers for Chrome.
+    * Discovered and fixed tons of security bugs.
+    * <todo>Link to a few specific bugs.</todo>
+* Hosted an intern developing Extended DNS Errors.
+    * <todo>Link to crbug for EDE.</todo>
+    * <todo>Link to IETF spec.</todo>
 
 ### Draper Laboratory
 
@@ -143,4 +146,9 @@ State University of New York at Geneseo | Geneseo, NY | 2013
 * Presented *Stompbox* framework for real-time simulation of analog audio effects at GREAT Day (Geneseo Recognizing Excellence, Achievement, and Talent).
 
 
-## <todo>Skills</todo>
+## Skills
+
+* Languages: C, C++, Rust, Python, Bash. Approximate knowledge of many other languages.
+* Version control: Git. Some experience with Mercurial and Perforce.
+* Build systems: Bazel, GN, Make. Some experience with CMake.
+* Technical writing: DoD proposals and software documentation. Some contributions to IETF specifications.
