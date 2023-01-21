@@ -2,7 +2,7 @@
 body {
     font-family: sans-serif;
     padding: 2em 5em;
-    width: 50em;
+    width: 7in;
 }
 h1 {
     text-align: center;
@@ -51,6 +51,7 @@ I enjoy finding security vulnerabilities in low-level code by writing fuzzers, p
 Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
 I've contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness.
 In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I had some exposure to formal verification with the Coq proof assistant.
+<todo>Wrap it up.</todo>
 </div>
 
 ## Experience
@@ -67,25 +68,32 @@ Software Engineer | Cambridge, MA | October 2018 - January 2023
 * Wrote end-to-end tests for the chip, e.g. [PR #16169](https://github.com/lowRISC/opentitan/pull/16169), [PR #16139](https://github.com/lowRISC/opentitan/pull/16139), [PR #15798](https://github.com/lowRISC/opentitan/pull/15798).
 * Optimized memory functions and achieved a 1.5-5x speedup. [PR #14243](https://github.com/lowRISC/opentitan/pull/14243).
 * Enabled *semantic* codesearch features for C/C++ sources, e.g. [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c).
-* Designed and added tool for rapid bisecting. [PR #16701](https://github.com/lowRISC/opentitan/pull/16701).
+* Designed and added a tool for rapid bisecting. [PR #16701](https://github.com/lowRISC/opentitan/pull/16701).
 
 **Chrome**
 
-* Developed prototypes of *TLS Encrypted Client Hello* (ECH) in the BoringSSL library.
-    * Server prototype in [CL 45285](https://boringssl-review.googlesource.com/c/boringssl/+/45285).
+* Developed prototypes of *TLS Encrypted Client Hello* (ECH) in BoringSSL.
+  ECH enables clients to encrypt sensitive fields such as the desired server name, which are sent in cleartext by default.
+    * Added GREASE support for drafts 08 and 09 [[CL 40204](https://boringssl-review.googlesource.com/c/boringssl/+/40204), [CL 44784](https://boringssl-review.googlesource.com/c/boringssl/+/44784)].
+      GREASE staves off ecosystem ossification by enabling clients to send fake ECH data to servers that do not support it; passive middleboxes cannot tell the difference.
+    * Implemented backend server for draft 09 [[CL 43924]](https://boringssl-review.googlesource.com/c/boringssl/+/43924).
+    * Completed C and Go server prototypes for draft 09 [[CL 45285]](https://boringssl-review.googlesource.com/c/boringssl/+/45285).
     * <todo>More CLs of prototypes?</todo>
-* Developed prototypes of Hybrid Public Key Encryption (HPKE) in BoringSSL.
-    * draft-irtf-cfrg-hpke-04 in [CL 41304](https://boringssl-review.googlesource.com/c/boringssl/+/41304).
-    * draft-irtf-cfrg-hpke-07 in [CL 44904](https://boringssl-review.googlesource.com/c/boringssl/+/44904).
-* Contributed to specification for [SVCB/HTTPS](https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/), a new DNS resource record.
-    * Ran a Chrome experiment to study the impact of new resource records on the DNS ecosystem: [design doc](https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing).
+* Developed prototypes of [RFC 9180: Hybrid Public Key Encryption](https://www.rfc-editor.org/rfc/rfc9180.html) (HPKE) in BoringSSL.
+    * Implemented draft-irtf-cfrg-hpke-04 in C [[CL 41304]](https://boringssl-review.googlesource.com/c/boringssl/+/41304).
+    * Implemented draft-irtf-cfrg-hpke-05 in Go [[CL 42124]](https://boringssl-review.googlesource.com/c/boringssl/+/42124).
+    * Updated C implementation to draft-irtf-cfrg-hpke-05 [[CL 42444]](https://boringssl-review.googlesource.com/c/boringssl/+/42444).
+    * Added PSK variants of HPKE [[CL 42664]](https://boringssl-review.googlesource.com/c/boringssl/+/42664).
+    * Updated C and Go implementations to draft-irtf-cfrg-hpke-07 [[CL 44904]](https://boringssl-review.googlesource.com/c/boringssl/+/44904).
+
+* Contributed to specification for [SVCB/HTTPS](https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/), a new DNS resource record required for practical deployment of TLS ECH.
+    * While HTTPS record specification was in flux, designed and ran a Chrome experiment to study the impact of new resource records on the DNS ecosystem [[design doc]](https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing).
     * <todo>Add crbug?</todo>
+    * <todo>**Find GitHub PRs**</todo>
 * Developed many fuzzers for Chrome.
     * Discovered and fixed tons of security bugs.
     * <todo>Link to a few specific bugs.</todo>
-* Hosted an intern developing Extended DNS Errors.
-    * <todo>Link to crbug for EDE.</todo>
-    * <todo>Link to IETF spec.</todo>
+* Hosted an intern who implemented [RFC 8914: Extended DNS Errors](https://www.rfc-editor.org/rfc/rfc8914.html) in Chrome's net stack.
 
 ### Draper Laboratory
 
@@ -117,8 +125,8 @@ Adjunct Professor | Buffalo, NY | June 2015 - August 2015
 Graduate Teaching Assistant | Syracuse, NY | August 2013 - May 2014
 
 * CIS 252: Introduction to Computer Science (Spring 2014).
-    * Graded papers, held weekly office hours, and led two lab sessions per week in Haskell language.
-* CIS 275: Discrete Math (Fall 2013)
+    * Graded papers, held office hours, and led two lab sessions per week in Haskell language.
+* CIS 275: Discrete Math (Fall 2013).
     * Graded papers, held office hours, and led a weekly recitation.
 
 ### Metis Consulting Group
@@ -142,13 +150,16 @@ State University of New York at Buffalo | Buffalo, NY | 2015
 
 State University of New York at Geneseo | Geneseo, NY | 2013
 
-* Directed Studies focused on Document Image Analysis.
+* Multiple semesters of Directed Studies focused on Document Image Analysis.
 * Presented *Stompbox* framework for real-time simulation of analog audio effects at GREAT Day (Geneseo Recognizing Excellence, Achievement, and Talent).
 
 
 ## Skills
 
-* Languages: C, C++, Rust, Python, Bash. Approximate knowledge of many other languages.
+* Languages: C, C++, Rust, Python, Go, Bash.
+  Some experience with RISC-V and X86 assembly.
+  Approximate knowledge of many other languages.
 * Version control: Git. Some experience with Mercurial and Perforce.
 * Build systems: Bazel, GN, Make. Some experience with CMake.
-* Technical writing: DoD proposals and software documentation. Some contributions to IETF specifications.
+* Debuggers: GDB and RR.
+* Technical writing: DoD proposals and software documentation. Contributed to some IETF specifications.
