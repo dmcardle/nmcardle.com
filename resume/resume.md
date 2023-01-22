@@ -1,10 +1,25 @@
+---
+#title: Dan McArdle
+documentclass: article
+header-includes: |
+    \usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+    \usepackage{titling}
+    \setlength{\droptitle}{-5em}
+urlcolor: OliveGreen
+linkcolor: red
+lang: en-US
+
+backgroundcolor: blue;
+---
+
 <style>
 body {
     font-family: sans-serif;
     padding: 2em 5em;
     width: 7in;
 }
-h1 {
+h1 
+{
     text-align: center;
 }
 
@@ -30,20 +45,41 @@ h3 {
     font-weight: bold;
     color: darkred;
 }
-a {
-    color: green;
-}
 todo {
     background-color: yellow;
+}
+.right {
+    text-align: right;
 }
 .justify {
     text-align: justify;
 }
+
+#top {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+#top > h1 {
+    flex-grow: 1;
+    font-size: 30pt;
+}
+#top > div {
+    flex-grow: 1;
+    text-align: right;
+    margin: auto;
+    font-size: 11pt;
+}
 </style>
 
-<title>Dan McArdle</title>
-
+<div id="top">
 # Dan McArdle
+<div>
+  <div>[`https://github.com/dmcardle`](https://github.com/dmcardle)</div>
+  <div>[`https://nmcardle.com/resume`](https://nmcardle.com/resume)</div>
+  <div>`d@nmcardle.com|315-317-6220`</div>
+</div>
+</div>
 
 <div class="justify">
 I am a software engineer with over 8 years of experience in security, systems software, and cryptography.
@@ -51,7 +87,6 @@ I enjoy finding security vulnerabilities in low-level code by writing fuzzers, p
 Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
 I've contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness.
 In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I've had exposure to formal verification with the Coq proof assistant.
-<todo>Wrap it up.</todo>
 </div>
 
 ## Experience
@@ -97,7 +132,7 @@ Software Engineer | Cambridge, MA | October 2018 - January 2023
 
 ### Draper Laboratory
 
-Member of Technical Staff / Software Engineer | Cambridge, MA | March 2018 - October 2018
+Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 - October 2018
 
 * Technical work on DoD projects with a focus on formal methods and cybersecurity.
 * Specific topics include formally-verified software, static taint analysis, and fuzzing.
@@ -168,13 +203,21 @@ State University of New York at Geneseo | Geneseo, NY | 2013
 ## Patents & Publications
 
 * Daniel McArdle, Judson Powers, Robert A. Joyce (2022-12-06). *Self-healing architecture for resilient computing services* (US-11522904-B2). [https://patents.google.com/patent/US11522904B2/en](https://patents.google.com/patent/US11522904B2/en)
+
 * Paul Nicotera, Robert Joyce, Judson Powers, Daniel McArdle (2022-03-15). *Systems and methods for used learned representations to determine terrain type* (US-11275940-B1). [https://patents.google.com/patent/US11275940B1/en](https://patents.google.com/patent/US11275940B1/en)
+
 * Judson Powers, Daniel McArdle, Robert A. Joyce (2018-09-18). *Late-stage software feature reduction tool for security and performance* (US-10078510-B1). [https://patents.google.com/patent/US10078510B1/en](https://patents.google.com/patent/US10078510B1/en)
+
 * Judson Powers, Robert A. Joyce, Daniel McArdle (2019-05-07). *Application randomization mechanism* (US-10284592-B1). [https://patents.google.com/patent/US10284592B1/en](https://patents.google.com/patent/US10284592B1/en)
+
 * Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). *Mechanism for concealing application and operation system identity* (US-10412116-B1). [https://patents.google.com/patent/US10412116B1/en](https://patents.google.com/patent/US10412116B1/en)
+
 * Daniel McArdle, Judson Powers (2021-05-18). *Systems and methods for runtime enforcement of data flow integrity* (US-11010495-B1). [https://patents.google.com/patent/US11010495B1/en](https://patents.google.com/patent/US11010495B1/en)
+
 * Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). *Evaluating results of multiple virtual machines that use application randomization mechanism* (US-10200401-B1). [https://patents.google.com/patent/US10200401B1/en](https://patents.google.com/patent/US10200401B1/en)
+
 * Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). *Configuration of application randomization mechanism* (US-10200406-B1). [https://patents.google.com/patent/US10200406B1/en](https://patents.google.com/patent/US10200406B1/en)
+
 * Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). *Application randomization mechanism* (US-10412114-B1). [https://patents.google.com/patent/US10412114B1/en](https://patents.google.com/patent/US10412114B1/en)
 
 * Li, Muyuan, Daniel E. McArdle, Jeffrey C. Murphy, Bhargav Shivkumar, and Lukasz Ziarek. "Adding real-time capabilities to a SML compiler." ACM SIGBED Review 13, no. 2 (2016): 8-13.

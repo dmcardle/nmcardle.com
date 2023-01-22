@@ -1,10 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>resume</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  
+</head>
+<body>
 <style>
 body {
     font-family: sans-serif;
     padding: 2em 5em;
     width: 7in;
 }
-h1 {
+h1 
+{
     text-align: center;
 }
 
@@ -30,22 +49,48 @@ h3 {
     font-weight: bold;
     color: darkred;
 }
-a {
-    color: green;
-}
 todo {
     background-color: yellow;
+}
+.right {
+    text-align: right;
 }
 .justify {
     text-align: justify;
 }
+
+#top {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+#top > h1 {
+    flex-grow: 1;
+    font-size: 30pt;
+}
+#top > div {
+    flex-grow: 1;
+    text-align: right;
+    margin: auto;
+    font-size: 11pt;
+}
 </style>
-<title>
-Dan McArdle
-</title>
+<div id="top">
 <h1 id="dan-mcardle">Dan McArdle</h1>
+<div>
+<div>
+<a href="https://github.com/dmcardle"><code>https://github.com/dmcardle</code></a>
+</div>
+<div>
+<a href="https://nmcardle.com/resume"><code>https://nmcardle.com/resume</code></a>
+</div>
+<div>
+<code>d@nmcardle.com|315-317-6220</code>
+</div>
+</div>
+</div>
 <div class="justify">
-<p>I am a software engineer with over 8 years of experience in security, systems software, and cryptography. I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection. Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip. I’ve contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness. In the defense arena, I hacked on FreeBSD, LLVM’s X86 codegen, and I’ve had exposure to formal verification with the Coq proof assistant. <todo>Wrap it up.</todo></p>
+<p>I am a software engineer with over 8 years of experience in security, systems software, and cryptography. I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection. Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip. I’ve contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness. In the defense arena, I hacked on FreeBSD, LLVM’s X86 codegen, and I’ve had exposure to formal verification with the Coq proof assistant.</p>
 </div>
 <h2 id="experience">Experience</h2>
 <h3 id="google">Google</h3>
@@ -90,7 +135,7 @@ Dan McArdle
 <li>Hosted an intern who implemented <a href="https://www.rfc-editor.org/rfc/rfc8914.html">RFC 8914: Extended DNS Errors</a> in Chrome’s net stack.</li>
 </ul>
 <h3 id="draper-laboratory">Draper Laboratory</h3>
-<p>Member of Technical Staff / Software Engineer | Cambridge, MA | March 2018 - October 2018</p>
+<p>Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 - October 2018</p>
 <ul>
 <li>Technical work on DoD projects with a focus on formal methods and cybersecurity.</li>
 <li>Specific topics include formally-verified software, static taint analysis, and fuzzing.</li>
@@ -164,3 +209,5 @@ Dan McArdle
 <li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). <em>Application randomization mechanism</em> (US-10412114-B1). <a href="https://patents.google.com/patent/US10412114B1/en">https://patents.google.com/patent/US10412114B1/en</a></p></li>
 <li><p>Li, Muyuan, Daniel E. McArdle, Jeffrey C. Murphy, Bhargav Shivkumar, and Lukasz Ziarek. “Adding real-time capabilities to a SML compiler.” ACM SIGBED Review 13, no. 2 (2016): 8-13.</p></li>
 </ul>
+</body>
+</html>

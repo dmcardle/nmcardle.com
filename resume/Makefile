@@ -1,5 +1,8 @@
 %.html: %.md
+	pandoc --standalone -o $@ $<
+
+%.pdf: %.md
 	pandoc -o $@ $<
 
 .PHONY: all
-all: resume.html
+all: resume.html resume.pdf
