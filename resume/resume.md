@@ -7,6 +7,12 @@ documentclass: article
 urlcolor: OliveGreen
 colorlinks: True
 
+my-name: Dan McArdle
+personal-site: https://da.nmcardle.com/resume
+github-url: https://github.com/dmcardle
+email: d@nmcardle.com
+phone: (315) 317-6220
+
 dan-abstract: |
     I am a software engineer with over 8 years of experience in security, systems software, and cryptography.
     I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection.
@@ -22,7 +28,7 @@ dan-abstract: |
 
 Software Engineer | Cambridge, MA | October 2018 - January 2023
 
-**OpenTitan**
+#### OpenTitan
 
 * Developed tooling to splice OTP images into pre-built FPGA bitstreams.
     This enabled comprehensive end-to-end tests and saved >1 hour per test.
@@ -32,7 +38,7 @@ Software Engineer | Cambridge, MA | October 2018 - January 2023
 * Enabled *semantic* codesearch features for C/C++ sources, e.g. [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c).
 * Designed and added a tool for rapid bisecting. [PR #16701](https://github.com/lowRISC/opentitan/pull/16701).
 
-**Chrome**
+#### Chrome
 
 * Developed prototypes of *TLS Encrypted Client Hello* (ECH) in BoringSSL.
   ECH enables clients to encrypt sensitive fields such as the desired server name, which are sent in cleartext by default.

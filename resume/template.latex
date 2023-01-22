@@ -1,5 +1,7 @@
 \documentclass{article}
 
+\usepackage[T1]{fontenc}
+
 \usepackage[dvipsnames]{xcolor}
 \usepackage[colorlinks = true,
             linkcolor = blue,
@@ -12,11 +14,41 @@
 \usepackage{titling}
 \setlength{\droptitle}{-5em}
 
+\usepackage{multirow}
+
 % Workaround for `Undefined control sequence` error.
 \providecommand{\tightlist}{
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
+% Disable section numbering.
+\setcounter{secnumdepth}{0}
+
+\usepackage{array}
+\usepackage{multicol}
+
+% Select font for document.
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\urlstyle{sf}
+
 \begin{document}
+
+\setlength{\parindent}{0pt}
+
+
+\begin{multicols}{2}
+  \vspace{3em}
+  \Huge{$my-name$}
+
+  \columnbreak
+
+  \small{
+  \url{$personal-site$} \\
+  \url{$github-url$} \\
+  \href{mailto:$email$}{$email$} | $phone$
+  }
+\end{multicols}
+
 
 $dan-abstract$
 
