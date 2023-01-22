@@ -1,0 +1,25 @@
+\documentclass{article}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage[colorlinks = true,
+            linkcolor = blue,
+            urlcolor  = OliveGreen,
+            citecolor = blue,
+            anchorcolor = blue]{hyperref}
+
+\usepackage{hyperref}
+\usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+\usepackage{titling}
+\setlength{\droptitle}{-5em}
+
+% Workaround for `Undefined control sequence` error.
+\providecommand{\tightlist}{
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\begin{document}
+
+$dan-abstract$
+
+$body$
+
+\end{document}

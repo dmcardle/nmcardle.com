@@ -1,0 +1,79 @@
+<style>
+  body {
+      max-width: 7in;
+      margin: auto;
+      font-family: sans-serif;
+  }
+  a {
+      color: green;
+  }
+  /* Pandoc insists on emitting the title itself. */
+  #title-block-header {
+      display: none;
+  }
+  
+  h1 {
+      text-align: center;
+  }
+
+  /* Fancy horizontal line over h2 */
+  h2 {
+      display: flex;
+      flex-direction: row;
+  }
+  h2:before, h2:after {
+      content: "";
+      flex: 1 1;
+      border-bottom: 1px solid;
+      margin: auto;
+  }
+  h2:before {
+      margin-right: 10px;
+  }
+  h2:after {
+      margin-left: 10px;
+  }
+
+  h3 {
+      font-weight: bold;
+      color: darkred;
+  }
+  todo {
+      background-color: yellow;
+  }
+  .right {
+      text-align: right;
+  }
+  .justify {
+      text-align: justify;
+  }
+
+  #top {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+  }
+  #top > h1 {
+      flex-grow: 1;
+      font-size: 30pt;
+  }
+  #top > div {
+      flex-grow: 1;
+      text-align: right;
+      margin: auto;
+      font-size: 11pt;
+  }
+</style>
+
+<div id="top">
+  <h1>Dan McArdle</h1>
+  <div>
+    <div><a href="https://github.com/dmcardle">https://github.com/dmcardle</a></div>
+    <div><a href="https://nmcardle.com/resume">https://nmcardle.com/resume</a></div>
+    <div><a href="mailto:d@nmcardle.com">d@nmcardle.com</a> | 315-317-6220</div>
+  </div>
+</div>
+
+<div class="justify">$dan-abstract$</div>
+
+$body$

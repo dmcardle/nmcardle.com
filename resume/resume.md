@@ -1,93 +1,20 @@
 ---
-#title: Dan McArdle
-documentclass: article
-header-includes: |
-    \usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
-    \usepackage{titling}
-    \setlength{\droptitle}{-5em}
-urlcolor: OliveGreen
-linkcolor: red
+title: Dan McArdle
 lang: en-US
+documentclass: article
 
-backgroundcolor: blue;
+# LaTeX variables
+urlcolor: OliveGreen
+colorlinks: True
+
+dan-abstract: |
+    I am a software engineer with over 8 years of experience in security, systems software, and cryptography.
+    I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection.
+    Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
+    I've contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness.
+    In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I've had exposure to formal verification with the Coq proof assistant.
+
 ---
-
-<style>
-body {
-    font-family: sans-serif;
-    padding: 2em 5em;
-    width: 7in;
-}
-h1 
-{
-    text-align: center;
-}
-
-/* Fancy horizontal line over h2 */
-h2 {
-    display: flex;
-    flex-direction: row;
-}
-h2:before, h2:after {
-    content: "";
-    flex: 1 1;
-    border-bottom: 1px solid;
-    margin: auto;
-}
-h2:before {
-    margin-right: 10px;
-}
-h2:after {
-    margin-left: 10px;
-}
-
-h3 {
-    font-weight: bold;
-    color: darkred;
-}
-todo {
-    background-color: yellow;
-}
-.right {
-    text-align: right;
-}
-.justify {
-    text-align: justify;
-}
-
-#top {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-}
-#top > h1 {
-    flex-grow: 1;
-    font-size: 30pt;
-}
-#top > div {
-    flex-grow: 1;
-    text-align: right;
-    margin: auto;
-    font-size: 11pt;
-}
-</style>
-
-<div id="top">
-# Dan McArdle
-<div>
-  <div>[`https://github.com/dmcardle`](https://github.com/dmcardle)</div>
-  <div>[`https://nmcardle.com/resume`](https://nmcardle.com/resume)</div>
-  <div>`d@nmcardle.com|315-317-6220`</div>
-</div>
-</div>
-
-<div class="justify">
-I am a software engineer with over 8 years of experience in security, systems software, and cryptography.
-I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection.
-Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
-I've contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness.
-In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I've had exposure to formal verification with the Coq proof assistant.
-</div>
 
 ## Experience
 
@@ -144,7 +71,7 @@ Software Engineer | Ithaca, NY | August 2015 - February 2018
 
 * Cybersecurity R&D for DoD customers and technical proposal writing.
 * Wrote winning Phase II SBIR proposal and managed two-year development effort.
-* Proposal work lead to nine patents.
+* Proposal work lead to a number of patents.
 * Supervised interns developing interactive security coursework.
 * Technical work included Linux/FreeBSD kernel hacking and modifying the LLVM compiler.
 

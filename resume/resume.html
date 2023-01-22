@@ -1,129 +1,165 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>resume</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-  </style>
-  
-</head>
-<body>
 <style>
-body {
-    font-family: sans-serif;
-    padding: 2em 5em;
-    width: 7in;
-}
-h1 
-{
-    text-align: center;
-}
+  body {
+      max-width: 7in;
+      margin: auto;
+      font-family: sans-serif;
+  }
+  a {
+      color: green;
+  }
+  /* Pandoc insists on emitting the title itself. */
+  #title-block-header {
+      display: none;
+  }
+  
+  h1 {
+      text-align: center;
+  }
 
-/* Fancy horizontal line over h2 */
-h2 {
-    display: flex;
-    flex-direction: row;
-}
-h2:before, h2:after {
-    content: "";
-    flex: 1 1;
-    border-bottom: 1px solid;
-    margin: auto;
-}
-h2:before {
-    margin-right: 10px;
-}
-h2:after {
-    margin-left: 10px;
-}
+  /* Fancy horizontal line over h2 */
+  h2 {
+      display: flex;
+      flex-direction: row;
+  }
+  h2:before, h2:after {
+      content: "";
+      flex: 1 1;
+      border-bottom: 1px solid;
+      margin: auto;
+  }
+  h2:before {
+      margin-right: 10px;
+  }
+  h2:after {
+      margin-left: 10px;
+  }
 
-h3 {
-    font-weight: bold;
-    color: darkred;
-}
-todo {
-    background-color: yellow;
-}
-.right {
-    text-align: right;
-}
-.justify {
-    text-align: justify;
-}
+  h3 {
+      font-weight: bold;
+      color: darkred;
+  }
+  todo {
+      background-color: yellow;
+  }
+  .right {
+      text-align: right;
+  }
+  .justify {
+      text-align: justify;
+  }
 
-#top {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-}
-#top > h1 {
-    flex-grow: 1;
-    font-size: 30pt;
-}
-#top > div {
-    flex-grow: 1;
-    text-align: right;
-    margin: auto;
-    font-size: 11pt;
-}
+  #top {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+  }
+  #top > h1 {
+      flex-grow: 1;
+      font-size: 30pt;
+  }
+  #top > div {
+      flex-grow: 1;
+      text-align: right;
+      margin: auto;
+      font-size: 11pt;
+  }
 </style>
+
 <div id="top">
-<h1 id="dan-mcardle">Dan McArdle</h1>
-<div>
-<div>
-<a href="https://github.com/dmcardle"><code>https://github.com/dmcardle</code></a>
+  <h1>Dan McArdle</h1>
+  <div>
+    <div><a href="https://github.com/dmcardle">https://github.com/dmcardle</a></div>
+    <div><a href="https://nmcardle.com/resume">https://nmcardle.com/resume</a></div>
+    <div><a href="mailto:d@nmcardle.com">d@nmcardle.com</a> | 315-317-6220</div>
+  </div>
 </div>
-<div>
-<a href="https://nmcardle.com/resume"><code>https://nmcardle.com/resume</code></a>
-</div>
-<div>
-<code>d@nmcardle.com|315-317-6220</code>
-</div>
-</div>
-</div>
-<div class="justify">
-<p>I am a software engineer with over 8 years of experience in security, systems software, and cryptography. I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection. Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip. I’ve contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness. In the defense arena, I hacked on FreeBSD, LLVM’s X86 codegen, and I’ve had exposure to formal verification with the Coq proof assistant.</p>
-</div>
+
+<div class="justify"><p>I am a software engineer with over 8 years of
+experience in security, systems software, and cryptography. I enjoy
+finding security vulnerabilities in low-level code by writing fuzzers,
+performing static analysis, and sometimes just by manual inspection.
+Recently, I developed infrastructure for end-to-end hardware
+verification of OpenTitan, an open-source silicon root-of-trust chip.
+I’ve contributed to IETF specifications and developed prototypes of
+draft revisions to evaluate their feasibility and correctness. In the
+defense arena, I hacked on FreeBSD, LLVM’s X86 codegen, and I’ve had
+exposure to formal verification with the Coq proof assistant.</p></div>
+
 <h2 id="experience">Experience</h2>
 <h3 id="google">Google</h3>
 <p>Software Engineer | Cambridge, MA | October 2018 - January 2023</p>
 <p><strong>OpenTitan</strong></p>
 <ul>
-<li>Developed tooling to splice OTP images into pre-built FPGA bitstreams. This enabled comprehensive end-to-end tests and saved &gt;1 hour per test.</li>
-<li>Created infrastructure for JTAG-based tests defined with GDB and OpenOCD.</li>
-<li>Wrote end-to-end tests for the chip, e.g. <a href="https://github.com/lowRISC/opentitan/pull/16169">PR #16169</a>, <a href="https://github.com/lowRISC/opentitan/pull/16139">PR #16139</a>, <a href="https://github.com/lowRISC/opentitan/pull/15798">PR #15798</a>.</li>
-<li>Optimized memory functions and achieved a 1.5-5x speedup. <a href="https://github.com/lowRISC/opentitan/pull/14243">PR #14243</a>.</li>
-<li>Enabled <em>semantic</em> codesearch features for C/C++ sources, e.g. <a href="https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c">dif_otbn.c</a>.</li>
-<li>Designed and added a tool for rapid bisecting. <a href="https://github.com/lowRISC/opentitan/pull/16701">PR #16701</a>.</li>
+<li>Developed tooling to splice OTP images into pre-built FPGA
+bitstreams. This enabled comprehensive end-to-end tests and saved &gt;1
+hour per test.</li>
+<li>Created infrastructure for JTAG-based tests defined with GDB and
+OpenOCD.</li>
+<li>Wrote end-to-end tests for the chip, e.g. <a
+href="https://github.com/lowRISC/opentitan/pull/16169">PR #16169</a>, <a
+href="https://github.com/lowRISC/opentitan/pull/16139">PR #16139</a>, <a
+href="https://github.com/lowRISC/opentitan/pull/15798">PR
+#15798</a>.</li>
+<li>Optimized memory functions and achieved a 1.5-5x speedup. <a
+href="https://github.com/lowRISC/opentitan/pull/14243">PR
+#14243</a>.</li>
+<li>Enabled <em>semantic</em> codesearch features for C/C++ sources,
+e.g. <a
+href="https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c">dif_otbn.c</a>.</li>
+<li>Designed and added a tool for rapid bisecting. <a
+href="https://github.com/lowRISC/opentitan/pull/16701">PR
+#16701</a>.</li>
 </ul>
 <p><strong>Chrome</strong></p>
 <ul>
-<li>Developed prototypes of <em>TLS Encrypted Client Hello</em> (ECH) in BoringSSL. ECH enables clients to encrypt sensitive fields such as the desired server name, which are sent in cleartext by default.
+<li>Developed prototypes of <em>TLS Encrypted Client Hello</em> (ECH) in
+BoringSSL. ECH enables clients to encrypt sensitive fields such as the
+desired server name, which are sent in cleartext by default.
 <ul>
-<li>Added GREASE support for drafts 08 and 09 [<a href="https://boringssl-review.googlesource.com/c/boringssl/+/40204">CL 40204</a>, <a href="https://boringssl-review.googlesource.com/c/boringssl/+/44784">CL 44784</a>]. GREASE staves off ecosystem ossification by enabling clients to send fake ECH data to servers that do not support it; passive middleboxes cannot tell the difference.</li>
-<li>Implemented backend server for draft 09 <a href="https://boringssl-review.googlesource.com/c/boringssl/+/43924">[CL 43924]</a>.</li>
-<li>Completed C and Go server prototypes for draft 09 <a href="https://boringssl-review.googlesource.com/c/boringssl/+/45285">[CL 45285]</a>.</li>
+<li>Added GREASE support for drafts 08 and 09 [<a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/40204">CL
+40204</a>, <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/44784">CL
+44784</a>]. GREASE staves off ecosystem ossification by enabling clients
+to send fake ECH data to servers that do not support it; passive
+middleboxes cannot tell the difference.</li>
+<li>Implemented backend server for draft 09 <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/43924">[CL
+43924]</a>.</li>
+<li>Completed C and Go server prototypes for draft 09 <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/45285">[CL
+45285]</a>.</li>
 <li><todo>More CLs of prototypes?</todo></li>
 </ul></li>
-<li>Developed prototypes of <a href="https://www.rfc-editor.org/rfc/rfc9180.html">RFC 9180: Hybrid Public Key Encryption</a> (HPKE) in BoringSSL.
+<li>Developed prototypes of <a
+href="https://www.rfc-editor.org/rfc/rfc9180.html">RFC 9180: Hybrid
+Public Key Encryption</a> (HPKE) in BoringSSL.
 <ul>
-<li>Implemented draft-irtf-cfrg-hpke-04 in C <a href="https://boringssl-review.googlesource.com/c/boringssl/+/41304">[CL 41304]</a>.</li>
-<li>Implemented draft-irtf-cfrg-hpke-05 in Go <a href="https://boringssl-review.googlesource.com/c/boringssl/+/42124">[CL 42124]</a>.</li>
-<li>Updated C implementation to draft-irtf-cfrg-hpke-05 <a href="https://boringssl-review.googlesource.com/c/boringssl/+/42444">[CL 42444]</a>.</li>
-<li>Added PSK variants of HPKE <a href="https://boringssl-review.googlesource.com/c/boringssl/+/42664">[CL 42664]</a>.</li>
-<li>Updated C and Go implementations to draft-irtf-cfrg-hpke-07 <a href="https://boringssl-review.googlesource.com/c/boringssl/+/44904">[CL 44904]</a>.</li>
+<li>Implemented draft-irtf-cfrg-hpke-04 in C <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/41304">[CL
+41304]</a>.</li>
+<li>Implemented draft-irtf-cfrg-hpke-05 in Go <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/42124">[CL
+42124]</a>.</li>
+<li>Updated C implementation to draft-irtf-cfrg-hpke-05 <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/42444">[CL
+42444]</a>.</li>
+<li>Added PSK variants of HPKE <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/42664">[CL
+42664]</a>.</li>
+<li>Updated C and Go implementations to draft-irtf-cfrg-hpke-07 <a
+href="https://boringssl-review.googlesource.com/c/boringssl/+/44904">[CL
+44904]</a>.</li>
 </ul></li>
-<li>Contributed to specification for <a href="https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/">SVCB/HTTPS</a>, a new DNS resource record required for practical deployment of TLS ECH.
+<li>Contributed to specification for <a
+href="https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/">SVCB/HTTPS</a>,
+a new DNS resource record required for practical deployment of TLS ECH.
 <ul>
-<li>While HTTPS record specification was in flux, designed and ran a Chrome experiment to study the impact of new resource records on the DNS ecosystem <a href="https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing">[design doc]</a>.</li>
+<li>While HTTPS record specification was in flux, designed and ran a
+Chrome experiment to study the impact of new resource records on the DNS
+ecosystem <a
+href="https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing">[design
+doc]</a>.</li>
 <li><todo>Add crbug?</todo></li>
 <li><todo><strong>Find GitHub PRs</strong></todo></li>
 </ul></li>
@@ -132,37 +168,52 @@ todo {
 <li>Discovered and fixed tons of security bugs.</li>
 <li><todo>Link to a few specific bugs.</todo></li>
 </ul></li>
-<li>Hosted an intern who implemented <a href="https://www.rfc-editor.org/rfc/rfc8914.html">RFC 8914: Extended DNS Errors</a> in Chrome’s net stack.</li>
+<li>Hosted an intern who implemented <a
+href="https://www.rfc-editor.org/rfc/rfc8914.html">RFC 8914: Extended
+DNS Errors</a> in Chrome’s net stack.</li>
 </ul>
 <h3 id="draper-laboratory">Draper Laboratory</h3>
-<p>Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 - October 2018</p>
+<p>Software Engineer / Member of Technical Staff | Cambridge, MA | March
+2018 - October 2018</p>
 <ul>
-<li>Technical work on DoD projects with a focus on formal methods and cybersecurity.</li>
-<li>Specific topics include formally-verified software, static taint analysis, and fuzzing.</li>
-<li>Audited Adam Chlipala’s Spring 2018 <em>Formal Reasoning about Programs</em> at MIT.</li>
+<li>Technical work on DoD projects with a focus on formal methods and
+cybersecurity.</li>
+<li>Specific topics include formally-verified software, static taint
+analysis, and fuzzing.</li>
+<li>Audited Adam Chlipala’s Spring 2018 <em>Formal Reasoning about
+Programs</em> at MIT.</li>
 </ul>
-<h3 id="architecture-technology-corporation">Architecture Technology Corporation</h3>
+<h3 id="architecture-technology-corporation">Architecture Technology
+Corporation</h3>
 <p>Software Engineer | Ithaca, NY | August 2015 - February 2018</p>
 <ul>
-<li>Cybersecurity R&amp;D for DoD customers and technical proposal writing.</li>
-<li>Wrote winning Phase II SBIR proposal and managed two-year development effort.</li>
-<li>Proposal work lead to nine patents.</li>
+<li>Cybersecurity R&amp;D for DoD customers and technical proposal
+writing.</li>
+<li>Wrote winning Phase II SBIR proposal and managed two-year
+development effort.</li>
+<li>Proposal work lead to a number of patents.</li>
 <li>Supervised interns developing interactive security coursework.</li>
-<li>Technical work included Linux/FreeBSD kernel hacking and modifying the LLVM compiler.</li>
+<li>Technical work included Linux/FreeBSD kernel hacking and modifying
+the LLVM compiler.</li>
 </ul>
-<h3 id="state-university-of-new-york-at-buffalo">State University of New York at Buffalo</h3>
+<h3 id="state-university-of-new-york-at-buffalo">State University of New
+York at Buffalo</h3>
 <p>Adjunct Professor | Buffalo, NY | June 2015 - August 2015</p>
 <ul>
 <li>Taught CSE 305: Introduction to Programming Languages.</li>
-<li>Developed lectures and coursework teaching a variety of programming paradigms.</li>
-<li>Focused on Haskell programming language and the Lambda calculus.</li>
+<li>Developed lectures and coursework teaching a variety of programming
+paradigms.</li>
+<li>Focused on Haskell programming language and the Lambda
+calculus.</li>
 </ul>
 <h3 id="syracuse-university">Syracuse University</h3>
-<p>Graduate Teaching Assistant | Syracuse, NY | August 2013 - May 2014</p>
+<p>Graduate Teaching Assistant | Syracuse, NY | August 2013 - May
+2014</p>
 <ul>
 <li>CIS 252: Introduction to Computer Science (Spring 2014).
 <ul>
-<li>Graded papers, held office hours, and led two lab sessions per week in Haskell language.</li>
+<li>Graded papers, held office hours, and led two lab sessions per week
+in Haskell language.</li>
 </ul></li>
 <li>CIS 275: Discrete Math (Fall 2013).
 <ul>
@@ -170,44 +221,82 @@ todo {
 </ul></li>
 </ul>
 <h3 id="metis-consulting-group">Metis Consulting Group</h3>
-<p>Intern &amp; Software Engineer | Syracuse, NY | May 2011 - August 2014</p>
+<p>Intern &amp; Software Engineer | Syracuse, NY | May 2011 - August
+2014</p>
 <ul>
-<li>Responsible for web application development projects, specializing in travel.</li>
-<li>Tech stack included ColdFusion, PHP, Microsoft SQL Server, and JavaScript.</li>
+<li>Responsible for web application development projects, specializing
+in travel.</li>
+<li>Tech stack included ColdFusion, PHP, Microsoft SQL Server, and
+JavaScript.</li>
 </ul>
 <!-- SUNY Geneseo -->
 <h2 id="education">Education</h2>
-<h3 id="master-of-science-computer-science-and-engineering">Master of Science | Computer Science and Engineering</h3>
+<h3 id="master-of-science-computer-science-and-engineering">Master of
+Science | Computer Science and Engineering</h3>
 <p>State University of New York at Buffalo | Buffalo, NY | 2015</p>
 <ul>
-<li>Contributed to published research on adding real-time capabilities to Standard ML, a functional programming language.</li>
+<li>Contributed to published research on adding real-time capabilities
+to Standard ML, a functional programming language.</li>
 </ul>
-<h3 id="bachelor-of-arts-computer-science">Bachelor of Arts | Computer Science</h3>
+<h3 id="bachelor-of-arts-computer-science">Bachelor of Arts | Computer
+Science</h3>
 <p>State University of New York at Geneseo | Geneseo, NY | 2013</p>
 <ul>
-<li>Multiple semesters of Directed Studies focused on Document Image Analysis.</li>
-<li>Presented <em>Stompbox</em> framework for real-time simulation of analog audio effects at GREAT Day (Geneseo Recognizing Excellence, Achievement, and Talent).</li>
+<li>Multiple semesters of Directed Studies focused on Document Image
+Analysis.</li>
+<li>Presented <em>Stompbox</em> framework for real-time simulation of
+analog audio effects at GREAT Day (Geneseo Recognizing Excellence,
+Achievement, and Talent).</li>
 </ul>
 <h2 id="skills">Skills</h2>
 <ul>
-<li>Languages: C, C++, Rust, Python, Go, Bash. Some experience with RISC-V and X86 assembly. Approximate knowledge of many other languages.</li>
-<li>Version control: Git. Some experience with Mercurial and Perforce.</li>
+<li>Languages: C, C++, Rust, Python, Go, Bash. Some experience with
+RISC-V and X86 assembly. Approximate knowledge of many other
+languages.</li>
+<li>Version control: Git. Some experience with Mercurial and
+Perforce.</li>
 <li>Build systems: Bazel, GN, Make. Some experience with CMake.</li>
 <li>Debuggers: GDB and RR.</li>
-<li>Technical writing: DoD proposals and software documentation. Contributed to some IETF specifications.</li>
+<li>Technical writing: DoD proposals and software documentation.
+Contributed to some IETF specifications.</li>
 </ul>
 <h2 id="patents-publications">Patents &amp; Publications</h2>
 <ul>
-<li><p>Daniel McArdle, Judson Powers, Robert A. Joyce (2022-12-06). <em>Self-healing architecture for resilient computing services</em> (US-11522904-B2). <a href="https://patents.google.com/patent/US11522904B2/en">https://patents.google.com/patent/US11522904B2/en</a></p></li>
-<li><p>Paul Nicotera, Robert Joyce, Judson Powers, Daniel McArdle (2022-03-15). <em>Systems and methods for used learned representations to determine terrain type</em> (US-11275940-B1). <a href="https://patents.google.com/patent/US11275940B1/en">https://patents.google.com/patent/US11275940B1/en</a></p></li>
-<li><p>Judson Powers, Daniel McArdle, Robert A. Joyce (2018-09-18). <em>Late-stage software feature reduction tool for security and performance</em> (US-10078510-B1). <a href="https://patents.google.com/patent/US10078510B1/en">https://patents.google.com/patent/US10078510B1/en</a></p></li>
-<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-05-07). <em>Application randomization mechanism</em> (US-10284592-B1). <a href="https://patents.google.com/patent/US10284592B1/en">https://patents.google.com/patent/US10284592B1/en</a></p></li>
-<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). <em>Mechanism for concealing application and operation system identity</em> (US-10412116-B1). <a href="https://patents.google.com/patent/US10412116B1/en">https://patents.google.com/patent/US10412116B1/en</a></p></li>
-<li><p>Daniel McArdle, Judson Powers (2021-05-18). <em>Systems and methods for runtime enforcement of data flow integrity</em> (US-11010495-B1). <a href="https://patents.google.com/patent/US11010495B1/en">https://patents.google.com/patent/US11010495B1/en</a></p></li>
-<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). <em>Evaluating results of multiple virtual machines that use application randomization mechanism</em> (US-10200401-B1). <a href="https://patents.google.com/patent/US10200401B1/en">https://patents.google.com/patent/US10200401B1/en</a></p></li>
-<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). <em>Configuration of application randomization mechanism</em> (US-10200406-B1). <a href="https://patents.google.com/patent/US10200406B1/en">https://patents.google.com/patent/US10200406B1/en</a></p></li>
-<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). <em>Application randomization mechanism</em> (US-10412114-B1). <a href="https://patents.google.com/patent/US10412114B1/en">https://patents.google.com/patent/US10412114B1/en</a></p></li>
-<li><p>Li, Muyuan, Daniel E. McArdle, Jeffrey C. Murphy, Bhargav Shivkumar, and Lukasz Ziarek. “Adding real-time capabilities to a SML compiler.” ACM SIGBED Review 13, no. 2 (2016): 8-13.</p></li>
+<li><p>Daniel McArdle, Judson Powers, Robert A. Joyce (2022-12-06).
+<em>Self-healing architecture for resilient computing services</em>
+(US-11522904-B2). <a
+href="https://patents.google.com/patent/US11522904B2/en">https://patents.google.com/patent/US11522904B2/en</a></p></li>
+<li><p>Paul Nicotera, Robert Joyce, Judson Powers, Daniel McArdle
+(2022-03-15). <em>Systems and methods for used learned representations
+to determine terrain type</em> (US-11275940-B1). <a
+href="https://patents.google.com/patent/US11275940B1/en">https://patents.google.com/patent/US11275940B1/en</a></p></li>
+<li><p>Judson Powers, Daniel McArdle, Robert A. Joyce (2018-09-18).
+<em>Late-stage software feature reduction tool for security and
+performance</em> (US-10078510-B1). <a
+href="https://patents.google.com/patent/US10078510B1/en">https://patents.google.com/patent/US10078510B1/en</a></p></li>
+<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-05-07).
+<em>Application randomization mechanism</em> (US-10284592-B1). <a
+href="https://patents.google.com/patent/US10284592B1/en">https://patents.google.com/patent/US10284592B1/en</a></p></li>
+<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10).
+<em>Mechanism for concealing application and operation system
+identity</em> (US-10412116-B1). <a
+href="https://patents.google.com/patent/US10412116B1/en">https://patents.google.com/patent/US10412116B1/en</a></p></li>
+<li><p>Daniel McArdle, Judson Powers (2021-05-18). <em>Systems and
+methods for runtime enforcement of data flow integrity</em>
+(US-11010495-B1). <a
+href="https://patents.google.com/patent/US11010495B1/en">https://patents.google.com/patent/US11010495B1/en</a></p></li>
+<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05).
+<em>Evaluating results of multiple virtual machines that use application
+randomization mechanism</em> (US-10200401-B1). <a
+href="https://patents.google.com/patent/US10200401B1/en">https://patents.google.com/patent/US10200401B1/en</a></p></li>
+<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05).
+<em>Configuration of application randomization mechanism</em>
+(US-10200406-B1). <a
+href="https://patents.google.com/patent/US10200406B1/en">https://patents.google.com/patent/US10200406B1/en</a></p></li>
+<li><p>Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10).
+<em>Application randomization mechanism</em> (US-10412114-B1). <a
+href="https://patents.google.com/patent/US10412114B1/en">https://patents.google.com/patent/US10412114B1/en</a></p></li>
+<li><p>Li, Muyuan, Daniel E. McArdle, Jeffrey C. Murphy, Bhargav
+Shivkumar, and Lukasz Ziarek. “Adding real-time capabilities to a SML
+compiler.” ACM SIGBED Review 13, no. 2 (2016): 8-13.</p></li>
 </ul>
-</body>
-</html>
