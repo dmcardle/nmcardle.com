@@ -137,20 +137,6 @@ Intern & Software Engineer | Syracuse, NY | May 2011 - August 2014
 * Responsible for web application development projects, specializing in travel.
 * Tech stack included ColdFusion, PHP, Microsoft SQL Server, and JavaScript.
 
-## Patents and Publications
-
-* Daniel McArdle, Judson Powers, Robert A. Joyce (2022-12-06). *Self-healing architecture for resilient computing services* (US-11522904-B2). [https://patents.google.com/patent/US11522904B2/en](https://patents.google.com/patent/US11522904B2/en)
-* Paul Nicotera, Robert Joyce, Judson Powers, Daniel McArdle (2022-03-15). *Systems and methods for used learned representations to determine terrain type* (US-11275940-B1). [https://patents.google.com/patent/US11275940B1/en](https://patents.google.com/patent/US11275940B1/en)
-* Judson Powers, Daniel McArdle, Robert A. Joyce (2018-09-18). *Late-stage software feature reduction tool for security and performance* (US-10078510-B1). [https://patents.google.com/patent/US10078510B1/en](https://patents.google.com/patent/US10078510B1/en)
-* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-05-07). *Application randomization mechanism* (US-10284592-B1). [https://patents.google.com/patent/US10284592B1/en](https://patents.google.com/patent/US10284592B1/en)
-* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). *Mechanism for concealing application and operation system identity* (US-10412116-B1). [https://patents.google.com/patent/US10412116B1/en](https://patents.google.com/patent/US10412116B1/en)
-* Daniel McArdle, Judson Powers (2021-05-18). *Systems and methods for runtime enforcement of data flow integrity* (US-11010495-B1). [https://patents.google.com/patent/US11010495B1/en](https://patents.google.com/patent/US11010495B1/en)
-* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). *Evaluating results of multiple virtual machines that use application randomization mechanism* (US-10200401-B1). [https://patents.google.com/patent/US10200401B1/en](https://patents.google.com/patent/US10200401B1/en)
-* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). *Configuration of application randomization mechanism* (US-10200406-B1). [https://patents.google.com/patent/US10200406B1/en](https://patents.google.com/patent/US10200406B1/en)
-* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). *Application randomization mechanism* (US-10412114-B1). [https://patents.google.com/patent/US10412114B1/en](https://patents.google.com/patent/US10412114B1/en)
-
-* Li, Muyuan, Daniel E. McArdle, Jeffrey C. Murphy, Bhargav Shivkumar, and Lukasz Ziarek. "Adding real-time capabilities to a SML compiler." ACM SIGBED Review 13, no. 2 (2016): 8-13.
-
 <!-- SUNY Geneseo -->
 
 ## Education
@@ -178,3 +164,17 @@ State University of New York at Geneseo | Geneseo, NY | 2013
 * Build systems: Bazel, GN, Make. Some experience with CMake.
 * Debuggers: GDB and RR.
 * Technical writing: DoD proposals and software documentation. Contributed to some IETF specifications.
+
+## Patents & Publications
+
+* Daniel McArdle, Judson Powers, Robert A. Joyce (2022-12-06). *Self-healing architecture for resilient computing services* (US-11522904-B2). [https://patents.google.com/patent/US11522904B2/en](https://patents.google.com/patent/US11522904B2/en)
+* Paul Nicotera, Robert Joyce, Judson Powers, Daniel McArdle (2022-03-15). *Systems and methods for used learned representations to determine terrain type* (US-11275940-B1). [https://patents.google.com/patent/US11275940B1/en](https://patents.google.com/patent/US11275940B1/en)
+* Judson Powers, Daniel McArdle, Robert A. Joyce (2018-09-18). *Late-stage software feature reduction tool for security and performance* (US-10078510-B1). [https://patents.google.com/patent/US10078510B1/en](https://patents.google.com/patent/US10078510B1/en)
+* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-05-07). *Application randomization mechanism* (US-10284592-B1). [https://patents.google.com/patent/US10284592B1/en](https://patents.google.com/patent/US10284592B1/en)
+* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). *Mechanism for concealing application and operation system identity* (US-10412116-B1). [https://patents.google.com/patent/US10412116B1/en](https://patents.google.com/patent/US10412116B1/en)
+* Daniel McArdle, Judson Powers (2021-05-18). *Systems and methods for runtime enforcement of data flow integrity* (US-11010495-B1). [https://patents.google.com/patent/US11010495B1/en](https://patents.google.com/patent/US11010495B1/en)
+* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). *Evaluating results of multiple virtual machines that use application randomization mechanism* (US-10200401-B1). [https://patents.google.com/patent/US10200401B1/en](https://patents.google.com/patent/US10200401B1/en)
+* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-02-05). *Configuration of application randomization mechanism* (US-10200406-B1). [https://patents.google.com/patent/US10200406B1/en](https://patents.google.com/patent/US10200406B1/en)
+* Judson Powers, Robert A. Joyce, Daniel McArdle (2019-09-10). *Application randomization mechanism* (US-10412114-B1). [https://patents.google.com/patent/US10412114B1/en](https://patents.google.com/patent/US10412114B1/en)
+
+* Li, Muyuan, Daniel E. McArdle, Jeffrey C. Murphy, Bhargav Shivkumar, and Lukasz Ziarek. "Adding real-time capabilities to a SML compiler." ACM SIGBED Review 13, no. 2 (2016): 8-13.
