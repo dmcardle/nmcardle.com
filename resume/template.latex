@@ -9,7 +9,7 @@
             citecolor = blue,
             anchorcolor = blue]{hyperref}
 
-\usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
 \usepackage{titling}
 \setlength{\droptitle}{-5em}
 
@@ -36,6 +36,7 @@
 \begin{document}
 
 \setlength{\parindent}{0pt}
+\setlength{\parskip}{-5pt}
 
 \setlength{\columnsep}{2in}
 \begin{multicols}{2}
