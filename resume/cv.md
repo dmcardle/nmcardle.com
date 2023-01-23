@@ -14,8 +14,7 @@ email: d@nmcardle.com
 phone: (315) 317-6220
 
 dan-abstract: |
-    I am a software engineer with over 8 years of experience in security, systems software, and cryptography.
-    I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and sometimes just by manual inspection.
+    A software engineer with 8+ years' experience in security, systems software, and cryptography, I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and manual inspection.
     Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
     I've contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness.
     In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I've had exposure to formal verification with the Coq proof assistant.
@@ -77,8 +76,8 @@ Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 -- Oc
 Software Engineer | Ithaca, NY | August 2015 -- February 2018
 
 * Cybersecurity R&D for DoD customers and technical proposal writing.
-* Wrote winning Phase II SBIR proposal and managed two-year development effort.
-* Proposal work lead to a number of patents.
+* Authored winning Phase II SBIR proposal and managed two-year development effort.
+* Proposal work led to a number of patents.
 * Supervised interns developing interactive security coursework.
 * Technical work included Linux/FreeBSD kernel hacking and modifying the LLVM compiler.
 
@@ -87,8 +86,8 @@ Software Engineer | Ithaca, NY | August 2015 -- February 2018
 Adjunct Professor | Buffalo, NY | June 2015 -- August 2015
 
 * Taught CSE 305: Introduction to Programming Languages.
-* Developed lectures and coursework teaching a variety of programming paradigms.
-* Focused on Haskell programming language and the Lambda calculus.
+    * Developed lectures and coursework teaching a variety of programming paradigms.
+    * Focused on Haskell programming language and the Lambda calculus.
 
 ## Syracuse University
 
