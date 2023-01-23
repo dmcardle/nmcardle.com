@@ -12,31 +12,31 @@
       display: none;
   }
   
-  h1 {
-      text-align: center;
-  }
-
   /* Fancy horizontal line over h2 */
-  h2 {
+  h1 {
       display: flex;
       flex-direction: row;
   }
-  h2:before, h2:after {
+  h1:before, h1:after {
       content: "";
       flex: 1 1;
       border-bottom: 1px solid;
       margin: auto;
   }
-  h2:before {
+  h1:before {
       margin-right: 10px;
   }
-  h2:after {
+  h1:after {
       margin-left: 10px;
   }
 
-  h3 {
+  h2 {
       font-weight: bold;
       color: darkred;
+      margin-bottom: 0;
+  }
+  h2 + p {
+      margin-top: 0.25em;
   }
   todo {
       background-color: yellow;
@@ -53,8 +53,9 @@
       flex-direction: row;
       justify-content: center;
   }
-  #top > h1 {
+  #top > .name {
       flex-grow: 1;
+      font-weight: bold;
       font-size: 30pt;
   }
   #top > div {
@@ -66,7 +67,7 @@
 </style>
 
 <div id="top">
-  <h1>$my-name$</h1>
+  <div class="name">$my-name$</div>
   <div>
     <div><a href="$personal-site$">$personal-site$</a></div>
     <div><a href="$github-url$">$github-url$</a></div>

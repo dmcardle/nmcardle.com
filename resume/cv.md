@@ -22,13 +22,12 @@ dan-abstract: |
 
 ---
 
-## Experience
+# Experience
 
-### Google
-
+## Google
 Software Engineer | Cambridge, MA | October 2018 -- January 2023
 
-#### OpenTitan
+### OpenTitan
 
 * Developed tooling to splice OTP images into pre-built FPGA bitstreams.
     This enabled comprehensive end-to-end tests and saved >1 hour per test.
@@ -38,7 +37,7 @@ Software Engineer | Cambridge, MA | October 2018 -- January 2023
 * Enabled *semantic* codesearch features for C/C++ sources (e.g., [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c)).
 * Designed and added a tool for rapid bisecting (see issue [#16406](https://github.com/lowRISC/opentitan/issues/16406) and PR [#16701](https://github.com/lowRISC/opentitan/pull/16701)).
 
-#### Chrome
+### Chrome
 
 * Developed prototypes of *TLS Encrypted Client Hello* (ECH) in BoringSSL.
   ECH enables clients to encrypt sensitive fields such as the desired server name, which are sent in cleartext by default.
@@ -65,7 +64,7 @@ Software Engineer | Cambridge, MA | October 2018 -- January 2023
 
 * Hosted an intern who implemented [RFC 8914: Extended DNS Errors](https://www.rfc-editor.org/rfc/rfc8914.html) in Chrome's net stack.
 
-### Draper Laboratory
+## Draper Laboratory
 
 Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 -- October 2018
 
@@ -73,7 +72,7 @@ Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 -- Oc
 * Specific topics include formally-verified software, static taint analysis, and fuzzing.
 * Audited Adam Chlipala's Spring 2018 *Formal Reasoning about Programs* at MIT.
 
-### Architecture Technology Corporation
+## Architecture Technology Corporation
 
 Software Engineer | Ithaca, NY | August 2015 -- February 2018
 
@@ -83,7 +82,7 @@ Software Engineer | Ithaca, NY | August 2015 -- February 2018
 * Supervised interns developing interactive security coursework.
 * Technical work included Linux/FreeBSD kernel hacking and modifying the LLVM compiler.
 
-### State University of New York at Buffalo
+## State University of New York at Buffalo
 
 Adjunct Professor | Buffalo, NY | June 2015 -- August 2015
 
@@ -91,7 +90,7 @@ Adjunct Professor | Buffalo, NY | June 2015 -- August 2015
 * Developed lectures and coursework teaching a variety of programming paradigms.
 * Focused on Haskell programming language and the Lambda calculus.
 
-### Syracuse University
+## Syracuse University
 
 Graduate Teaching Assistant | Syracuse, NY | August 2013 -- May 2014
 
@@ -100,7 +99,7 @@ Graduate Teaching Assistant | Syracuse, NY | August 2013 -- May 2014
 * CIS 275: Discrete Math (Fall 2013).
     * Graded papers, held office hours, and led a weekly recitation.
 
-### Metis Consulting Group
+## Metis Consulting Group
 
 Intern & Software Engineer | Syracuse, NY | May 2011 -- August 2014
 
@@ -109,15 +108,15 @@ Intern & Software Engineer | Syracuse, NY | May 2011 -- August 2014
 
 <!-- SUNY Geneseo -->
 
-## Education
+# Education
 
-### Master of Science | Computer Science and Engineering
+## Master of Science | Computer Science and Engineering
 
 State University of New York at Buffalo | Buffalo, NY | 2015
 
 * Contributed to published research on adding real-time capabilities to Standard ML, a functional programming language.
 
-### Bachelor of Arts | Computer Science
+## Bachelor of Arts | Computer Science
 
 State University of New York at Geneseo | Geneseo, NY | 2013
 
@@ -125,7 +124,7 @@ State University of New York at Geneseo | Geneseo, NY | 2013
 * Presented *Stompbox* framework for real-time simulation of analog audio effects at GREAT Day (Geneseo Recognizing Excellence, Achievement, and Talent).
 
 
-## Skills
+# Skills
 
 * Languages: C, C++, Rust, Python, Go, Bash.
   Some experience with RISC-V and X86 assembly.
@@ -135,7 +134,7 @@ State University of New York at Geneseo | Geneseo, NY | 2013
 * Debuggers: GDB and RR.
 * Technical writing: DoD proposals and software documentation. Contributed to some IETF specifications.
 
-## Patents & Publications
+# Patents & Publications
 
 * Daniel McArdle, Judson Powers, Robert A. Joyce (2022-12-06). *Self-healing architecture for resilient computing services* (US-11522904-B2). [https://patents.google.com/patent/US11522904B2/en](https://patents.google.com/patent/US11522904B2/en)
 
