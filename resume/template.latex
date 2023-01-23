@@ -3,13 +3,12 @@
 \usepackage[T1]{fontenc}
 
 \usepackage[dvipsnames]{xcolor}
-\usepackage[colorlinks = true,
+\PassOptionsToPackage{hyphens}{url}\usepackage[colorlinks = true,
             linkcolor = blue,
             urlcolor  = OliveGreen,
             citecolor = blue,
             anchorcolor = blue]{hyperref}
 
-\usepackage{hyperref}
 \usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
 \usepackage{titling}
 \setlength{\droptitle}{-5em}
@@ -31,11 +30,14 @@
 \renewcommand{\familydefault}{\sfdefault}
 \urlstyle{sf}
 
+\usepackage{sectsty}
+\subsubsectionfont{\color{BrickRed}}
+
 \begin{document}
 
 \setlength{\parindent}{0pt}
 
-
+\setlength{\columnsep}{2in}
 \begin{multicols}{2}
   \vspace{3em}
   \Huge{$my-name$}
