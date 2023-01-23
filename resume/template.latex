@@ -31,7 +31,7 @@
 \urlstyle{sf}
 
 \usepackage{sectsty}
-\subsubsectionfont{\color{BrickRed}}
+\subsectionfont{\color{BrickRed}}
 
 \begin{document}
 
