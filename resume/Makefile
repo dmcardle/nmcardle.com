@@ -1,10 +1,10 @@
 PANDOC=pandoc-3.0/bin/pandoc
 
-resume.html: resume.md template.html
+cv.html: cv.md template.html
 	${PANDOC} --template template.html --standalone -o $@ $<
 
-resume.pdf: resume.md template.latex
+cv.pdf: cv.md template.latex
 	${PANDOC} --template template.latex -o $@ $<
 
 .PHONY: all
-all: resume.html resume.pdf
+all: cv.html cv.pdf
