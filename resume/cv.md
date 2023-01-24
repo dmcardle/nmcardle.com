@@ -1,9 +1,9 @@
 ---
 title: Dan McArdle
 lang: en-US
-documentclass: article
 
 # LaTeX variables
+documentclass: article
 urlcolor: OliveGreen
 colorlinks: True
 
