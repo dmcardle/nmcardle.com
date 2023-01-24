@@ -33,6 +33,14 @@
 \usepackage{sectsty}
 \subsectionfont{\color{BrickRed}}
 
+% Set styling for section headings. They should be centered with a decorative
+% horizontal line on each side.
+\usepackage{titlesec}
+\newcommand{\fancysection}[1]{\hrulefill\;\mbox{\raisebox{-0.25em}{#1}}\;\hrulefill}
+% Parameters for \titleformat :
+%   \titleformat {<command>} {<shape>} {<format>} {<label>} {<sep>} {<before-code>} [<after-code>]
+\titleformat{\section}{\centering\Large\bfseries}{}{0em}{\fancysection}[]
+
 \begin{document}
 
 \setlength{\parindent}{0pt}
