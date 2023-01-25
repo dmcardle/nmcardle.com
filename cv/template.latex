@@ -1,0 +1,68 @@
+% This template file is preprocessed by `pandoc` before it reaches `pdflatex`.
+% Variables from the Markdown file's metadata block can be expanded in this
+% template by surrounding the variable name with single dollar signs. (If for
+% some reason an actual dollar sign symbol is needed, e.g. for a LaTeX formula,
+% it should be written as two dollar signs.)
+\documentclass{article}
+
+% Workaround for `Undefined control sequence` error.
+\providecommand{\tightlist}{
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\usepackage[T1]{fontenc}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+\usepackage[dvipsnames]{xcolor}
+\PassOptionsToPackage{hyphens}{url}\usepackage[colorlinks = true,
+            linkcolor = blue,
+            urlcolor  = OliveGreen,
+            citecolor = blue,
+            anchorcolor = blue]{hyperref}
+
+% Disable section numbering.
+\setcounter{secnumdepth}{0}
+
+% Used for contact info block.
+\usepackage{multicol}
+
+% Select Helvetica as the default font.
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\urlstyle{sf}
+
+% Set styling for section and subsection headings. Section headings
+% (``Experience'', etc.) should be centered with a decorative horizontal line on
+% each side. Subsection headings (employers, etc.) just need a custom color.
+\usepackage{sectsty}
+\usepackage{titlesec}
+\newcommand{\fancysection}[1]{\hrulefill\;\mbox{\raisebox{-0.25em}{#1}}\;\hrulefill}
+% Parameters for \titleformat :
+%   \titleformat {<command>} {<shape>} {<format>} {<label>} {<sep>} {<before-code>} [<after-code>]
+\titleformat{\section}{\centering\Large\bfseries}{}{0em}{\fancysection}[]
+% Set styling for subsection headings.
+\subsectionfont{\color{BrickRed}}
+
+\begin{document}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{-5pt}
+
+\setlength{\columnsep}{2in}
+\begin{multicols}{2}
+  \vspace{3em}
+  \Huge{$my-name$}
+
+  \columnbreak
+
+  \small{
+  \url{$personal-site$} \\
+  \url{$github-url$} \\
+  \href{mailto:$email$}{$email$} | $phone$
+  }
+\end{multicols}
+
+$dan-abstract$
+
+$body$
+
+\end{document}

@@ -5,6 +5,16 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/cv",
+        "destination": "/gen/cv/pandoc-generated.html"
+      },
+      {
+        "source": "/dmcardle-cv.pdf",
+        "destination": "/gen/cv/pandoc-generated.pdf"
+      }
     ]
   }
 }

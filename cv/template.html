@@ -1,0 +1,83 @@
+<style>
+  body {
+      max-width: 7in;
+      margin: auto;
+      font-family: sans-serif;
+  }
+  a {
+      color: green;
+  }
+  /* Pandoc insists on emitting the title itself. */
+  #title-block-header {
+      display: none;
+  }
+
+  /* Name and contact block. */
+  #top {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      margin-top: 2Rem;
+  }
+  #top > .name {
+      flex-grow: 1;
+      font-weight: bold;
+      font-size: 3Rem;
+  }
+  #top > div {
+      flex-grow: 1;
+      text-align: right;
+      margin: auto;
+      font-size: 1Rem;
+  }
+  
+  /* Fancy horizontal line over h2 */
+  h1 {
+      display: flex;
+      flex-direction: row;
+      font-size: 2.25Rem;
+  }
+  h1:before, h1:after {
+      content: "";
+      flex: 1 0;
+      border-bottom: 1px solid;
+      margin: auto;
+  }
+  h1:before {
+      margin-right: 1Rem;
+  }
+  h1:after {
+      margin-left: 1Rem;
+  }
+
+  h2 {
+      font-weight: bold;
+      color: darkred;
+      margin-bottom: 0;
+  }
+  h2 + p {
+      margin-top: 0.25Rem;
+  }
+  todo {
+      background-color: yellow;
+  }
+  .right {
+      text-align: right;
+  }
+  .justify {
+      text-align: justify;
+  }
+</style>
+
+<div id="top">
+  <div class="name">$my-name$</div>
+  <div>
+    <div><a href="$personal-site$">$personal-site$</a></div>
+    <div><a href="$github-url$">$github-url$</a></div>
+    <div><a href="mailto:$email$">$email$</a> | $phone$</div>
+  </div>
+</div>
+
+<div class="justify">$dan-abstract$</div>
+
+$body$
