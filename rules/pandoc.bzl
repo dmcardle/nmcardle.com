@@ -1,5 +1,5 @@
 def _pandoc_impl(ctx):
-    out_file = ctx.actions.declare_file("pandoc-generated." + ctx.attr.out_format)
+    out_file = ctx.actions.declare_file("{}.{}".format(ctx.label.name, ctx.attr.out_format))
 
     args = ctx.actions.args()
     args.add("--verbose")

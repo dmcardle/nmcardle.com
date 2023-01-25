@@ -3,20 +3,23 @@ load("//rules:pandoc.bzl", "pandoc")
 filegroup(
     name = "cv",
     srcs = [
-        ":cv_html",
-        ":cv_pdf",
+        ":dan_mcardle_cv_html",
+        ":dan_mcardle_cv_pdf",
     ],
 )
 
+# N.B.: The pandoc rule generates the output file's name from the target name.
+# The generated files' names must be kept in sync with `firebase.json`.
+
 pandoc(
-    name = "cv_html",
+    name = "dan_mcardle_cv_html",
     srcs = ["cv.md"],
     out_format = "html",
     template = "template.html",
 )
 
 pandoc(
-    name = "cv_pdf",
+    name = "dan_mcardle_cv_pdf",
     srcs = ["cv.md"],
     out_format = "pdf",
     template = "template.latex",
