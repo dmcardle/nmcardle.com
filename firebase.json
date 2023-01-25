@@ -9,7 +9,11 @@
     "rewrites": [
       {
         "source": "/cv",
-        "destination": "/cv.html"
+        "destination": "/gen/cv/pandoc-generated.html"
+      },
+      {
+        "source": "/dmcardle-cv.pdf",
+        "destination": "/gen/cv/pandoc-generated.pdf"
       }
     ]
   }

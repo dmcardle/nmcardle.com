@@ -1,0 +1,12 @@
+workspace(name = "nmcardle")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name="pandoc",
+    url="https://github.com/jgm/pandoc/releases/download/3.0/pandoc-3.0-linux-amd64.tar.gz",
+    strip_prefix="pandoc-3.0/bin",
+    sha256 = "0fe2ef8366a61b9296ef4a8512b9a2d4acd056c7f92ce7e0cc82add960c2cc8f",
+    build_file_content="exports_files(glob(['**']))",
+)
+
