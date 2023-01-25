@@ -8,13 +8,20 @@ Assuming Debian 11.
 
 ```sh
 sudo apt install texlive
-go install github.com/bazelbuild/bazelisk
+go get github.com/bazelbuild/bazelisk
+go get github.com/bazelbuild/buildtools/buildifier
 ```
 
 ## To build
 
 ```sh
 bazelisk build //...  # Builds files in bazel output directories.
+```
+
+## To format BUILD files
+
+```sh
+buildifier -r .
 ```
 
 ## To deploy the site
