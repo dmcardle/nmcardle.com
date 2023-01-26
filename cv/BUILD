@@ -6,9 +6,10 @@ filegroup(
         ":dan_mcardle_cv_html",
         ":dan_mcardle_cv_pdf",
     ],
+    visibility = ["//:__pkg__"],
 )
 
-# N.B.: The pandoc rule generates the output file's name from the target name.
+# N.B.: The pandoc rule generates the output filename from the target's name.
 # The generated files' names must be kept in sync with `firebase.json`.
 
 pandoc(

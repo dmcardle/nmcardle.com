@@ -16,6 +16,7 @@ def _pandoc_impl(ctx):
         outputs = [out_file],
         arguments = [args],
         executable = ctx.attr._pandoc_bin.files_to_run,
+        # Pandoc must not be sandboxed so it can use the system `pdflatex`.
         execution_requirements = {
             "no-sandbox": "",
         },

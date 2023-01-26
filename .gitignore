@@ -72,4 +72,4 @@ bazel-out
 bazel-testlogs
 
 # Generated release files.
-public/gen/*
+public/

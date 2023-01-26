@@ -28,7 +28,7 @@ buildifier -r .
 
 ```sh
 ./release.sh          # Copies selected output files to public/.
-firebase deploy
+firebase deploy       # Uploads public/ to cloud hosting, sets up routes, etc.
 ```
 
 ## Tips and tricks

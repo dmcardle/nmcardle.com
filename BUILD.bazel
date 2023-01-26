@@ -1,0 +1,16 @@
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+pkg_tar(
+    name = "release",
+    srcs = [
+        "//cv",
+        "//static:all_files",
+    ],
+    package_dir = "public",
+    remap_paths = {
+        # Dump files from static/ directly into the public/ dir.
+        "static": "",
+    },
+    # Do not collapse directory structure.
+    strip_prefix = ".",
+)

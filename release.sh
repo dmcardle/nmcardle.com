@@ -2,13 +2,22 @@
 
 set -e
 
-echo "::Building everything with Bazel..."
-bazelisk build //...
+if [ -e public/ ]; then
+    if [ -z "${NMCARDLE_DESTRUCTIVE}" ]; then
+        echo "Error: public/ dir already exists. Define NMCARDLE_DESTRUCTIVE env"
+        echo "var to enable this script to delete public/."
+        exit 1
+    fi
+    rm -rf public/
+fi
 
-PUBLIC_CV_DIR=public/gen/cv/
-echo "::Copying generated //cv files to public/"
-rm -rf "${PUBLIC_CV_DIR}"
-mkdir -p "${PUBLIC_CV_DIR}"
-bazelisk cquery --output=files //cv | tee | xargs cp -t "${PUBLIC_CV_DIR}"
+echo "::Building release tarfile."
+TAR_FILE="$(bazelisk cquery --output=files //:release)"
+bazelisk build //:release
 
+echo
+echo "::Extracting tarfile."
+tar -xvf "$TAR_FILE"
+
+echo
 echo "::Run [firebase deploy] when you're ready."
