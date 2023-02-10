@@ -53,3 +53,7 @@ rust_register_toolchains(
         "1.67.1"
     ],
 )
+
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+
+rust_analyzer_dependencies()

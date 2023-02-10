@@ -73,3 +73,6 @@ bazel-testlogs
 
 # Generated release files.
 public/
+
+# Project definition for rust-analyzer.
+rust-project.json

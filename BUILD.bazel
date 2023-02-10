@@ -14,3 +14,9 @@ pkg_tar(
     # Do not collapse directory structure.
     strip_prefix = ".",
 )
+
+# Run this target before rust-analyzer.
+alias(
+    name = "gen_rust_project",
+    actual = "@rules_rust//tools/rust_analyzer:gen_rust_project",
+)
