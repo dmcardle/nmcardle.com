@@ -24,6 +24,12 @@ bazelisk build //...  # Builds files in bazel output directories.
 buildifier -r .
 ```
 
+## To format Rust sources
+
+``` sh
+bazelisk run @rules_rust//:rustfmt
+```
+
 ## To deploy the site
 
 ```sh
