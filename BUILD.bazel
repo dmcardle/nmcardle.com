@@ -15,8 +15,14 @@ pkg_tar(
     strip_prefix = ".",
 )
 
-# Run this target before rust-analyzer.
+# Run this target before starting rust-analyzer.
 alias(
     name = "gen_rust_project",
     actual = "@rules_rust//tools/rust_analyzer:gen_rust_project",
+)
+
+# Run this target to format all Rust sources in the tree.
+alias(
+    name = "rustfmt",
+    actual = "@rules_rust//:rustfmt",
 )
