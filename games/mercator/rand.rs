@@ -1,0 +1,95 @@
+use std::fs::File;
+use std::io::Read;
+
+pub trait RandomStream {
+    fn read_u8(&mut self) -> Option<u8>;
+
+    fn read_usize(&mut self) -> Option<usize> {
+        const N: usize = std::mem::size_of::<usize>();
+        let mut bytes = [0u8; N];
+        for (i, out) in bytes.iter_mut().enumerate() {
+            *out = self.read_u8()?;
+        }
+        Some(usize::from_ne_bytes(bytes))
+    }
+}
+
+/// Fisher-yates shuffle.
+pub fn shuffle<T>(r: &mut dyn RandomStream, buf: &mut [T]) {
+    for i in (1..buf.len()).rev() {
+        let k = r.read_usize().expect("Should get random usize");
+        buf.swap(i, k % i);
+    }
+}
+
+pub fn get_system_random_stream() -> std::io::Result<Box<dyn RandomStream>> {
+    Ok(Box::new(RandomStreamLinux::new()?))
+}
+
+const RAND_BUF_SIZE: usize = 1024;
+
+struct RandomStreamLinux {
+    file: File,
+    buf: [u8; RAND_BUF_SIZE],
+    remaining: usize,
+}
+
+impl RandomStreamLinux {
+    fn new() -> std::io::Result<RandomStreamLinux> {
+        Ok(RandomStreamLinux {
+            file: File::open("/dev/urandom")?,
+            buf: [0u8; RAND_BUF_SIZE],
+            remaining: 0,
+        })
+    }
+}
+
+impl RandomStream for RandomStreamLinux {
+    fn read_u8(&mut self) -> Option<u8> {
+        if self.remaining > 0 {
+            let byte = self.buf[RAND_BUF_SIZE - self.remaining];
+            self.remaining -= 1;
+            Some(byte)
+        } else {
+            match self.file.read(&mut self.buf) {
+                Ok(n) => {
+                    self.remaining = n;
+                    self.read_u8()
+                }
+                Err(_) => None,
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_simple() {
+        let mut stream = get_system_random_stream().expect("Should get system random stream");
+        stream.read_u8().expect("Should read u8");
+        stream.read_usize().expect("Should read usize");
+    }
+
+    #[test]
+    fn test_exceed_buf_size() {
+        let mut stream = get_system_random_stream().expect("Should get system random stream");
+        for _ in 0..RAND_BUF_SIZE + 1 {
+            stream.read_u8().expect("Should read u8");
+        }
+    }
+
+    #[test]
+    fn test_shuffle() {
+        let mut stream = get_system_random_stream().expect("Should get system random stream");
+        let original_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+        let mut shuffled_numbers = original_numbers;
+        shuffle(stream.as_mut(), &mut shuffled_numbers);
+        // Test that the shuffled list is not equal to the original list. If we
+        // are astronomically unlucky, shuffling will produce the original
+        // permutation and this test will fail.
+        assert_ne!(shuffled_numbers, original_numbers);
+    }
+}
