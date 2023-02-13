@@ -81,3 +81,12 @@
 <div class="justify">$dan-abstract$</div>
 
 $body$
+
+<script>
+  window.onload = function() {
+      // Modify all links to open in a new tab.
+      document.querySelectorAll("a").forEach((link) => {
+          link.setAttribute("target", "_blank");
+      });
+  };
+</script>
