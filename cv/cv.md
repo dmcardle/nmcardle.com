@@ -14,10 +14,10 @@ email: d@nmcardle.com
 phone: (315) 317-6220
 
 dan-abstract: |
-    A software engineer with 8+ years' experience in security, systems software, and cryptography, I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and manual inspection.
-    Recently, I developed infrastructure for end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
-    I've contributed to IETF specifications and developed prototypes of draft revisions to evaluate their feasibility and correctness.
-    In the defense arena, I hacked on FreeBSD, LLVM's X86 codegen, and I've had exposure to formal verification with the Coq proof assistant.
+    A generalist software engineer with 8+ years' experience in security, systems software, and cryptography, I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and manual inspection.
+    Recently, I developed infrastructure that enabled JTAG-based end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
+    I've contributed to IETF specifications in the TLS and DNS spaces by developing prototypes of draft revisions, which supported the evaluation of their feasibility and correctness.
+    In the defense arena, I developed a PoC that generates VMs with unique calling conventions by modifying LLVM's X86 codegen and FreeBSD's kernel and userspace.
 
 ---
 
@@ -28,21 +28,29 @@ Software Engineer | Cambridge, MA | October 2018 -- January 2023
 
 ### OpenTitan
 
-* Developed tooling to splice OTP images into pre-built FPGA bitstreams.
-    This enabled comprehensive end-to-end tests and saved >1 hour per test.
-* Created infrastructure for JTAG-based tests defined with GDB and OpenOCD.
-* Wrote end-to-end tests for the chip (e.g., PRs [#16169](https://github.com/lowRISC/opentitan/pull/16169), [#16139](https://github.com/lowRISC/opentitan/pull/16139), and [#15798](https://github.com/lowRISC/opentitan/pull/15798)).
-* Optimized memory functions and achieved a 1.5-5x speedup (e.g., PR [#14243](https://github.com/lowRISC/opentitan/pull/14243)).
-* Enabled *semantic* codesearch features for C/C++ sources (e.g., [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c)).
-* Designed and added a tool for rapid bisecting (see issue [#16406](https://github.com/lowRISC/opentitan/issues/16406) and PR [#16701](https://github.com/lowRISC/opentitan/pull/16701)).
+* Developed tooling to splice [OTP](https://docs.opentitan.org/hw/ip/otp_ctrl/doc/) (one-time programmable memory) images into pre-built FPGA bitstreams.
+  This enabled more comprehensive end-to-end tests and saved >1 hour of build time per test.
+* Created infrastructure for JTAG-based end-to-end tests defined with GDB and OpenOCD.
+* Used these new testing capabilities to develop a number of end-to-end tests. A few examples:
+  * Test that the ROM initializes watchdog timer (PR [#15798](https://github.com/lowRISC/opentitan/pull/15798)).
+  * Test that JTAG debugging works in various lifecycle states (PR [#16139](https://github.com/lowRISC/opentitan/pull/16139)).
+  * Test the configuration of physical memory protection (PR [#16169](https://github.com/lowRISC/opentitan/pull/16169)).
+* Optimized memory functions and achieved a 1.5-5x speedup (PR [#14243](https://github.com/lowRISC/opentitan/pull/14243)).
+* Enabled cross-references for C/C++ sources in [Codesearch](https://cs.opensource.google/opentitan) by developing an internal CI pipeline.
+  This improves developer productivity by reducing friction while exploring the codebase.
+  Try it out by clicking on a function or variable in [dif_otbn.c](https://cs.opensource.google/opentitan/opentitan/+/master:sw/device/lib/dif/dif_otbn.c).
+* Designed and implemented `bitstream_bisect.py`, a tool that accelerates `git bisect` (see the design proposal in issue [#16406](https://github.com/lowRISC/opentitan/issues/16406) and implementation in PR [#16701](https://github.com/lowRISC/opentitan/pull/16701)).
+  The key insight is that the time spent building bitstreams dominates the time spent running tests.
+  By bisecting only on commits with cached bitstreams, we can run what would be an all-day bisect session in an hour.
 
 ### Chrome
 
 * Developed prototypes of *TLS Encrypted Client Hello* (ECH) in BoringSSL.
   ECH enables clients to encrypt sensitive fields such as the desired server name, which are sent in cleartext by default.
     * Added GREASE support for drafts 08 and 09 in [CL 40204](https://boringssl-review.googlesource.com/c/boringssl/+/40204) and [CL 44784](https://boringssl-review.googlesource.com/c/boringssl/+/44784).
-      GREASE staves off ecosystem ossification by enabling clients to send fake ECH data to servers that do not support it; passive middleboxes cannot tell the difference.
-    * Implemented backend server for draft 09 [CL 43924](https://boringssl-review.googlesource.com/c/boringssl/+/43924).
+      First defined in [RFC 8701](https://datatracker.ietf.org/doc/rfc8701/), GREASE staves off ecosystem ossification by enabling clients to send fake ECH data to servers that do not support it; passive middleboxes cannot tell the difference.
+      Thus, passive adversaries cannot selectively block ECH traffic without blocking GREASEd non-ECH traffic.
+    * Implemented backend server for draft 09 in [CL 43924](https://boringssl-review.googlesource.com/c/boringssl/+/43924).
     * Completed C and Go server prototypes for draft 09 in [CL 45285](https://boringssl-review.googlesource.com/c/boringssl/+/45285).
     * Contributed to ECH's specification in [eight PRs](https://github.com/tlswg/draft-ietf-tls-esni/pulls?q=is%3Apr+is%3Aclosed+author%3Admcardle).
 
