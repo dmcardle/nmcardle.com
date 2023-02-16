@@ -14,10 +14,6 @@
       {
         "source": "/dmcardle-cv.pdf",
         "destination": "/cv/dan_mcardle_cv_pdf.pdf"
-      },
-      {
-        "source": "/experimentally-edit-rewrites-for-issue-2",
-        "destination": "/404.html"
       }
     ]
   }
