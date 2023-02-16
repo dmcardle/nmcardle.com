@@ -28,10 +28,12 @@ Software Engineer | Cambridge, MA | October 2018 -- January 2023
 
 ### OpenTitan
 
-* Developed tooling to splice [OTP](https://docs.opentitan.org/hw/ip/otp_ctrl/doc/) (one-time programmable memory) images into pre-built FPGA bitstreams.
+* Developed Python, TCL, and Bazel tooling to splice [OTP](https://docs.opentitan.org/hw/ip/otp_ctrl/doc/) (one-time programmable memory) images into pre-built FPGA bitstreams (PR [#15163](https://github.com/lowRISC/opentitan/pull/15163)).
   This enabled more comprehensive end-to-end tests and saved >1 hour of build time per test.
 * Created infrastructure for JTAG-based end-to-end tests defined with GDB and OpenOCD.
-* Used these new testing capabilities to develop a number of end-to-end tests. A few examples:
+  * Custom Bazel test rule: [`opentitan_gdb_fpga_cw310_test`](https://github.com/lowRISC/opentitan/blob/master/rules/opentitan_gdb_test.bzl#L234).
+  * Python backend for rule: [`gdb_test_coordinator.py`](https://github.com/lowRISC/opentitan/blob/3f69ac5a0863acd31343914a42ee2a3bbd79b64a/rules/scripts/gdb_test_coordinator.py).
+* Used these new splicing and testing capabilities to develop a number of end-to-end tests. A few examples:
   * Test that the ROM initializes watchdog timer (PR [#15798](https://github.com/lowRISC/opentitan/pull/15798)).
   * Test that JTAG debugging works in various lifecycle states (PR [#16139](https://github.com/lowRISC/opentitan/pull/16139)).
   * Test the configuration of physical memory protection (PR [#16169](https://github.com/lowRISC/opentitan/pull/16169)).
