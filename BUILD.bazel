@@ -26,3 +26,11 @@ alias(
     name = "rustfmt",
     actual = "@rules_rust//:rustfmt",
 )
+
+sh_binary(
+    name = "open_rustdoc",
+    srcs = ["util/open_rustdoc.sh"],
+    data = [
+        "//games/mercator:mercator_doc",
+    ],
+)
