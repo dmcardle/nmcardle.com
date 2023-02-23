@@ -9,15 +9,11 @@
     "rewrites": [
       {
         "source": "/cv",
-        "destination": "/cv/dan_mcardle_cv_html.html"
-      },
-      {
-        "source": "/cv1",
-        "destination": "/cv/dan_mcardle_cv_html.html"
+        "destination": "/cv/dan_mcardle_cv_html_foo.html"
       },
       {
         "source": "/dmcardle-cv.pdf",
-        "destination": "/cv/dan_mcardle_cv_pdf.pdf"
+        "destination": "/cv/dan_mcardle_cv_pdf_foo.pdf"
       }
     ],
     "headers": [ {
