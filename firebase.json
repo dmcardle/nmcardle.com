@@ -12,6 +12,10 @@
         "destination": "/cv/dan_mcardle_cv_html.html"
       },
       {
+        "source": "/cv1",
+        "destination": "/cv/dan_mcardle_cv_html.html"
+      },
+      {
         "source": "/dmcardle-cv.pdf",
         "destination": "/cv/dan_mcardle_cv_pdf.pdf"
       }
