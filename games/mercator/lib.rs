@@ -1,2 +1,2 @@
-mod game;
-mod rand;
+pub mod game;
+pub mod rand;

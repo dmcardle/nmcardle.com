@@ -12,22 +12,26 @@ pub enum Color {
     Yellow,
 }
 
-/// This is effectively a multiset of `Element`. It represents quantities of
-/// each kind of currency.
+/// This is effectively a multiset of `Color`. It represents quantities of each
+/// kind of currency.
 #[derive(Clone, Debug, PartialEq)]
 struct ColorCounts([usize; NUM_COLORS]);
 
 impl ColorCounts {
+    /// This [ColorCounts] value contains zero of every color.
     const ZERO: ColorCounts = ColorCounts([0; NUM_COLORS]);
 
-    /// The game starts with seven of every regular token and five wild tokens.
-    const GAME_START: ColorCounts = ColorCounts([7, 7, 7, 7, 7, 5]);
+    /// The game begins with seven of every regular token and five wild tokens.
+    const BANK_START: ColorCounts = ColorCounts([7, 7, 7, 7, 7, 5]);
 
+    /// Return the quantity of the given color.
     fn get(&self, color: Color) -> usize {
         let index = color as usize;
         self.0[index]
     }
 
+    /// Add another [ColorCounts] to this one. Returns a value iff the result
+    /// does not overflow.
     fn plus(&self, other: &ColorCounts) -> Option<ColorCounts> {
         let mut out = ColorCounts::ZERO;
         for i in 0..NUM_COLORS {
@@ -36,6 +40,8 @@ impl ColorCounts {
         Some(out)
     }
 
+    /// Subtract another [ColorCounts] from this one. Returns a value iff the
+    /// result does not overflow.
     fn minus(&self, other: &ColorCounts) -> Option<ColorCounts> {
         let mut out = ColorCounts::ZERO;
         for i in 0..NUM_COLORS {
@@ -128,7 +134,18 @@ impl TurnAction {
 
 #[derive(Clone)]
 enum PlayerStrategy {
+    /// Make choices based on a RNG. I'm not sure whether it makes sense to
+    /// uniformly sample the space of actions; this would be heavily weighted
+    /// towards purchasing cards. Perhaps this enum variant needs some
+    /// parameters.
     Random,
+    /// Purchase the highest-value card that the player can afford. Otherwise,
+    /// randomly select three tokens.
+    GreedyPurchase,
+    /// When a high-value card with a single-color cost is placed on the table,
+    /// e.g. 7 red tokens, reserve it. Work towards the purchase by taking two
+    /// tokens at a time.
+    SelectiveReservation,
 }
 
 #[derive(Clone)]
@@ -152,13 +169,6 @@ impl Player {
     }
 }
 
-struct Players {
-    /// All players in the game.
-    players: Vec<Player>,
-    /// The index of an element in `players`. Represents whose turn it is.
-    turn: usize,
-}
-
 struct Game {
     /// Quantities of tokens that are available.
     bank: ColorCounts,
@@ -177,38 +187,42 @@ impl Game {
     }];
     const ALL_CARDS: [&[Card]; 3] = [&[], &[], &[]];
 
-    fn new_random_game(rand: &dyn RandomStream) -> Game {
-        let mut rand = get_system_random_stream().expect("Should get system random stream");
+    fn new_random_game(rand: &mut dyn RandomStream) -> Game {
         Game {
-            bank: ColorCounts::GAME_START,
-            noble_row: CardRow::new_shuffled(
-                rand.as_mut(),
-                &Game::ALL_NOBLES,
-                Game::NUM_CARDS_FACE_UP,
-            ),
+            bank: ColorCounts::BANK_START,
+            noble_row: CardRow::new_shuffled(rand, &Game::ALL_NOBLES, Game::NUM_CARDS_FACE_UP),
             card_rows: Game::ALL_CARDS
-                .map(|cards| CardRow::new_shuffled(rand.as_mut(), cards, Game::NUM_CARDS_FACE_UP)),
+                .map(|cards| CardRow::new_shuffled(rand, cards, Game::NUM_CARDS_FACE_UP)),
         }
     }
 }
 
-impl Players {
-    fn new(num_players: usize) -> Self {
-        Players {
+pub struct Simulation {
+    game: Game,
+    players: Vec<Player>,
+    turn_index: usize,
+    winner_index: Option<usize>,
+}
+
+impl Simulation {
+    pub fn new(num_players: usize) -> Self {
+        let mut rand = get_system_random_stream().expect("Should get system random stream");
+        Simulation {
+            game: Game::new_random_game(rand.as_mut()),
             players: vec![Player::new(); num_players],
-            turn: 0,
+            turn_index: 0,
+            winner_index: None,
         }
     }
 
-    fn step(&mut self, game: &mut Game) {
+    /// Simulate the next player's turn. Returns the unit value iff the game
+    /// should continue.
+    pub fn step(&mut self) -> Option<()> {
         let num_players = self.players.len();
-        let player = &mut self.players[self.turn];
-        self.turn = (self.turn + 1) % num_players;
-
-        player
-            .play(&game)
-            .apply_to(player, game)
-            .expect("Player's selected action should be valid");
+        let player = &mut self.players[self.turn_index];
+        self.turn_index = (self.turn_index + 1) % num_players;
+        player.play(&self.game).apply_to(player, &mut self.game)?;
+        Some(())
     }
 }
 
@@ -231,6 +245,7 @@ mod tests {
             Some(ColorCounts([3, 5, 7, 9, 11, 13]))
         );
 
+        // Any number added to `usize::MAX` would overflow.
         let max_money = ColorCounts([usize::MAX, 0, 0, 0, 0, 0]);
         assert_eq!(money.plus(&max_money), None);
     }
@@ -251,6 +266,16 @@ mod tests {
             Some(ColorCounts([1; NUM_COLORS]))
         );
 
-        assert_eq!(money.minus(&other_money), None);
+        // Any non-zero number subtracted from zero would overflow.
+        assert_eq!(ColorCounts::ZERO.minus(&other_money), None);
+    }
+
+    #[test]
+    fn test_color_counts_get() {
+        assert_eq!(ColorCounts::ZERO.get(Color::Red), 0);
+
+        let money = ColorCounts([1, 2, 3, 4, 5, 6]);
+        assert_eq!(money.get(Color::Red), 1);
+        assert_eq!(money.get(Color::Yellow), 6);
     }
 }
