@@ -9,6 +9,7 @@ rust_binary(
 rust_library(
     name = "mercator_lib",
     srcs = [
+        "cards.rs",
         "game.rs",
         "lib.rs",
         "rand.rs",
@@ -20,8 +21,6 @@ rust_test(
     crate = ":mercator_lib",
 )
 
-# TODO Figure out how to spin up a doc server? This documentation target is not
-# super useful.
 rust_doc(
     name = "mercator_doc",
     crate = ":mercator_lib",

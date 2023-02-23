@@ -1,8 +1,9 @@
+use crate::cards::{get_all_cards, get_all_nobles};
 use crate::rand::{get_system_random_stream, shuffle, RandomStream};
 
 const NUM_COLORS: usize = 6;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Color {
     Red,
     Green,
@@ -15,11 +16,11 @@ pub enum Color {
 /// This is effectively a multiset of `Color`. It represents quantities of each
 /// kind of currency.
 #[derive(Clone, Debug, PartialEq)]
-struct ColorCounts([usize; NUM_COLORS]);
+pub struct ColorCounts([usize; NUM_COLORS]);
 
 impl ColorCounts {
     /// This [ColorCounts] value contains zero of every color.
-    const ZERO: ColorCounts = ColorCounts([0; NUM_COLORS]);
+    pub const ZERO: ColorCounts = ColorCounts([0; NUM_COLORS]);
 
     /// The game begins with seven of every regular token and five wild tokens.
     const BANK_START: ColorCounts = ColorCounts([7, 7, 7, 7, 7, 5]);
@@ -62,15 +63,25 @@ impl From<Color> for ColorCounts {
     }
 }
 
+impl<const N: usize> From<&[(Color, usize); N]> for ColorCounts {
+    fn from(colors: &[(Color, usize); N]) -> Self {
+        let mut counts = ColorCounts::ZERO;
+        for (color, count) in colors {
+            counts.0[*color as usize] += count;
+        }
+        counts
+    }
+}
+
 #[derive(Clone)]
-struct Card {
-    points: usize,
+pub struct Card {
+    pub points: usize,
     /// The purchase price of this card.
-    price: ColorCounts,
+    pub price: ColorCounts,
     /// The purchasing power this card gives when held. It could be represented
     /// by `Option<Color>`, but `ColorCounts` is more ergonomic for addition and
     /// subtraction.
-    value: ColorCounts,
+    pub value: ColorCounts,
 }
 
 #[derive(Clone)]
@@ -180,19 +191,12 @@ struct Game {
 
 impl Game {
     const NUM_CARDS_FACE_UP: usize = 4;
-    const ALL_NOBLES: [Card; 1] = [Card {
-        points: 4,
-        price: ColorCounts([4, 4, 0, 0, 0, 0]),
-        value: ColorCounts::ZERO,
-    }];
-    const ALL_CARDS: [&[Card]; 3] = [&[], &[], &[]];
-
     fn new_random_game(rand: &mut dyn RandomStream) -> Game {
         Game {
             bank: ColorCounts::BANK_START,
-            noble_row: CardRow::new_shuffled(rand, &Game::ALL_NOBLES, Game::NUM_CARDS_FACE_UP),
-            card_rows: Game::ALL_CARDS
-                .map(|cards| CardRow::new_shuffled(rand, cards, Game::NUM_CARDS_FACE_UP)),
+            noble_row: CardRow::new_shuffled(rand, &get_all_nobles(), Game::NUM_CARDS_FACE_UP),
+            card_rows: get_all_cards()
+                .map(|cards| CardRow::new_shuffled(rand, &cards, Game::NUM_CARDS_FACE_UP)),
         }
     }
 }
