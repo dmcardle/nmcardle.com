@@ -33,56 +33,6 @@ impl From<usize> for Color {
 pub struct ColorCounts([usize; NUM_COLORS]);
 
 impl ColorCounts {
-    fn iter(&self) -> ColorCountsIter {
-        ColorCountsIter {
-            i: 0,
-            counts: *self,
-        }
-    }
-
-    fn count(&self) -> usize {
-        self.0.iter().sum()
-    }
-
-    fn random_choice(&self, rand: &mut dyn RandomStream) -> (ColorCounts, Option<Color>) {
-        // This naive implementation fully expands the multiset of colors and
-        // picks an index at random. A clever implementation could skip the heap
-        // allocation and run in constant time.
-
-        let colors: Vec<Color> = self
-            .iter()
-            .flat_map(|(color, n)| std::iter::repeat(color).take(n))
-            .collect();
-        match colors.len() {
-            0 => (*self, None),
-            _ => {
-                let index = rand.read_usize() % colors.len();
-                (*self, Some(colors[index]))
-            }
-        }
-    }
-}
-
-struct ColorCountsIter {
-    i: usize,
-    counts: ColorCounts,
-}
-
-impl Iterator for ColorCountsIter {
-    type Item = (Color, usize);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.i < self.counts.0.len() {
-            let i = self.i;
-            self.i += 1;
-            Some((Color::from(i), self.counts.0[i]))
-        } else {
-            None
-        }
-    }
-}
-
-impl ColorCounts {
     /// This [ColorCounts] value contains zero of every color.
     pub const ZERO: ColorCounts = ColorCounts([0; NUM_COLORS]);
 
@@ -117,6 +67,37 @@ impl ColorCounts {
         }
         Some(out)
     }
+
+    /// Returns the total number of coins.
+    fn len(&self) -> usize {
+        self.0.iter().sum()
+    }
+
+    /// Create an iterator that goes over each coin individually.
+    fn iter(&self) -> ColorCountsIter {
+        ColorCountsIter {
+            i: 0,
+            counts: *self,
+        }
+    }
+
+    /// Attempts to select a token at random. Returns a tuple containing the new
+    /// [ColorCounts], with the selected token removed, and the token that was
+    /// removed (if any).
+    fn random_choice(&self, rand: &mut dyn RandomStream) -> (ColorCounts, Option<Color>) {
+        if self.len() == 0 {
+            return (*self, None);
+        }
+        let rand_index = rand.read_usize() % self.len();
+        let color = self
+            .iter()
+            .flat_map(|(color, n)| std::iter::repeat(color).take(n))
+            .skip(rand_index)
+            .next()
+            .unwrap();
+        let new_counts = self.clone().minus(&ColorCounts::from(color)).unwrap();
+        (new_counts, Some(color))
+    }
 }
 
 impl From<Color> for ColorCounts {
@@ -134,6 +115,25 @@ impl<const N: usize> From<&[(Color, usize); N]> for ColorCounts {
             counts.0[*color as usize] += count;
         }
         counts
+    }
+}
+
+struct ColorCountsIter {
+    i: usize,
+    counts: ColorCounts,
+}
+
+impl Iterator for ColorCountsIter {
+    type Item = (Color, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i < self.counts.0.len() {
+            let i = self.i;
+            self.i += 1;
+            Some((Color::from(i), self.counts.0[i]))
+        } else {
+            None
+        }
     }
 }
 
@@ -248,7 +248,7 @@ impl Player {
         match self.strategy {
             PlayerStrategy::Random => match rand.read_u8() % 4 {
                 0 => {
-                    if game.bank.count() < 3 {
+                    if game.bank.len() < 3 {
                         println!("Cannot take three tokens. Trying again.");
                         return self.select_action(rand, game);
                     }
