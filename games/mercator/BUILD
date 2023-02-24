@@ -1,9 +1,9 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_binary", "rust_test", "rust_doc")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_library", "rust_test")
 
 rust_binary(
     name = "mercator",
-    srcs = [ "main.rs" ],
-    deps = [ ":mercator_lib" ]
+    srcs = ["main.rs"],
+    deps = [":mercator_lib"],
 )
 
 rust_library(
