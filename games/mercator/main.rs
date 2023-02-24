@@ -1,10 +1,10 @@
 extern crate mercator_lib;
 
-use mercator_lib::game::Simulation;
+use mercator_lib::game::{PlayerStrategy, Simulation};
 
 fn main() {
-    const NUM_PLAYERS: usize = 3;
-    let mut sim = Simulation::new(NUM_PLAYERS);
+    let player_strategies = [PlayerStrategy::Random; 3];
+    let mut sim = Simulation::new(&player_strategies);
 
     while sim.step().is_some() {
         println!("STEP");

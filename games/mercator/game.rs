@@ -13,10 +13,74 @@ pub enum Color {
     Yellow,
 }
 
+impl From<usize> for Color {
+    fn from(n: usize) -> Color {
+        match n {
+            0 => Color::Red,
+            1 => Color::Green,
+            2 => Color::Blue,
+            3 => Color::White,
+            4 => Color::Black,
+            5 => Color::Yellow,
+            _ => panic!("No Color for {n}"),
+        }
+    }
+}
+
 /// This is effectively a multiset of `Color`. It represents quantities of each
 /// kind of currency.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ColorCounts([usize; NUM_COLORS]);
+
+impl ColorCounts {
+    fn iter(&self) -> ColorCountsIter {
+        ColorCountsIter {
+            i: 0,
+            counts: *self,
+        }
+    }
+
+    fn count(&self) -> usize {
+        self.0.iter().sum()
+    }
+
+    fn random_choice(&self, rand: &mut dyn RandomStream) -> (ColorCounts, Option<Color>) {
+        // This naive implementation fully expands the multiset of colors and
+        // picks an index at random. A clever implementation could skip the heap
+        // allocation and run in constant time.
+
+        let colors: Vec<Color> = self
+            .iter()
+            .flat_map(|(color, n)| std::iter::repeat(color).take(n))
+            .collect();
+        match colors.len() {
+            0 => (*self, None),
+            _ => {
+                let index = rand.read_usize() % colors.len();
+                (*self, Some(colors[index]))
+            }
+        }
+    }
+}
+
+struct ColorCountsIter {
+    i: usize,
+    counts: ColorCounts,
+}
+
+impl Iterator for ColorCountsIter {
+    type Item = (Color, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i < self.counts.0.len() {
+            let i = self.i;
+            self.i += 1;
+            Some((Color::from(i), self.counts.0[i]))
+        } else {
+            None
+        }
+    }
+}
 
 impl ColorCounts {
     /// This [ColorCounts] value contains zero of every color.
@@ -73,7 +137,7 @@ impl<const N: usize> From<&[(Color, usize); N]> for ColorCounts {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct Card {
     pub points: usize,
     /// The purchase price of this card.
@@ -132,19 +196,24 @@ impl TurnAction {
                 player.tokens = player.tokens.plus(&colors)?;
             }
             TurnAction::Reserve(card) => {
-                // TODO: Find card in rows? (Seems inefficient.)
-                // TODO: Replace card with one from face-down cards.
-                // TODO: Add card to player's hand, but face-down.
-                todo!()
+                game.take_card(card);
+                player.hand.hidden.push(card);
+                player.tokens = player
+                    .tokens
+                    .plus(&ColorCounts::from(Color::Yellow))
+                    .expect("ColorCounts should not overflow");
             }
-            TurnAction::Purchase(_) => todo!(),
+            TurnAction::Purchase(card) => {
+                game.take_card(card);
+                player.hand.face_up.push(card);
+            }
         }
         Some(())
     }
 }
 
-#[derive(Clone)]
-enum PlayerStrategy {
+#[derive(Clone, Copy)]
+pub enum PlayerStrategy {
     /// Make choices based on a RNG. I'm not sure whether it makes sense to
     /// uniformly sample the space of actions; this would be heavily weighted
     /// towards purchasing cards. Perhaps this enum variant needs some
@@ -167,16 +236,50 @@ struct Player {
 }
 
 impl Player {
-    fn new() -> Self {
+    fn new(strategy: PlayerStrategy) -> Self {
         Player {
             hand: CardRow::new(),
             tokens: ColorCounts::ZERO,
-            strategy: PlayerStrategy::Random,
+            strategy,
         }
     }
 
-    fn play(&mut self, game: &Game) -> TurnAction {
-        todo!()
+    fn select_action(&mut self, rand: &mut dyn RandomStream, game: &Game) -> TurnAction {
+        match self.strategy {
+            PlayerStrategy::Random => match rand.read_u8() % 4 {
+                0 => {
+                    if game.bank.count() < 3 {
+                        println!("Cannot take three tokens. Trying again.");
+                        return self.select_action(rand, game);
+                    }
+                    loop {
+                        let bank = game.bank;
+                        let (bank, color1) = bank.random_choice(rand);
+                        let (bank, color2) = bank.random_choice(rand);
+                        let (bank, color3) = bank.random_choice(rand);
+
+                        match (color1, color2, color3) {
+                            (Some(c1), Some(c2), Some(c3)) => {
+                                return TurnAction::TakeThreeTokens(c1, c2, c3);
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                1 => match game.bank.random_choice(rand) {
+                    (_, Some(color)) => TurnAction::TakeTwoTokens(color),
+                    _ => {
+                        println!("Zero tokens remain. Trying again.");
+                        self.select_action(rand, game)
+                    }
+                },
+                2 => TurnAction::Reserve(game.random_card(rand)),
+                3 => TurnAction::Purchase(game.random_card(rand)),
+                _ => panic!("Unreachable"),
+            },
+            PlayerStrategy::GreedyPurchase => todo!(),
+            PlayerStrategy::SelectiveReservation => todo!(),
+        }
     }
 }
 
@@ -199,6 +302,29 @@ impl Game {
                 .map(|cards| CardRow::new_shuffled(rand, &cards, Game::NUM_CARDS_FACE_UP)),
         }
     }
+
+    fn random_card(&self, rand: &mut dyn RandomStream) -> Card {
+        let row = rand.read_usize() % self.card_rows.len();
+        let col = rand.read_usize() % self.card_rows[row].face_up.len();
+        self.card_rows[row].face_up[col]
+    }
+
+    fn take_card(&mut self, card: Card) {
+        for row in self.card_rows.iter_mut() {
+            for table_card in row.face_up.iter_mut() {
+                if *table_card == card {
+                    match row.hidden.pop() {
+                        Some(new_card) => {
+                            *table_card = new_card;
+                        }
+                        None => {}
+                    }
+                    return;
+                }
+            }
+        }
+        panic!("Cannot take a card that is not on the table")
+    }
 }
 
 pub struct Simulation {
@@ -206,16 +332,18 @@ pub struct Simulation {
     players: Vec<Player>,
     turn_index: usize,
     winner_index: Option<usize>,
+    rand: Box<dyn RandomStream>,
 }
 
 impl Simulation {
-    pub fn new(num_players: usize) -> Self {
+    pub fn new(strategies: &[PlayerStrategy]) -> Self {
         let mut rand = get_system_random_stream().expect("Should get system random stream");
         Simulation {
             game: Game::new_random_game(rand.as_mut()),
-            players: vec![Player::new(); num_players],
+            players: strategies.iter().map(|&s| Player::new(s)).collect(),
             turn_index: 0,
             winner_index: None,
+            rand,
         }
     }
 
@@ -225,8 +353,10 @@ impl Simulation {
         let num_players = self.players.len();
         let player = &mut self.players[self.turn_index];
         self.turn_index = (self.turn_index + 1) % num_players;
-        player.play(&self.game).apply_to(player, &mut self.game)?;
-        Some(())
+
+        player
+            .select_action(self.rand.as_mut(), &self.game)
+            .apply_to(player, &mut self.game)
     }
 }
 
