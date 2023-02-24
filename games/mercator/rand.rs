@@ -2,26 +2,29 @@ use std::fs::File;
 use std::io::Read;
 
 pub trait RandomStream {
-    fn read_u8(&mut self) -> Option<u8>;
+    fn read_u8(&mut self) -> u8;
 
-    fn read_usize(&mut self) -> Option<usize> {
+    fn read_usize(&mut self) -> usize {
         const N: usize = std::mem::size_of::<usize>();
         let mut bytes = [0u8; N];
         for (i, out) in bytes.iter_mut().enumerate() {
-            *out = self.read_u8()?;
+            *out = self.read_u8();
         }
-        Some(usize::from_ne_bytes(bytes))
+        usize::from_ne_bytes(bytes)
     }
 }
 
 /// Fisher-yates shuffle.
 pub fn shuffle<T>(r: &mut dyn RandomStream, buf: &mut [T]) {
     for i in (1..buf.len()).rev() {
-        let k = r.read_usize().expect("Should get random usize");
+        let k = r.read_usize();
         buf.swap(i, k % i);
     }
 }
 
+/// Get a RandomStream for the current platform.
+///
+/// TODO: Support non-Linux platforms.
 pub fn get_system_random_stream() -> std::io::Result<Box<dyn RandomStream>> {
     Ok(Box::new(RandomStreamLinux::new()?))
 }
@@ -45,19 +48,14 @@ impl RandomStreamLinux {
 }
 
 impl RandomStream for RandomStreamLinux {
-    fn read_u8(&mut self) -> Option<u8> {
+    fn read_u8(&mut self) -> u8 {
         if self.remaining > 0 {
             let byte = self.buf[RAND_BUF_SIZE - self.remaining];
             self.remaining -= 1;
-            Some(byte)
+            byte
         } else {
-            match self.file.read(&mut self.buf) {
-                Ok(n) => {
-                    self.remaining = n;
-                    self.read_u8()
-                }
-                Err(_) => None,
-            }
+            self.remaining = self.file.read(&mut self.buf).expect("Must read from file");
+            self.read_u8()
         }
     }
 }
@@ -69,15 +67,15 @@ mod tests {
     #[test]
     fn test_simple() {
         let mut stream = get_system_random_stream().expect("Should get system random stream");
-        stream.read_u8().expect("Should read u8");
-        stream.read_usize().expect("Should read usize");
+        stream.read_u8();
+        stream.read_usize();
     }
 
     #[test]
     fn test_exceed_buf_size() {
         let mut stream = get_system_random_stream().expect("Should get system random stream");
         for _ in 0..RAND_BUF_SIZE + 1 {
-            stream.read_u8().expect("Should read u8");
+            stream.read_u8();
         }
     }
 
