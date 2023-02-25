@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::cards::{get_all_cards, get_all_nobles};
 use crate::rand::{get_system_random_stream, shuffle, RandomStream};
 
@@ -47,25 +49,26 @@ impl ColorCounts {
 
     /// Add another [ColorCounts] to this one. Returns a value iff the result
     /// does not overflow.
-    fn plus(&self, other: &ColorCounts) -> Option<ColorCounts> {
+    fn plus(&self, other: &ColorCounts) -> Result<ColorCounts, String> {
         let mut out = ColorCounts::ZERO;
         for i in 0..NUM_COLORS {
-            out.0[i] = self.0[i].checked_add(other.0[i])?;
+            out.0[i] = self.0[i]
+                .checked_add(other.0[i])
+                .ok_or("ColorCounts addition overflowed")?;
         }
-        Some(out)
+        Ok(out)
     }
 
     /// Subtract another [ColorCounts] from this one. Returns a value iff the
     /// result does not overflow.
-    fn minus(&self, other: &ColorCounts) -> Option<ColorCounts> {
+    fn minus(&self, other: &ColorCounts) -> Result<ColorCounts, String> {
         let mut out = ColorCounts::ZERO;
         for i in 0..NUM_COLORS {
-            if self.0[i] < other.0[i] {
-                return None;
-            }
-            out.0[i] = self.0[i] - other.0[i];
+            out.0[i] = self.0[i]
+                .checked_sub(other.0[i])
+                .ok_or("ColorCounts subtraction overflowed")?;
         }
-        Some(out)
+        Ok(out)
     }
 
     /// Returns the total number of coins.
@@ -118,6 +121,13 @@ impl<const N: usize> From<&[(Color, usize); N]> for ColorCounts {
     }
 }
 
+impl Display for ColorCounts {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self);
+        Ok(())
+    }
+}
+
 struct ColorCountsIter {
     i: usize,
     counts: ColorCounts,
@@ -137,7 +147,7 @@ impl Iterator for ColorCountsIter {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Card {
     pub points: usize,
     /// The purchase price of this card.
@@ -148,7 +158,14 @@ pub struct Card {
     pub value: ColorCounts,
 }
 
-#[derive(Clone)]
+impl Display for Card {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}, {}pts, {}]", self.value, self.points, self.price);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
 struct CardRow {
     face_up: Vec<Card>,
     hidden: Vec<Card>,
@@ -173,6 +190,22 @@ impl CardRow {
     }
 }
 
+impl Display for CardRow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Face-up: ");
+        for card in self.face_up.iter() {
+            write!(f, "{} ", card);
+        }
+        writeln!(f);
+        write!(f, "Hidden: ");
+        for card in self.hidden.iter() {
+            write!(f, "{} ", card);
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
 enum TurnAction {
     TakeThreeTokens(Color, Color, Color),
     TakeTwoTokens(Color),
@@ -181,12 +214,13 @@ enum TurnAction {
 }
 
 impl TurnAction {
-    fn apply_to(self, player: &mut Player, game: &mut Game) -> Option<()> {
+    fn apply_to(self, player: &mut Player, game: &mut Game) -> Result<(), String> {
         match self {
             TurnAction::TakeThreeTokens(color1, color2, color3) => {
                 let colors = ColorCounts::from(color1)
-                    .plus(&ColorCounts::from(color2))?
-                    .plus(&ColorCounts::from(color3))?;
+                    .plus(&ColorCounts::from(color2))
+                    .and_then(|c| c.plus(&ColorCounts::from(color3)))?;
+
                 game.bank = game.bank.minus(&colors)?;
                 player.tokens = player.tokens.plus(&colors)?;
             }
@@ -208,11 +242,11 @@ impl TurnAction {
                 player.hand.face_up.push(card);
             }
         }
-        Some(())
+        Ok(())
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum PlayerStrategy {
     /// Make choices based on a RNG. I'm not sure whether it makes sense to
     /// uniformly sample the space of actions; this would be heavily weighted
@@ -228,7 +262,7 @@ pub enum PlayerStrategy {
     SelectiveReservation,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Player {
     hand: CardRow,
     tokens: ColorCounts,
@@ -252,19 +286,15 @@ impl Player {
                         println!("Cannot take three tokens. Trying again.");
                         return self.select_action(rand, game);
                     }
-                    loop {
-                        let bank = game.bank;
-                        let (bank, color1) = bank.random_choice(rand);
-                        let (bank, color2) = bank.random_choice(rand);
-                        let (bank, color3) = bank.random_choice(rand);
+                    let bank = game.bank;
+                    let (bank, color1) = bank.random_choice(rand);
+                    let (bank, color2) = bank.random_choice(rand);
+                    let (_bank, color3) = bank.random_choice(rand);
 
-                        match (color1, color2, color3) {
-                            (Some(c1), Some(c2), Some(c3)) => {
-                                return TurnAction::TakeThreeTokens(c1, c2, c3);
-                            }
-                            _ => {}
-                        }
-                    }
+                    return match (color1, color2, color3) {
+                        (Some(c1), Some(c2), Some(c3)) => TurnAction::TakeThreeTokens(c1, c2, c3),
+                        _ => self.select_action(rand, game),
+                    };
                 }
                 1 => match game.bank.random_choice(rand) {
                     (_, Some(color)) => TurnAction::TakeTwoTokens(color),
@@ -283,6 +313,15 @@ impl Player {
     }
 }
 
+impl Display for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // TODO implement a more compact display.
+        write!(f, "{:?}", self);
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
 struct Game {
     /// Quantities of tokens that are available.
     bank: ColorCounts,
@@ -327,6 +366,16 @@ impl Game {
     }
 }
 
+impl Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Game:");
+        writeln!(f, "  * bank: {}", self.bank);
+        writeln!(f, "  * nobles: {}", self.noble_row);
+        writeln!(f, "  * cards: {:?}", self.card_rows);
+        Ok(())
+    }
+}
+
 pub struct Simulation {
     game: Game,
     players: Vec<Player>,
@@ -349,14 +398,25 @@ impl Simulation {
 
     /// Simulate the next player's turn. Returns the unit value iff the game
     /// should continue.
-    pub fn step(&mut self) -> Option<()> {
+    pub fn step(&mut self) -> Result<(), String> {
         let num_players = self.players.len();
         let player = &mut self.players[self.turn_index];
         self.turn_index = (self.turn_index + 1) % num_players;
 
-        player
-            .select_action(self.rand.as_mut(), &self.game)
-            .apply_to(player, &mut self.game)
+        let action = player.select_action(self.rand.as_mut(), &self.game);
+        println!("Action: {:?}", action);
+        action.apply_to(player, &mut self.game)
+    }
+}
+
+impl Display for Simulation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, player) in self.players.iter().enumerate() {
+            writeln!(f, "Player {}: {}", i, player);
+        }
+        writeln!(f, "-- Player {}'s turn", self.turn_index);
+        writeln!(f, "{}", self.game);
+        Ok(())
     }
 }
 
@@ -364,44 +424,42 @@ impl Simulation {
 mod tests {
     use super::*;
 
+    #[test]
     fn test_color_counts_plus() {
         assert_eq!(
             ColorCounts::ZERO.plus(&ColorCounts::ZERO),
-            Some(ColorCounts::ZERO)
+            Ok(ColorCounts::ZERO)
         );
 
         let money = ColorCounts([1, 2, 3, 4, 5, 6]);
-        assert_eq!(money.plus(&money), Some(ColorCounts([2, 4, 6, 8, 10, 12])));
+        assert_eq!(money.plus(&money), Ok(ColorCounts([2, 4, 6, 8, 10, 12])));
 
         let other_money = ColorCounts([2, 3, 4, 5, 6, 7]);
         assert_eq!(
             other_money.plus(&money),
-            Some(ColorCounts([3, 5, 7, 9, 11, 13]))
+            Ok(ColorCounts([3, 5, 7, 9, 11, 13]))
         );
 
         // Any number added to `usize::MAX` would overflow.
         let max_money = ColorCounts([usize::MAX, 0, 0, 0, 0, 0]);
-        assert_eq!(money.plus(&max_money), None);
+        assert!(money.plus(&max_money).is_err());
     }
 
     #[test]
     fn test_color_counts_minus() {
         assert_eq!(
             ColorCounts::ZERO.minus(&ColorCounts::ZERO),
-            Some(ColorCounts::ZERO)
+            Ok(ColorCounts::ZERO)
         );
 
         let money = ColorCounts([1, 2, 3, 4, 5, 6]);
-        assert_eq!(money.minus(&money), Some(ColorCounts::ZERO));
+        assert_eq!(money.minus(&money), Ok(ColorCounts::ZERO));
 
         let other_money = ColorCounts([2, 3, 4, 5, 6, 7]);
-        assert_eq!(
-            other_money.minus(&money),
-            Some(ColorCounts([1; NUM_COLORS]))
-        );
+        assert_eq!(other_money.minus(&money), Ok(ColorCounts([1; NUM_COLORS])));
 
         // Any non-zero number subtracted from zero would overflow.
-        assert_eq!(ColorCounts::ZERO.minus(&other_money), None);
+        assert!(ColorCounts::ZERO.minus(&other_money).is_err());
     }
 
     #[test]
