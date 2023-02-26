@@ -42,6 +42,7 @@ impl ColorCounts {
     const BANK_START: ColorCounts = ColorCounts([7, 7, 7, 7, 7, 5]);
 
     /// Return the quantity of the given color.
+    #[allow(dead_code)]
     fn get(&self, color: Color) -> usize {
         let index = color as usize;
         self.0[index]
@@ -414,6 +415,9 @@ impl Display for Simulation {
         }
         writeln!(f, "-- Player {}'s turn", self.turn_index)?;
         writeln!(f, "{}", self.game)?;
+        if let Some(winner_index) = self.winner_index {
+            writeln!(f, "Winner is {}", winner_index)?;
+        }
         Ok(())
     }
 }

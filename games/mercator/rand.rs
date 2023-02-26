@@ -7,7 +7,7 @@ pub trait RandomStream {
     fn read_usize(&mut self) -> usize {
         const N: usize = std::mem::size_of::<usize>();
         let mut bytes = [0u8; N];
-        for (i, out) in bytes.iter_mut().enumerate() {
+        for out in bytes.iter_mut() {
             *out = self.read_u8();
         }
         usize::from_ne_bytes(bytes)
