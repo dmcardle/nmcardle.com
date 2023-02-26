@@ -123,8 +123,7 @@ impl<const N: usize> From<&[(Color, usize); N]> for ColorCounts {
 
 impl Display for ColorCounts {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self);
-        Ok(())
+        write!(f, "{:?}", self)
     }
 }
 
@@ -160,8 +159,7 @@ pub struct Card {
 
 impl Display for Card {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}, {}pts, {}]", self.value, self.points, self.price);
-        Ok(())
+        write!(f, "[{}, {}pts, {}]", self.value, self.points, self.price)
     }
 }
 
@@ -192,14 +190,14 @@ impl CardRow {
 
 impl Display for CardRow {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Face-up: ");
+        write!(f, "Face-up: ")?;
         for card in self.face_up.iter() {
-            write!(f, "{} ", card);
+            write!(f, "{} ", card)?;
         }
-        writeln!(f);
-        write!(f, "Hidden: ");
+        writeln!(f)?;
+        write!(f, "Hidden: ")?;
         for card in self.hidden.iter() {
-            write!(f, "{} ", card);
+            write!(f, "{} ", card)?;
         }
         Ok(())
     }
@@ -316,7 +314,7 @@ impl Player {
 impl Display for Player {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // TODO implement a more compact display.
-        write!(f, "{:?}", self);
+        write!(f, "{:?}", self)?;
         Ok(())
     }
 }
@@ -368,10 +366,10 @@ impl Game {
 
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Game:");
-        writeln!(f, "  * bank: {}", self.bank);
-        writeln!(f, "  * nobles: {}", self.noble_row);
-        writeln!(f, "  * cards: {:?}", self.card_rows);
+        writeln!(f, "Game:")?;
+        writeln!(f, "  * bank: {}", self.bank)?;
+        writeln!(f, "  * nobles: {}", self.noble_row)?;
+        writeln!(f, "  * cards: {:?}", self.card_rows)?;
         Ok(())
     }
 }
@@ -412,10 +410,10 @@ impl Simulation {
 impl Display for Simulation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, player) in self.players.iter().enumerate() {
-            writeln!(f, "Player {}: {}", i, player);
+            writeln!(f, "Player {}: {}", i, player)?;
         }
-        writeln!(f, "-- Player {}'s turn", self.turn_index);
-        writeln!(f, "{}", self.game);
+        writeln!(f, "-- Player {}'s turn", self.turn_index)?;
+        writeln!(f, "{}", self.game)?;
         Ok(())
     }
 }
