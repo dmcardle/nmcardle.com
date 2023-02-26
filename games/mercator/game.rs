@@ -124,7 +124,19 @@ impl<const N: usize> From<&[(Color, usize); N]> for ColorCounts {
 
 impl Display for ColorCounts {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        let s: Vec<String> = self
+            .0
+            .iter()
+            .enumerate()
+            .filter_map(|(i, n)| match n {
+                0 => None,
+                _ => Some(format!("{n} {:?}", Color::from(i))),
+            })
+            .collect();
+
+        let s = s.join(", ");
+
+        write!(f, "{}", s)
     }
 }
 
@@ -152,15 +164,21 @@ pub struct Card {
     pub points: usize,
     /// The purchase price of this card.
     pub price: ColorCounts,
-    /// The purchasing power this card gives when held. It could be represented
-    /// by `Option<Color>`, but `ColorCounts` is more ergonomic for addition and
-    /// subtraction.
-    pub value: ColorCounts,
+    /// The purchasing power this card gives when held.
+    pub value: Option<Color>,
 }
 
 impl Display for Card {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}, {}pts, {}]", self.value, self.points, self.price)
+        write!(f, "Card: ")?;
+        if self.points > 0 {
+            write!(f, "+{} points, ", self.points)?;
+        }
+        if let Some(color) = self.value {
+            write!(f, "{:?}, ", color)?;
+        }
+        write!(f, "[{}].", self.price)?;
+        Ok(())
     }
 }
 
@@ -367,10 +385,17 @@ impl Game {
 
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Game:")?;
-        writeln!(f, "  * bank: {}", self.bank)?;
-        writeln!(f, "  * nobles: {}", self.noble_row)?;
-        writeln!(f, "  * cards: {:?}", self.card_rows)?;
+        writeln!(f, "Bank: {}", self.bank)?;
+        writeln!(f, "Nobles ({} hidden):", self.noble_row.hidden.len())?;
+        for noble in self.noble_row.face_up.iter() {
+            writeln!(f, "  {}", noble)?;
+        }
+        for (i, card_row) in self.card_rows.iter().enumerate() {
+            writeln!(f, "L{} cards ({} hidden):", i + 1, card_row.hidden.len())?;
+            for card in card_row.face_up.iter() {
+                writeln!(f, "  {}", card)?;
+            }
+        }
         Ok(())
     }
 }
@@ -403,7 +428,7 @@ impl Simulation {
         self.turn_index = (self.turn_index + 1) % num_players;
 
         let action = player.select_action(self.rand.as_mut(), &self.game);
-        println!("Action: {:?}", action);
+        println!("Player selected {:?}", action);
         action.apply_to(player, &mut self.game)
     }
 }
@@ -411,13 +436,13 @@ impl Simulation {
 impl Display for Simulation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, player) in self.players.iter().enumerate() {
-            writeln!(f, "Player {}: {}", i, player)?;
+            writeln!(f, "  Player {}: {}", i, player)?;
         }
-        writeln!(f, "-- Player {}'s turn", self.turn_index)?;
-        writeln!(f, "{}", self.game)?;
+        write!(f, "{}", self.game)?;
         if let Some(winner_index) = self.winner_index {
             writeln!(f, "Winner is {}", winner_index)?;
         }
+        write!(f, "Player {}'s turn...", self.turn_index)?;
         Ok(())
     }
 }
