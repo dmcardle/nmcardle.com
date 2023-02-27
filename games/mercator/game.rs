@@ -207,12 +207,17 @@ impl Game {
                     }
                 }
             }
+
             if let Some(i) = delete_index {
-                row.face_up.swap_remove(i);
+                // Remove the card from its row and shift subsequent cards
+                // leftward, since there are no hidden cards to replace it.
+                // Although `Vec::remove()` runs in O(n) time, we know n <= 4
+                // (`Game::NUM_CARDS_FACE_UP`), so this is effectively O(1).
+                row.face_up.remove(i);
                 return;
             }
         }
-        panic!("Cannot take a card that is not on the table")
+        unreachable!("Cannot take a card that is not on the table")
     }
 }
 
