@@ -53,6 +53,10 @@ impl CardRow {
             hidden: Vec::from(cards_down),
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.face_up.is_empty() && self.hidden.is_empty()
+    }
 }
 
 impl Display for CardRow {
@@ -224,4 +228,29 @@ pub fn get_all_cards() -> [Vec<Card>; 3] {
             },
         ],
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_card_fmt() {
+        let noble = Card {
+            points: 4,
+            price: ColorCounts::from(&[(Color::Red, 4), (Color::Black, 3)]),
+            value: None,
+        };
+        assert_eq!(format!("{}", noble), "Card: +4 points, [4 Red, 3 Black].");
+
+        let regular_card = Card {
+            points: 5,
+            price: ColorCounts::from(&[(Color::Green, 4), (Color::Black, 4)]),
+            value: Some(Color::Black),
+        };
+        assert_eq!(
+            format!("{}", regular_card),
+            "Card: +5 points, Black, [4 Green, 4 Black]."
+        );
+    }
 }

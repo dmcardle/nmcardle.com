@@ -37,6 +37,7 @@ impl TurnAction {
                     .expect("ColorCounts should not overflow");
             }
             TurnAction::Purchase(card) => {
+                // TODO return an error when the player cannot afford this card.
                 game.take_card(card);
                 player.hand.face_up.push(card);
             }
@@ -77,7 +78,22 @@ impl Player {
         }
     }
 
-    fn select_action(&mut self, rand: &mut dyn RandomStream, game: &Game) -> TurnAction {
+    fn select_action(
+        &mut self,
+        rand: &mut dyn RandomStream,
+        game: &Game,
+    ) -> Result<TurnAction, String> {
+        // TODO Return an error if no moves remain.
+        //
+
+        let no_coins_remain = game.bank.len() == 0;
+        let no_cards_remain = game.card_rows.iter().all(|row| row.is_empty());
+        let no_reserved_cards = self.hand.hidden.is_empty();
+
+        if no_coins_remain && no_cards_remain && no_reserved_cards {
+            return Err("No moves".to_string());
+        }
+
         match self.strategy {
             PlayerStrategy::Random => match rand.read_u8() % 4 {
                 0 => {
@@ -91,19 +107,27 @@ impl Player {
                     let (_bank, color3) = bank.random_choice(rand);
 
                     return match (color1, color2, color3) {
-                        (Some(c1), Some(c2), Some(c3)) => TurnAction::TakeThreeTokens(c1, c2, c3),
+                        (Some(c1), Some(c2), Some(c3)) => {
+                            Ok(TurnAction::TakeThreeTokens(c1, c2, c3))
+                        }
                         _ => self.select_action(rand, game),
                     };
                 }
                 1 => match game.bank.random_choice(rand) {
-                    (_, Some(color)) => TurnAction::TakeTwoTokens(color),
+                    (_, Some(color)) => Ok(TurnAction::TakeTwoTokens(color)),
                     _ => {
                         println!("Zero tokens remain. Trying again.");
                         self.select_action(rand, game)
                     }
                 },
-                2 => TurnAction::Reserve(game.random_card(rand)),
-                3 => TurnAction::Purchase(game.random_card(rand)),
+                2 => match game.random_card(rand) {
+                    Some(card) => Ok(TurnAction::Reserve(card)),
+                    None => self.select_action(rand, game),
+                },
+                3 => match game.random_card(rand) {
+                    Some(card) => Ok(TurnAction::Purchase(card)),
+                    None => self.select_action(rand, game),
+                },
                 _ => panic!("Unreachable"),
             },
             PlayerStrategy::GreedyPurchase => todo!(),
@@ -141,24 +165,51 @@ impl Game {
         }
     }
 
-    fn random_card(&self, rand: &mut dyn RandomStream) -> Card {
-        let row = rand.read_usize() % self.card_rows.len();
-        let col = rand.read_usize() % self.card_rows[row].face_up.len();
-        self.card_rows[row].face_up[col]
+    fn random_card(&self, rand: &mut dyn RandomStream) -> Option<Card> {
+        let num_visible_cards: usize = self.card_rows.iter().map(|row| row.face_up.len()).sum();
+        if num_visible_cards == 0 {
+            return None;
+        }
+        let want_index = rand.read_usize() % num_visible_cards;
+        let mut i = 0;
+        for row in self.card_rows.iter() {
+            for card in row.face_up.iter() {
+                if i == want_index {
+                    return Some(*card);
+                }
+                i += 1;
+            }
+        }
+        None
     }
 
+    /// Remove [card] from the table. If possible, replace it with a hidden card
+    /// from the appropriate deck.
     fn take_card(&mut self, card: Card) {
         for row in self.card_rows.iter_mut() {
-            for table_card in row.face_up.iter_mut() {
+            let mut delete_index = None;
+
+            for (i, table_card) in row.face_up.iter_mut().enumerate() {
                 if *table_card == card {
                     match row.hidden.pop() {
                         Some(new_card) => {
+                            // Replace the matching table card with a card drawn
+                            // from the deck.
                             *table_card = new_card;
+                            return;
                         }
-                        None => {}
+                        None => {
+                            // Delete the matching table card. We have to defer
+                            // this deletion until `row.face_up` is not being
+                            // mutably borrowed.
+                            delete_index = Some(i);
+                        }
                     }
-                    return;
                 }
+            }
+            if let Some(i) = delete_index {
+                row.face_up.swap_remove(i);
+                return;
             }
         }
         panic!("Cannot take a card that is not on the table")
@@ -209,7 +260,7 @@ impl Simulation {
         let player = &mut self.players[self.turn_index];
         self.turn_index = (self.turn_index + 1) % num_players;
 
-        let action = player.select_action(self.rand.as_mut(), &self.game);
+        let action = player.select_action(self.rand.as_mut(), &self.game)?;
         println!("Player selected {:?}", action);
         action.apply_to(player, &mut self.game)
     }
