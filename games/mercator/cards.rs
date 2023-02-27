@@ -1,4 +1,74 @@
-use crate::game::{Card, Color, ColorCounts};
+use std::fmt::Display;
+
+use crate::rand::{shuffle, RandomStream};
+use crate::tokens::{Color, ColorCounts};
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Card {
+    pub points: usize,
+    /// The purchase price of this card.
+    pub price: ColorCounts,
+    /// The purchasing power this card gives when held.
+    pub value: Option<Color>,
+}
+
+impl Display for Card {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Card: ")?;
+        if self.points > 0 {
+            write!(f, "+{} points, ", self.points)?;
+        }
+        if let Some(color) = self.value {
+            write!(f, "{:?}, ", color)?;
+        }
+        write!(f, "[{}].", self.price)?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CardRow {
+    pub face_up: Vec<Card>,
+    pub hidden: Vec<Card>,
+}
+
+impl CardRow {
+    pub fn new() -> Self {
+        CardRow {
+            face_up: Vec::new(),
+            hidden: Vec::new(),
+        }
+    }
+
+    pub fn new_shuffled(
+        rand: &mut dyn RandomStream,
+        cards: &[Card],
+        num_face_up: usize,
+    ) -> CardRow {
+        let mut cards = Vec::from(cards);
+        shuffle(rand, &mut cards);
+        let (cards_up, cards_down) = cards.split_at(num_face_up);
+        CardRow {
+            face_up: Vec::from(cards_up),
+            hidden: Vec::from(cards_down),
+        }
+    }
+}
+
+impl Display for CardRow {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Face-up: ")?;
+        for card in self.face_up.iter() {
+            write!(f, "{} ", card)?;
+        }
+        writeln!(f)?;
+        write!(f, "Hidden: ")?;
+        for card in self.hidden.iter() {
+            write!(f, "{} ", card)?;
+        }
+        Ok(())
+    }
+}
 
 // TODO: Replace this bogus list of nobles with the real list.
 pub fn get_all_nobles() -> [Card; 7] {

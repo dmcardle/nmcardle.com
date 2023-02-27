@@ -13,6 +13,7 @@ rust_library(
         "game.rs",
         "lib.rs",
         "rand.rs",
+        "tokens.rs",
     ],
 )
 

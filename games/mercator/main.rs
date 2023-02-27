@@ -48,10 +48,11 @@ fn main() -> Result<(), Error> {
             continue;
         }
         match prompt()? {
-            UserChoice::Step => {},
-            UserChoice::Run => { run_mode = true;},
+            UserChoice::Step => {}
+            UserChoice::Run => {
+                run_mode = true;
+            }
             UserChoice::Quit => return Ok(()),
         }
     }
-    Ok(())
 }
