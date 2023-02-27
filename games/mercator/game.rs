@@ -6,6 +6,8 @@ use crate::tokens::{Color, ColorCounts};
 
 #[derive(Debug)]
 enum TurnAction {
+    // TODO: Reframe as `TakeDistinctTokens` and allow for taking two or one
+    // token when the bank is running low.
     TakeThreeTokens(Color, Color, Color),
     TakeTwoTokens(Color),
     Reserve(Card),
@@ -16,17 +18,25 @@ impl TurnAction {
     fn apply_to(self, player: &mut Player, game: &mut Game) -> Result<(), String> {
         match self {
             TurnAction::TakeThreeTokens(color1, color2, color3) => {
-                let colors = ColorCounts::from(color1)
-                    .plus(&ColorCounts::from(color2))
-                    .and_then(|c| c.plus(&ColorCounts::from(color3)))?;
-
-                game.bank = game.bank.minus(&colors)?;
-                player.tokens = player.tokens.plus(&colors)?;
+                let sum = ColorCounts::from(color1)
+                    .plus(&ColorCounts::from(color2))?
+                    .plus(&ColorCounts::from(color3))?;
+                let colors_distinct = sum.iter().map(|(_, n)| n).max().unwrap() <= 1;
+                if !colors_distinct {
+                    Err("To take three tokens, they must be distinct".to_string())
+                } else if sum.get(Color::Yellow) > 0 {
+                    Err("Players cannot take yellow tokens directly".to_string())
+                } else {
+                    game.bank = game.bank.minus(&sum)?;
+                    player.tokens = player.tokens.plus(&sum)?;
+                    Ok(())
+                }
             }
             TurnAction::TakeTwoTokens(color) => {
                 let colors = ColorCounts::from(color);
                 game.bank = game.bank.minus(&colors)?;
                 player.tokens = player.tokens.plus(&colors)?;
+                Ok(())
             }
             TurnAction::Reserve(card) => {
                 game.take_card(card);
@@ -35,14 +45,15 @@ impl TurnAction {
                     .tokens
                     .plus(&ColorCounts::from(Color::Yellow))
                     .expect("ColorCounts should not overflow");
+                Ok(())
             }
             TurnAction::Purchase(card) => {
                 // TODO return an error when the player cannot afford this card.
                 game.take_card(card);
                 player.hand.face_up.push(card);
+                Ok(())
             }
         }
-        Ok(())
     }
 }
 
@@ -282,5 +293,72 @@ impl Display for Simulation {
         }
         write!(f, "Player {}'s turn...", self.turn_index)?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::rand::RandomStreamForTest;
+
+    #[test]
+    fn test_turnaction_take3() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+        let action = TurnAction::TakeThreeTokens(Color::Red, Color::Green, Color::Blue);
+        assert_eq!(action.apply_to(&mut player, &mut game), Ok(()));
+    }
+
+    #[test]
+    fn test_turnaction_take3_repeated_colors() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+
+        let action = TurnAction::TakeThreeTokens(Color::Red, Color::Red, Color::Blue);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+
+        let action = TurnAction::TakeThreeTokens(Color::Red, Color::Blue, Color::Blue);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+
+        let action = TurnAction::TakeThreeTokens(Color::Blue, Color::Blue, Color::Blue);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+    }
+
+    #[test]
+    fn test_turnaction_take3_wild() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+
+        let action = TurnAction::TakeThreeTokens(Color::Yellow, Color::Red, Color::Blue);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+
+        let action = TurnAction::TakeThreeTokens(Color::Red, Color::Yellow, Color::Blue);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+
+        let action = TurnAction::TakeThreeTokens(Color::Red, Color::Blue, Color::Yellow);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+    }
+
+    /// Test behavior when the player requests more tokens of a particular color
+    /// than they are allowed.
+    #[test]
+    fn test_turnaction_take3_until_insufficient() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+
+        // Keep taking until zero red tokens remain.
+        while game.bank.get(Color::Red) > 0 {
+            assert_eq!(
+                TurnAction::TakeThreeTokens(Color::Red, Color::Green, Color::Blue)
+                    .apply_to(&mut player, &mut game),
+                Ok(())
+            );
+        }
+
+        assert!(
+            TurnAction::TakeThreeTokens(Color::Red, Color::White, Color::Black)
+                .apply_to(&mut player, &mut game)
+                .is_err()
+        );
     }
 }

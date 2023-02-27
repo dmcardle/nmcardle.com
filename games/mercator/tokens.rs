@@ -40,8 +40,7 @@ impl ColorCounts {
     pub const BANK_START: ColorCounts = ColorCounts([7, 7, 7, 7, 7, 5]);
 
     /// Return the quantity of the given color.
-    #[allow(dead_code)]
-    fn get(&self, color: Color) -> usize {
+    pub fn get(&self, color: Color) -> usize {
         let index = color as usize;
         self.0[index]
     }
@@ -57,6 +56,7 @@ impl ColorCounts {
         }
         Ok(out)
     }
+
     /// Subtract another [ColorCounts] from this one. Returns a value iff the
     /// result does not overflow.
     pub fn minus(&self, other: &ColorCounts) -> Result<ColorCounts, String> {
@@ -75,7 +75,7 @@ impl ColorCounts {
     }
 
     /// Create an iterator that goes over each coin individually.
-    fn iter(&self) -> ColorCountsIter {
+    pub fn iter(&self) -> ColorCountsIter {
         ColorCountsIter {
             i: 0,
             counts: *self,
@@ -135,7 +135,7 @@ impl Display for ColorCounts {
     }
 }
 
-struct ColorCountsIter {
+pub struct ColorCountsIter {
     i: usize,
     counts: ColorCounts,
 }

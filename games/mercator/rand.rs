@@ -60,6 +60,22 @@ impl RandomStream for RandomStreamLinux {
     }
 }
 
+pub struct RandomStreamForTest {
+    counter: u8,
+}
+
+impl RandomStreamForTest {
+    pub fn new() -> Self {
+        RandomStreamForTest { counter: 0 }
+    }
+}
+
+impl RandomStream for RandomStreamForTest {
+    fn read_u8(&mut self) -> u8 {
+        self.counter.wrapping_add(1)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
