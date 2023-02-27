@@ -11,7 +11,8 @@ enum Error {
 }
 
 enum UserChoice {
-    Continue,
+    Step,
+    Run,
     Quit,
 }
 
@@ -26,10 +27,11 @@ fn prompt() -> Result<UserChoice, Error> {
         .map_err(|_| Error::IoError("Failed to read stdin".to_string()))?;
 
     match buf.as_str() {
-        "\n" => Ok(UserChoice::Continue),
+        "s\n" | "\n" => Ok(UserChoice::Step),
+        "r\n" => Ok(UserChoice::Run),
         "q\n" => Ok(UserChoice::Quit),
         _ => {
-            println!("Type 'q' to quit, or press enter to continue.");
+            println!("Options: [q]uit, [r]un, or [s]tep (default=s).");
             prompt()
         }
     }
@@ -38,11 +40,16 @@ fn prompt() -> Result<UserChoice, Error> {
 fn main() -> Result<(), Error> {
     let player_strategies = [PlayerStrategy::Random; 3];
     let mut sim = Simulation::new(&player_strategies);
+    let mut run_mode = false;
     loop {
         println!("{}", sim);
         sim.step().map_err(Error::SimulationError)?;
+        if run_mode {
+            continue;
+        }
         match prompt()? {
-            UserChoice::Continue => {}
+            UserChoice::Step => {},
+            UserChoice::Run => { run_mode = true;},
             UserChoice::Quit => return Ok(()),
         }
     }
