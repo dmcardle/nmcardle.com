@@ -42,9 +42,16 @@ impl TurnAction {
                 Ok(())
             }
             TurnAction::TakeTwoTokens(color) => {
-                let colors = ColorCounts::from(color);
+                let colors: ColorCounts = [color, color].into();
                 let new_bank = game.bank.minus(&colors)?;
                 let new_player_tokens = player.tokens.plus(&colors)?;
+
+                if new_player_tokens.len() > 10 {
+                    return Err(format!(
+                        "Player would exceed ten tokens if they took {}",
+                        colors
+                    ));
+                }
                 game.bank = new_bank;
                 player.tokens = new_player_tokens;
                 Ok(())
@@ -56,10 +63,15 @@ impl TurnAction {
                     .tokens
                     .plus(&ColorCounts::from(Color::Yellow))
                     .expect("ColorCounts should not overflow");
+
+                // TODO Remember to discard tokens if they now exceed 10. Does
+                // player get to choose which tokens? If so, that slightly
+                // complicates the definition of `TurnAction`.
                 Ok(())
             }
             TurnAction::Purchase(card) => {
                 // TODO return an error when the player cannot afford this card.
+
                 game.take_card(card);
                 player.hand.face_up.push(card);
                 Ok(())
