@@ -408,4 +408,18 @@ mod tests {
                 .is_err()
         );
     }
+
+    /// When the player requests more than three tokens, [TurnAction::apply_to]
+    /// should fail.
+    #[test]
+    fn test_turnaction_take_distinct_request_too_many() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+
+        let action = TurnAction::TakeDistinctTokensAndDiscard(
+            [Red, Green, Blue, White].into(),
+            ColorCounts::ZERO,
+        );
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+    }
 }
