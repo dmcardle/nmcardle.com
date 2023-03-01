@@ -10,9 +10,14 @@ enum TurnAction {
     /// Players are allowed to temporarily exceed the max of ten tokens, so long
     /// as they discard down to ten before the end of their turn.
     TakeDistinctTokensAndDiscard(ColorCounts, ColorCounts),
-    /// Take two tokens of the same color.
+    /// Take two tokens of the same color. Players may use this action to exceed
+    /// ten tokens.
     TakeTwoTokens(Color),
-    Reserve(Card),
+    /// Reserve a card from the board and receive a yellow token. If that would
+    /// cause the player to have more than ten tokens, they must specify the
+    /// color of token to trade.
+    Reserve(Card, Option<Color>),
+    /// Purchase a card from the board.
     Purchase(Card),
 }
 
@@ -28,10 +33,10 @@ impl TurnAction {
                     return Err(format!("Cannot take more than three tokens: {}", take));
                 }
 
-                let new_bank = game.bank.minus(&take)?;
+                let new_bank = game.bank.plus(&discard)?.minus(&take)?;
                 let new_player_tokens = player.tokens.plus(&take)?.minus(&discard)?;
 
-                if new_player_tokens.len() > 10 {
+                if new_player_tokens.len() > Player::MAX_TOKENS {
                     return Err(format!(
                         "Player would exceed ten tokens if they took {} and discarded {}",
                         take, discard
@@ -49,7 +54,7 @@ impl TurnAction {
                 let new_bank = game.bank.minus(&colors)?;
                 let new_player_tokens = player.tokens.plus(&colors)?;
 
-                if new_player_tokens.len() > 10 {
+                if new_player_tokens.len() > Player::MAX_TOKENS {
                     return Err(format!(
                         "Player would exceed ten tokens if they took {}",
                         colors
@@ -59,23 +64,38 @@ impl TurnAction {
                 player.tokens = new_player_tokens;
                 Ok(())
             }
-            TurnAction::Reserve(card) => {
-                game.take_card(card);
-                player.hand.hidden.push(card);
-                player.tokens = player
-                    .tokens
-                    .plus(&ColorCounts::from(Color::Yellow))
-                    .expect("ColorCounts should not overflow");
+            TurnAction::Reserve(card, release_token) => {
+                game.take_card(card)?;
 
-                // TODO Remember to discard tokens if they now exceed 10. Does
-                // player get to choose which tokens? If so, that slightly
-                // complicates the definition of `TurnAction`.
+                let mut new_tokens = player.tokens.plus(&Color::Yellow.into())?;
+                if new_tokens.len() > Player::MAX_TOKENS {
+                    if let Some(color) = release_token {
+                        new_tokens = new_tokens.minus(&color.into())?;
+                        game.bank = game.bank.plus(&color.into())?;
+                    } else {
+                        return Err("Player would have too many tokens".to_string());
+                    }
+                }
+                assert!(new_tokens.len() <= Player::MAX_TOKENS);
+
+                player.hand.hidden.push(card);
+                player.tokens = new_tokens;
+
+                // TODO Remember to discard tokens if they now exceed
+                // Player::MAX_TOKENS. Does player get to choose which tokens?
+                // If so, that slightly complicates the definition of
+                // `TurnAction`.
                 Ok(())
             }
             TurnAction::Purchase(card) => {
-                // TODO return an error when the player cannot afford this card.
+                let discount = player.purchasing_discount();
+                println!("**** discount = {}, price = {}", discount, card.price);
+                let effective_price = card.price.minus_clamping(&discount);
+                let new_tokens = player.tokens.minus(&effective_price)?;
 
-                game.take_card(card);
+                // TODO return an error when the player cannot afford this card.
+                game.take_card(card)?;
+                player.tokens = new_tokens;
                 player.hand.face_up.push(card);
                 Ok(())
             }
@@ -107,12 +127,31 @@ struct Player {
 }
 
 impl Player {
+    const MAX_TOKENS: usize = 10;
+
     fn new(strategy: PlayerStrategy) -> Self {
         Player {
             hand: CardRow::new(),
             tokens: ColorCounts::ZERO,
             strategy,
         }
+    }
+
+    /// Compute the purchasing discount conferred by the player's hand.
+    fn purchasing_discount(&self) -> ColorCounts {
+        self.hand.face_up.iter().map(|card| card.price).sum()
+    }
+
+    /// Count all tokens and color bonuses from the player's hand.
+    fn purchasing_power(&self) -> ColorCounts {
+        self.purchasing_discount()
+            .plus(&self.tokens)
+            .expect("Should not overflow")
+    }
+
+    /// Compute the sum of points in the player's hand.
+    fn points(&self) -> usize {
+        self.hand.face_up.iter().map(|card| card.points).sum()
     }
 
     fn select_action(
@@ -123,7 +162,7 @@ impl Player {
         // TODO Return an error if no moves remain.
         // TODO Enumerate all possible moves?
 
-        let no_coins_remain = game.bank.len() == 0;
+        let no_coins_remain = game.bank.minus_all(Color::Yellow).len() == 0;
         let no_cards_remain = game.card_rows.iter().all(|row| row.is_empty());
         let no_reserved_cards = self.hand.hidden.is_empty();
 
@@ -134,24 +173,40 @@ impl Player {
         match self.strategy {
             PlayerStrategy::Random => match rand.read_u8() % 4 {
                 0 => {
-                    if game.bank.len() == 0 {
+                    if no_coins_remain {
                         println!("Cannot take any tokens. Trying again.");
                         return self.select_action(rand, game);
                     }
 
-                    let bank: ColorCounts = game.bank;
-                    let (bank, _color1) = bank.random_choice(rand);
-                    let (bank, _color2) = bank.random_choice(rand);
-                    let (bank, _color3) = bank.random_choice(rand);
+                    // Make an alternate version of the game's bank. If a color
+                    // is present in the bank, the reduced bank contains exactly
+                    // one of that color.
+                    let bank: ColorCounts =
+                        game.bank.iter().fold(ColorCounts::ZERO, |acc, (color, n)| {
+                            if color != Color::Yellow && acc.get(color) == 0 && n > 0 {
+                                acc.plus(&ColorCounts::from(color)).unwrap()
+                            } else {
+                                acc
+                            }
+                        });
 
-                    let take: ColorCounts = game.bank.minus(&bank)?;
+                    println!("**** reduced bank = {}", bank);
+
+                    let (bank, color1) = bank.random_choice(rand);
+                    let (bank, color2) = bank.random_choice(rand);
+                    let (_bank, color3) = bank.random_choice(rand);
+
+                    let take: ColorCounts =
+                        ColorCounts::from_iter([color1, color2, color3].into_iter().flatten());
+                    println!("**** take = {}", take);
+
                     let new_player_tokens = self.tokens.plus(&take)?;
-                    let discard = if new_player_tokens.len() <= 10 {
+                    let discard = if new_player_tokens.len() <= Player::MAX_TOKENS {
                         ColorCounts::ZERO
                     } else {
                         let mut discard = ColorCounts::ZERO;
                         let mut new_player_tokens = new_player_tokens;
-                        while new_player_tokens.len() > 10 {
+                        while new_player_tokens.len() > Player::MAX_TOKENS {
                             let (tokens, color) = new_player_tokens.random_choice(rand);
                             new_player_tokens = tokens;
                             discard = discard.plus(&ColorCounts::from(color.unwrap()))?;
@@ -161,21 +216,52 @@ impl Player {
 
                     Ok(TurnAction::TakeDistinctTokensAndDiscard(take, discard))
                 }
-                1 => match game.bank.random_choice(rand) {
-                    (_, Some(color)) => Ok(TurnAction::TakeTwoTokens(color)),
-                    _ => {
-                        println!("Zero tokens remain. Trying again.");
+                1 => {
+                    if self.tokens.len() >= 8 {
+                        return self.select_action(rand, game);
+                    }
+                    // Randomly select a color that the bank has >= 2 of.
+
+                    let bank = game.bank.iter().fold(ColorCounts::ZERO, |acc, (color, n)| {
+                        if color != Color::Yellow && acc.get(color) <= 1 && n >= 2 {
+                            acc.plus(&ColorCounts::from(&[(color, n)])).unwrap()
+                        } else {
+                            acc
+                        }
+                    });
+                    match bank.random_choice(rand) {
+                        (_, Some(color)) => Ok(TurnAction::TakeTwoTokens(color)),
+                        _ => {
+                            println!("Zero tokens remain. Trying again.");
+                            self.select_action(rand, game)
+                        }
+                    }
+                }
+                2 => match game.random_card(rand) {
+                    Some(card) => {
+                        let (_, maybe_color) = self.tokens.random_choice(rand);
+                        Ok(TurnAction::Reserve(card, maybe_color))
+                    }
+                    None => self.select_action(rand, game),
+                },
+                3 => {
+                    let purchasing_power = self.purchasing_power();
+                    let candidate_cards: Vec<Card> = game
+                        .card_rows
+                        .iter()
+                        .flat_map(|row| row.face_up.iter())
+                        // Only keep cards that the player can afford.
+                        .filter(|card| purchasing_power.minus(&card.price).is_ok())
+                        .copied()
+                        .collect();
+
+                    if !candidate_cards.is_empty() {
+                        let i = rand.read_usize() % candidate_cards.len();
+                        Ok(TurnAction::Purchase(candidate_cards[i]))
+                    } else {
                         self.select_action(rand, game)
                     }
-                },
-                2 => match game.random_card(rand) {
-                    Some(card) => Ok(TurnAction::Reserve(card)),
-                    None => self.select_action(rand, game),
-                },
-                3 => match game.random_card(rand) {
-                    Some(card) => Ok(TurnAction::Purchase(card)),
-                    None => self.select_action(rand, game),
-                },
+                }
                 _ => panic!("Unreachable"),
             },
             PlayerStrategy::GreedyPurchase => todo!(),
@@ -187,7 +273,7 @@ impl Player {
 impl Display for Player {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // TODO implement a more compact display.
-        write!(f, "{:?}", self)?;
+        write!(f, "{:?} [points = {}]", self, self.points())?;
         Ok(())
     }
 }
@@ -233,7 +319,7 @@ impl Game {
 
     /// Remove [card] from the table. If possible, replace it with a hidden card
     /// from the appropriate deck.
-    fn take_card(&mut self, card: Card) {
+    fn take_card(&mut self, card: Card) -> Result<(), String> {
         for row in self.card_rows.iter_mut() {
             let mut delete_index = None;
 
@@ -244,7 +330,7 @@ impl Game {
                             // Replace the matching table card with a card drawn
                             // from the deck.
                             *table_card = new_card;
-                            return;
+                            return Ok(());
                         }
                         None => {
                             // Delete the matching table card. We have to defer
@@ -262,10 +348,10 @@ impl Game {
                 // Although `Vec::remove()` runs in O(n) time, we know n <= 4
                 // (`Game::NUM_CARDS_FACE_UP`), so this is effectively O(1).
                 row.face_up.remove(i);
-                return;
+                return Ok(());
             }
         }
-        unreachable!("Cannot take a card that is not on the table")
+        Err(format!("Could not find this card on the table: {}", card))
     }
 }
 
@@ -315,7 +401,16 @@ impl Simulation {
 
         let action = player.select_action(self.rand.as_mut(), &self.game)?;
         println!("Player selected {:?}", action);
-        action.apply_to(player, &mut self.game)
+        action.apply_to(player, &mut self.game)?;
+
+        // TODO This game-over logic isn't right. The game should continue until
+        // everyone gets the same number of turns.
+        if player.points() >= 15 {
+            println!("Game over!");
+            Err("Game over because player reached 15 points".to_string())
+        } else {
+            Ok(())
+        }
     }
 }
 

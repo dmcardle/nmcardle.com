@@ -1,5 +1,6 @@
 use crate::rand::RandomStream;
 use std::fmt::Display;
+use std::iter::{FromIterator, Sum};
 
 const NUM_COLORS: usize = 6;
 
@@ -69,6 +70,24 @@ impl ColorCounts {
         Ok(out)
     }
 
+    pub fn minus_clamping(&self, other: &ColorCounts) -> ColorCounts {
+        let mut out = ColorCounts::ZERO;
+        for i in 0..NUM_COLORS {
+            out.0[i] = if self.0[i] > other.0[i] {
+                self.0[i] - other.0[i]
+            } else {
+                0
+            };
+        }
+        out
+    }
+
+    pub fn minus_all(&self, color: Color) -> ColorCounts {
+        let mut out = *self;
+        out.0[color as usize] = 0;
+        out
+    }
+
     /// Returns the total number of coins.
     pub fn len(&self) -> usize {
         self.0.iter().sum()
@@ -101,6 +120,14 @@ impl ColorCounts {
     }
 }
 
+impl Sum for ColorCounts {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(ColorCounts::ZERO, |acc, x| {
+            acc.plus(&x).expect("Should not overflow")
+        })
+    }
+}
+
 impl From<Color> for ColorCounts {
     fn from(color: Color) -> Self {
         let mut counts = ColorCounts::ZERO;
@@ -113,6 +140,16 @@ impl<const N: usize> From<[Color; N]> for ColorCounts {
     fn from(colors: [Color; N]) -> Self {
         let mut counts = ColorCounts::ZERO;
         for color in colors {
+            counts.0[color as usize] += 1;
+        }
+        counts
+    }
+}
+
+impl FromIterator<Color> for ColorCounts {
+    fn from_iter<I: IntoIterator<Item = Color>>(iter: I) -> Self {
+        let mut counts = ColorCounts::ZERO;
+        for color in iter {
             counts.0[color as usize] += 1;
         }
         counts
@@ -153,6 +190,8 @@ pub struct ColorCountsIter {
 impl Iterator for ColorCountsIter {
     type Item = (Color, usize);
 
+    /// Produce the next color-count pair. This does not skip colors that have
+    /// counts of zero.
     fn next(&mut self) -> Option<Self::Item> {
         if self.i < self.counts.0.len() {
             let i = self.i;
