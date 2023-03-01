@@ -109,6 +109,16 @@ impl From<Color> for ColorCounts {
     }
 }
 
+impl<const N: usize> From<[Color; N]> for ColorCounts {
+    fn from(colors: [Color; N]) -> Self {
+        let mut counts = ColorCounts::ZERO;
+        for color in colors {
+            counts.0[color as usize] += 1;
+        }
+        counts
+    }
+}
+
 impl<const N: usize> From<&[(Color, usize); N]> for ColorCounts {
     fn from(colors: &[(Color, usize); N]) -> Self {
         let mut counts = ColorCounts::ZERO;
