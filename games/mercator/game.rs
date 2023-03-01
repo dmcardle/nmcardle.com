@@ -42,6 +42,9 @@ impl TurnAction {
                 Ok(())
             }
             TurnAction::TakeTwoTokens(color) => {
+                if color == Color::Yellow {
+                    return Err("Players cannot take yellow tokens directly".to_string());
+                }
                 let colors: ColorCounts = [color, color].into();
                 let new_bank = game.bank.minus(&colors)?;
                 let new_player_tokens = player.tokens.plus(&colors)?;
@@ -421,5 +424,46 @@ mod tests {
             ColorCounts::ZERO,
         );
         assert!(action.apply_to(&mut player, &mut game).is_err());
+    }
+
+    #[test]
+    fn test_turnaction_take_two() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+        let action = TurnAction::TakeTwoTokens(Red);
+        let red_count = game.bank.get(Red);
+        assert!(action.apply_to(&mut player, &mut game).is_ok());
+        assert_eq!(game.bank.get(Red), red_count - 2);
+    }
+
+    #[test]
+    fn test_turnaction_take_two_wild() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+        let yellow_count = game.bank.get(Yellow);
+        let action = TurnAction::TakeTwoTokens(Yellow);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+        assert_eq!(game.bank.get(Yellow), yellow_count);
+    }
+
+    #[test]
+    fn test_turnaction_take_two_until_insufficient() {
+        let mut player = Player::new(PlayerStrategy::Random);
+        let mut game = Game::new_random_game(&mut RandomStreamForTest::new());
+
+        while game.bank.get(Red) > 0 {
+            game.bank = game.bank.minus(&Red.into()).unwrap();
+        }
+
+        let red_count = game.bank.get(Red);
+        let green_count = game.bank.get(Green);
+
+        let action = TurnAction::TakeTwoTokens(Red);
+        assert!(action.apply_to(&mut player, &mut game).is_err());
+        assert_eq!(game.bank.get(Red), red_count);
+
+        let action = TurnAction::TakeTwoTokens(Green);
+        assert!(action.apply_to(&mut player, &mut game).is_ok());
+        assert_eq!(game.bank.get(Green), green_count - 2);
     }
 }
