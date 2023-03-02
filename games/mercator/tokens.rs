@@ -286,4 +286,32 @@ mod tests {
         assert_eq!(money.get(Color::Red), 1);
         assert_eq!(money.get(Color::Yellow), 6);
     }
+
+    #[test]
+    fn test_color_counts_iter() {
+        let money = ColorCounts([1, 2, 3, 4, 5, 6]);
+        let collected: Vec<(Color, usize)> = money.iter().collect();
+        assert_eq!(
+            collected,
+            vec![
+                (Color::Red, 1),
+                (Color::Green, 2),
+                (Color::Blue, 3),
+                (Color::White, 4),
+                (Color::Black, 5),
+                (Color::Yellow, 6),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_color_counts_sum() {
+        let moneys = [
+            ColorCounts([1, 2, 3, 4, 5, 6]),
+            ColorCounts([5, 0, 2, 1, 0, 9]),
+            ColorCounts([4, 2, 4, 2, 4, 2]),
+        ];
+        let sum: ColorCounts = moneys.into_iter().sum();
+        assert_eq!(sum, ColorCounts([10, 4, 9, 7, 9, 17]));
+    }
 }
