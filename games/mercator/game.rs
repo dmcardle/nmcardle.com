@@ -80,11 +80,6 @@ impl TurnAction {
 
                 player.hand.hidden.push(card);
                 player.tokens = new_tokens;
-
-                // TODO Remember to discard tokens if they now exceed
-                // Player::MAX_TOKENS. Does player get to choose which tokens?
-                // If so, that slightly complicates the definition of
-                // `TurnAction`.
                 Ok(())
             }
             TurnAction::Purchase(card) => {
