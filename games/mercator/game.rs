@@ -90,7 +90,7 @@ impl TurnAction {
             TurnAction::Purchase(card) => {
                 let discount = player.purchasing_discount();
                 println!("**** discount = {}, price = {}", discount, card.price);
-                let effective_price = card.price.minus_clamping(&discount);
+                let effective_price = card.price.minus_saturating(&discount);
                 let new_tokens = player.tokens.minus(&effective_price)?;
 
                 // TODO return an error when the player cannot afford this card.

@@ -46,42 +46,39 @@ impl ColorCounts {
         self.0[index]
     }
 
+    /// Zips this and `other` and applies `f` to each pair. If `f` returns
+    /// [None] for any pair, the entire result will be [None].
+    fn zip_map(
+        &self,
+        other: &ColorCounts,
+        f: fn(usize, usize) -> Option<usize>,
+    ) -> Option<ColorCounts> {
+        let mut out = ColorCounts::ZERO;
+        for ((out_sum, a), b) in out.0.iter_mut().zip(self.0).zip(other.0) {
+            *out_sum = f(a, b)?;
+        }
+        Some(out)
+    }
+
     /// Add another [ColorCounts] to this one. Returns a value iff the result
     /// does not overflow.
     pub fn plus(&self, other: &ColorCounts) -> Result<ColorCounts, String> {
-        let mut out = ColorCounts::ZERO;
-        for i in 0..NUM_COLORS {
-            out.0[i] = self.0[i]
-                .checked_add(other.0[i])
-                .ok_or("ColorCounts addition overflowed")?;
-        }
-        Ok(out)
+        self.zip_map(other, |a, b| a.checked_add(b))
+            .ok_or_else(|| "Addition overflowed".to_string())
     }
 
     /// Subtract another [ColorCounts] from this one. Returns a value iff the
     /// result does not overflow.
     pub fn minus(&self, other: &ColorCounts) -> Result<ColorCounts, String> {
-        let mut out = ColorCounts::ZERO;
-        for i in 0..NUM_COLORS {
-            out.0[i] = self.0[i]
-                .checked_sub(other.0[i])
-                .ok_or("ColorCounts subtraction overflowed")?;
-        }
-        Ok(out)
+        self.zip_map(other, |a, b| a.checked_sub(b))
+            .ok_or_else(|| "Subtraction overflowed".to_string())
     }
 
     /// Subtract another [ColorCounts] from this one. Where subtraction would go
     /// negative, a value of zero is used instead.
-    pub fn minus_clamping(&self, other: &ColorCounts) -> ColorCounts {
-        let mut out = ColorCounts::ZERO;
-        for i in 0..NUM_COLORS {
-            out.0[i] = if self.0[i] > other.0[i] {
-                self.0[i] - other.0[i]
-            } else {
-                0
-            };
-        }
-        out
+    pub fn minus_saturating(&self, other: &ColorCounts) -> ColorCounts {
+        self.zip_map(other, |a, b| Some(a.saturating_sub(b)))
+            .unwrap()
     }
 
     /// Return a copy of this [ColorCounts] that contains zero of `color`.
@@ -251,17 +248,23 @@ mod tests {
     #[test]
     fn test_color_counts_minus_clamping() {
         assert_eq!(
-            ColorCounts::ZERO.minus_clamping(&ColorCounts::ZERO),
+            ColorCounts::ZERO.minus_saturating(&ColorCounts::ZERO),
             ColorCounts::ZERO
         );
 
         let money = ColorCounts([1, 2, 3, 4, 5, 6]);
-        assert_eq!(money.minus_clamping(&money), ColorCounts::ZERO);
+        assert_eq!(money.minus_saturating(&money), ColorCounts::ZERO);
 
         let other_money = ColorCounts([2, 3, 4, 5, 6, 7]);
-        assert_eq!(other_money.minus_clamping(&money), ColorCounts([1; NUM_COLORS]));
-        assert_eq!(money.minus_clamping(&other_money), ColorCounts::ZERO);
-        assert_eq!(ColorCounts::ZERO.minus_clamping(&other_money), ColorCounts::ZERO);
+        assert_eq!(
+            other_money.minus_saturating(&money),
+            ColorCounts([1; NUM_COLORS])
+        );
+        assert_eq!(money.minus_saturating(&other_money), ColorCounts::ZERO);
+        assert_eq!(
+            ColorCounts::ZERO.minus_saturating(&other_money),
+            ColorCounts::ZERO
+        );
     }
 
     #[test]
@@ -269,7 +272,10 @@ mod tests {
         assert_eq!(ColorCounts::ZERO.minus_all(Color::Red), ColorCounts::ZERO);
         let money = ColorCounts([1, 2, 3, 4, 5, 6]);
         assert_eq!(money.minus_all(Color::Red), ColorCounts([0, 2, 3, 4, 5, 6]));
-        assert_eq!(money.minus_all(Color::Green), ColorCounts([1, 0, 3, 4, 5, 6]));
+        assert_eq!(
+            money.minus_all(Color::Green),
+            ColorCounts([1, 0, 3, 4, 5, 6])
+        );
     }
 
     #[test]
