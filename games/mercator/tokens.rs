@@ -70,6 +70,8 @@ impl ColorCounts {
         Ok(out)
     }
 
+    /// Subtract another [ColorCounts] from this one. Where subtraction would go
+    /// negative, a value of zero is used instead.
     pub fn minus_clamping(&self, other: &ColorCounts) -> ColorCounts {
         let mut out = ColorCounts::ZERO;
         for i in 0..NUM_COLORS {
@@ -82,6 +84,7 @@ impl ColorCounts {
         out
     }
 
+    /// Return a copy of this [ColorCounts] that contains zero of `color`.
     pub fn minus_all(&self, color: Color) -> ColorCounts {
         let mut out = *self;
         out.0[color as usize] = 0;
@@ -243,6 +246,30 @@ mod tests {
 
         // Any non-zero number subtracted from zero would overflow.
         assert!(ColorCounts::ZERO.minus(&other_money).is_err());
+    }
+
+    #[test]
+    fn test_color_counts_minus_clamping() {
+        assert_eq!(
+            ColorCounts::ZERO.minus_clamping(&ColorCounts::ZERO),
+            ColorCounts::ZERO
+        );
+
+        let money = ColorCounts([1, 2, 3, 4, 5, 6]);
+        assert_eq!(money.minus_clamping(&money), ColorCounts::ZERO);
+
+        let other_money = ColorCounts([2, 3, 4, 5, 6, 7]);
+        assert_eq!(other_money.minus_clamping(&money), ColorCounts([1; NUM_COLORS]));
+        assert_eq!(money.minus_clamping(&other_money), ColorCounts::ZERO);
+        assert_eq!(ColorCounts::ZERO.minus_clamping(&other_money), ColorCounts::ZERO);
+    }
+
+    #[test]
+    fn test_color_counts_minus_all() {
+        assert_eq!(ColorCounts::ZERO.minus_all(Color::Red), ColorCounts::ZERO);
+        let money = ColorCounts([1, 2, 3, 4, 5, 6]);
+        assert_eq!(money.minus_all(Color::Red), ColorCounts([0, 2, 3, 4, 5, 6]));
+        assert_eq!(money.minus_all(Color::Green), ColorCounts([1, 0, 3, 4, 5, 6]));
     }
 
     #[test]
