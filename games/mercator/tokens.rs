@@ -93,7 +93,7 @@ impl ColorCounts {
         self.0.iter().sum()
     }
 
-    /// Create an iterator that goes over each coin individually.
+    /// Create an iterator that yields color-count pairs.
     pub fn iter(&self) -> ColorCountsIter {
         ColorCountsIter {
             i: 0,
