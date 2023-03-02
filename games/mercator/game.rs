@@ -176,14 +176,17 @@ impl Player {
                     // Make an alternate version of the game's bank. If a color
                     // is present in the bank, the reduced bank contains exactly
                     // one of that color.
-                    let bank: ColorCounts =
-                        game.bank.iter().fold(ColorCounts::ZERO, |acc, (color, n)| {
-                            if color != Color::Yellow && acc.get(color) == 0 && n > 0 {
-                                acc.plus(&ColorCounts::from(color)).unwrap()
+                    let bank: ColorCounts = game
+                        .bank
+                        .iter()
+                        .fold(ColorCounts::ZERO, |acc, (color, n)| {
+                            if acc.get(color) == 0 && n > 0 {
+                                acc.plus(&color.into()).unwrap()
                             } else {
                                 acc
                             }
-                        });
+                        })
+                        .minus_all(Color::Yellow);
 
                     println!("**** reduced bank = {}", bank);
 
