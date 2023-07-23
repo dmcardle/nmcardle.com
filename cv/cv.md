@@ -23,12 +23,54 @@ dan-abstract: |
 
 # Experience
 
-## Google
-Software Engineer | Cambridge, MA | October 2018 -- January 2023
+## \[Stealth Startup\]
+Software Engineer | Cambridge, MA | April 2023 -- Present
 
 ### OpenTitan
 
-* Developed Python, TCL, and Bazel tooling to splice [OTP](https://docs.opentitan.org/hw/ip/otp_ctrl/doc/) (one-time programmable memory) images into pre-built FPGA bitstreams (PR [#15163](https://github.com/lowRISC/opentitan/pull/15163)).
+* Made CRC32 implementation 28x faster.
+  First, I developed an on-device perftest to give us a performance baseline.
+  Next, I replaced the C implementation with inline assembly instructions from RISC-V's [bitmanip](https://github.com/riscv/riscv-bitmanip/raw/main-history/bitmanip-0.93.pdf) spec. 
+  This gave a 20x speedup relative to the baseline (PR [#17989](https://github.com/lowRISC/opentitan/pull/17989)).
+  Later, I used `objdump` to inspect the machine code and noticed we were wasting a lot of cycles setting up function calls.
+  I inlined a few helper functions for an overall 28x speed improvement (PR [#18068](https://github.com/lowRISC/opentitan/pull/18068)).
+  This work obviously improves performance, but it may also have positive security implications; a faster-moving target is harder to glitch.
+* Enabled C/C++ compiler warnings for entire project in 20+ PRs ([tracker](https://github.com/lowRISC/opentitan/issues/12553#issuecomment-1542312293)).
+  When OpenTitan switched build systems from Meson to Bazel, it lost some of its C warning flags.
+  I added Bazel `feature` objects for the missing flags, fixed many would-be compile errors across the project, and wrapped it all up by enabling the new features by default.
+  While perhaps not glamorous, this work is important because it raises the bar on the quality, correctness, and security of the project's C codebase.
+* Audited usage of `sec_mmio` functions by developing tooling with Bazel, Python, and libclang (PR [#18719](https://github.com/lowRISC/opentitan/pull/18719)).
+  OpenTitan software uses functions from its `sec_mmio` library for security-critical operations.
+  These functions check that repeated memory accesses yield the same value.
+  Otherwise, they immediately halt the chip because it may be under attack.
+  We wanted to audit these call sites to reduce the chances of any self-inflicted DoS bugs being included in an upcoming release of the ROM software.
+* Added a "chip info" struct to the ROM (PRs [#18100](https://github.com/lowRISC/opentitan/pull/18100) and [#18254](https://github.com/lowRISC/opentitan/pull/18254)).
+  This gives us another way to determine the ROM's provenance if something goes wrong.
+  For instance, if we have a physical chip, but the ROM fails to boot, we can potentially dump this memory via the JTAG interface.
+* Currently developing "ROM\_EXT bootstrap", a recovery mode for use after manufacturing (PR [#19155](https://github.com/lowRISC/opentitan/pull/19155), WIP PR [#18929](https://github.com/lowRISC/opentitan/pull/18929)).
+  This mode enables the device owner to erase and reprogram the flash over the SPI interface.
+  Unlike ROM bootstrap, ROM\_EXT bootstrap can be used after manufacturing.
+  It also has finer-grained access controls that prevent the owner from overwriting ROM\_EXT in flash.
+
+<!--
+* Bazel work
+  * Upgraded to Bazel 6.2.1 (PR [#17021](https://github.com/lowRISC/opentitan/pull/17021)).
+  * Lychee: https://github.com/lowRISC/opentitan/pull/18257
+  * Added Bazel aspect to run clang-tidy: https://github.com/lowRISC/opentitan/pull/18537
+  * Clang-tidy test rules: https://github.com/lowRISC/opentitan/pull/18763
+  * Clang-tidy warnings not errors: https://github.com/lowRISC/opentitan/pull/18773
+* UB fixes
+  * Downcast: https://github.com/lowRISC/opentitan/pull/18943
+  * Bitshift: https://github.com/lowRISC/opentitan/pull/19097
+  * Union access: https://github.com/lowRISC/opentitan/pull/18498
+-->
+
+## Google
+Software Engineer | Cambridge, MA | October 2018 -- March 2023
+
+### OpenTitan
+
+* Developed Python, TCL, and Bazel tooling to splice [OTP](https://docs.opentitan.org/hw/ip/otp_ctrl/) (one-time programmable memory) images into pre-built FPGA bitstreams (PR [#15163](https://github.com/lowRISC/opentitan/pull/15163)).
   This enabled more comprehensive end-to-end tests and saved >1 hour of build time per test.
 * Created infrastructure for JTAG-based end-to-end tests defined with GDB and OpenOCD.
   * Custom Bazel test rule: [`opentitan_gdb_fpga_cw310_test`](https://github.com/lowRISC/opentitan/blob/master/rules/opentitan_gdb_test.bzl#L234).
