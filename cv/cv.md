@@ -65,11 +65,11 @@ Software Engineer | Cambridge, MA | October 2018 -- January 2023
 
 * Contributed to specification for [SVCB/HTTPS](https://datatracker.ietf.org/doc/draft-ietf-dnsop-svcb-https/), a new DNS resource record required for practical deployment of TLS ECH.
     * While HTTPS record specification was in flux, designed and ran a Chrome experiment to study the impact of new resource records on the DNS ecosystem [[design doc]](https://docs.google.com/document/d/14eCqVyT_3MSj7ydqNFl1Yl0yg1fs6g24qmYUUdi5V-k/edit?usp=sharing).
-* Added a number of fuzzers, such as [robots_rules_parser_fuzzer](https://chromium-review.googlesource.com/c/chromium/src/+/2625993), 
+* Added a number of fuzzers, such as [robots_rules_parser_fuzzer](https://chromium-review.googlesource.com/c/chromium/src/+/2625993),
     [content_settings_pattern_parser_fuzzer](https://chromium-review.googlesource.com/c/chromium/src/+/2308232),
     and [vr_omnibox_formatting_fuzzer](https://chromium-review.googlesource.com/c/chromium/src/+/1847793).
     * Discovered a bug in Chrome's URL parser that made it non-idempotent.
-      Filed [crbug 1128999](https://bugs.chromium.org/p/chromium/issues/detail?id=1128999) and added an idempotency check to gurl_fuzzer in [CL 2414615](https://chromium-review.googlesource.com/c/chromium/src/+/2414615). 
+      Filed [crbug 1128999](https://bugs.chromium.org/p/chromium/issues/detail?id=1128999) and added an idempotency check to gurl_fuzzer in [CL 2414615](https://chromium-review.googlesource.com/c/chromium/src/+/2414615).
 
 * Hosted an intern who implemented [RFC 8914: Extended DNS Errors](https://www.rfc-editor.org/rfc/rfc8914.html) in Chrome's net stack.
 
