@@ -12,7 +12,7 @@ def _pandoc_impl(ctx):
     args.add_all(ctx.files.srcs)
 
     ctx.actions.run(
-        inputs = ctx.files.srcs,
+        inputs = ctx.files.srcs + ctx.files.template,
         outputs = [out_file],
         arguments = [args],
         executable = ctx.attr._pandoc_bin.files_to_run,
