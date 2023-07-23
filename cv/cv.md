@@ -28,29 +28,24 @@ Software Engineer | Cambridge, MA | April 2023 -- Present
 
 ### OpenTitan
 
-* Made CRC32 implementation 28x faster.
-  First, I developed an on-device perftest to give us a performance baseline.
-  Next, I replaced the C implementation with inline assembly instructions from RISC-V's [bitmanip](https://github.com/riscv/riscv-bitmanip/raw/main-history/bitmanip-0.93.pdf) spec. 
-  This gave a 20x speedup relative to the baseline (PR [#17989](https://github.com/lowRISC/opentitan/pull/17989)).
-  Later, I used `objdump` to inspect the machine code and noticed we were wasting a lot of cycles setting up function calls.
-  I inlined a few helper functions for an overall 28x speed improvement (PR [#18068](https://github.com/lowRISC/opentitan/pull/18068)).
-  This work obviously improves performance, but it may also have positive security implications; a faster-moving target is harder to glitch.
+* Optimized software CRC32 implementation, achieving a 28x speedup.
+  This is also good for security because a faster-moving target is harder to glitch.
+  * Developed an on-device perftest to measure baseline and replaced the C implementation with inline assembly instructions from RISC-V's [bitmanip](https://github.com/riscv/riscv-bitmanip/raw/main-history/bitmanip-0.93.pdf) spec (PR [#17989](https://github.com/lowRISC/opentitan/pull/17989)).
+    This yielded a 20x speedup.
+  * Inspected the compiler-generated machine code with `objdump` which revealed significant overhead from function calls.
+    Achieved a 28x speed improvement compared to original baseline by inlining helper functions (PR [#18068](https://github.com/lowRISC/opentitan/pull/18068)).
+* Audited call sites of `sec_mmio` functions.
+  This mitigated the risk of shipping self-inflicted DoS bugs in the [M2.5.1-RC0](https://github.com/lowRISC/opentitan/releases/tag/Earlgrey-M2.5.1-RC0) release.
+  * Developed syntax-level audit tooling with Bazel, Python, and libclang (PR [#18719](https://github.com/lowRISC/opentitan/pull/18719)).
 * Enabled C/C++ compiler warnings for entire project in 20+ PRs ([tracker](https://github.com/lowRISC/opentitan/issues/12553#issuecomment-1542312293)).
-  When OpenTitan switched build systems from Meson to Bazel, it lost some of its C warning flags.
-  I added Bazel `feature` objects for the missing flags, fixed many would-be compile errors across the project, and wrapped it all up by enabling the new features by default.
-  While perhaps not glamorous, this work is important because it raises the bar on the quality, correctness, and security of the project's C codebase.
-* Audited usage of `sec_mmio` functions by developing tooling with Bazel, Python, and libclang (PR [#18719](https://github.com/lowRISC/opentitan/pull/18719)).
-  OpenTitan software uses functions from its `sec_mmio` library for security-critical operations.
-  These functions check that repeated memory accesses yield the same value.
-  Otherwise, they immediately halt the chip because it may be under attack.
-  We wanted to audit these call sites to reduce the chances of any self-inflicted DoS bugs being included in an upcoming release of the ROM software.
-* Added a "chip info" struct to the ROM (PRs [#18100](https://github.com/lowRISC/opentitan/pull/18100) and [#18254](https://github.com/lowRISC/opentitan/pull/18254)).
-  This gives us another way to determine the ROM's provenance if something goes wrong.
-  For instance, if we have a physical chip, but the ROM fails to boot, we can potentially dump this memory via the JTAG interface.
-* Currently developing "ROM\_EXT bootstrap", a recovery mode for use after manufacturing (PR [#19155](https://github.com/lowRISC/opentitan/pull/19155), WIP PR [#18929](https://github.com/lowRISC/opentitan/pull/18929)).
-  This mode enables the device owner to erase and reprogram the flash over the SPI interface.
-  Unlike ROM bootstrap, ROM\_EXT bootstrap can be used after manufacturing.
-  It also has finer-grained access controls that prevent the owner from overwriting ROM\_EXT in flash.
+  This work improved the project's security posture by making the toolchain more sensitive to bugs and undefined behavior.
+* Added a "chip info" struct at a fixed location in the ROM (PRs [#18100](https://github.com/lowRISC/opentitan/pull/18100) and [#18254](https://github.com/lowRISC/opentitan/pull/18254)).
+  This change is intended to aid debugging when the ROM crashes.
+  For instance, if the ROM silently failed on a physical chip, we could dump the chip info via JTAG and determine which Git revision the software came from.
+* Currently developing ROM\_EXT bootstrap feature, a recovery mode meant for programming the flash via SPI interface after manufacturing.
+  * Refactored existing ROM bootstrap into a library to enable code reuse (PR [#19155](https://github.com/lowRISC/opentitan/pull/19155)).
+  * Implementing new ROM\_EXT bootstrap with access controls that protect the flash regions that contain ROM\_EXT (WIP PR [#18929](https://github.com/lowRISC/opentitan/pull/18929)).
+  * Also implementing a fuzzer that throws SPI commands at the bootstrap library (PR [#19194](https://github.com/lowRISC/opentitan/pull/19194)).
 
 <!--
 * Bazel work
