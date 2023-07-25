@@ -5,9 +5,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "pandoc",
     build_file_content = "exports_files(glob(['**']))",
-    sha256 = "0fe2ef8366a61b9296ef4a8512b9a2d4acd056c7f92ce7e0cc82add960c2cc8f",
-    strip_prefix = "pandoc-3.0/bin",
-    url = "https://github.com/jgm/pandoc/releases/download/3.0/pandoc-3.0-linux-amd64.tar.gz",
+    sha256 = "6eec0e0c85e97c90a02b9184c993d4bd848426fb3d7452ddc0d6014368c5e3fd",
+    strip_prefix = "pandoc-3.1.6/bin",
+    url = "https://github.com/jgm/pandoc/releases/download/3.1.6/pandoc-3.1.6-linux-amd64.tar.gz",
 )
 
 http_archive(
