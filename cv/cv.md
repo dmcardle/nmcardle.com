@@ -28,21 +28,20 @@ Software Engineer | Cambridge, MA | April 2023 -- Present
 
 ### OpenTitan
 
-* Optimized software CRC32 implementation, achieving a 28x speedup.
-  This is also good for security because a faster-moving target is harder to glitch.
-  * Developed an on-device perftest to measure baseline and replaced the C implementation with inline assembly instructions from RISC-V's [bitmanip](https://github.com/riscv/riscv-bitmanip/raw/main-history/bitmanip-0.93.pdf) spec (PR [#17989](https://github.com/lowRISC/opentitan/pull/17989)).
+* Optimized CRC32 implementation, achieving a 28x speedup.
+  * Developed an on-device perftest to measure performance baseline, then rewrote the C implementation with inline assembly instructions from RISC-V's [bitmanip](https://github.com/riscv/riscv-bitmanip/raw/main-history/bitmanip-0.93.pdf) spec (PR [#17989](https://github.com/lowRISC/opentitan/pull/17989)).
     This yielded a 20x speedup.
-  * Inspected the compiler-generated machine code with `objdump` which revealed significant overhead from function calls.
-    Achieved a 28x speed improvement compared to original baseline by inlining helper functions (PR [#18068](https://github.com/lowRISC/opentitan/pull/18068)).
-* Audited call sites of `sec_mmio` functions.
+  * Discovered significant overhead from function calls by inspecting disassembly.
+    Achieved an overall 28x speed improvement by inlining helper functions (PR [#18068](https://github.com/lowRISC/opentitan/pull/18068)).
+* Audited call sites of `sec_mmio` functions for improper usage.
   This mitigated the risk of shipping self-inflicted DoS bugs in the [M2.5.1-RC0](https://github.com/lowRISC/opentitan/releases/tag/Earlgrey-M2.5.1-RC0) release.
   * Developed syntax-level audit tooling with Bazel, Python, and libclang (PR [#18719](https://github.com/lowRISC/opentitan/pull/18719)).
 * Enabled C/C++ compiler warnings for entire project in 20+ PRs ([tracker](https://github.com/lowRISC/opentitan/issues/12553#issuecomment-1542312293)).
-  This work improved the project's security posture by making the toolchain more sensitive to bugs and undefined behavior.
+  This work improved the toolchain's ability to detect bugs and undefined behavior.
 * Added a "chip info" struct at a fixed location in the ROM (PRs [#18100](https://github.com/lowRISC/opentitan/pull/18100) and [#18254](https://github.com/lowRISC/opentitan/pull/18254)).
   This change is intended to aid debugging when the ROM crashes.
   For instance, if the ROM silently failed on a physical chip, we could dump the chip info via JTAG and determine which Git revision the software came from.
-* Currently developing ROM\_EXT bootstrap feature, a recovery mode meant for programming the flash via SPI interface after manufacturing.
+* Currently developing "ROM\_EXT bootstrap" feature, a recovery mode for reprogramming the flash via the SPI interface after manufacturing.
   * Refactored existing ROM bootstrap into a library to enable code reuse (PR [#19155](https://github.com/lowRISC/opentitan/pull/19155)).
   * Implementing new ROM\_EXT bootstrap with access controls that protect the flash regions that contain ROM\_EXT (WIP PR [#18929](https://github.com/lowRISC/opentitan/pull/18929)).
   * Also implementing a fuzzer that throws SPI commands at the bootstrap library (PR [#19194](https://github.com/lowRISC/opentitan/pull/19194)).
@@ -86,12 +85,12 @@ Software Engineer | Cambridge, MA | October 2018 -- March 2023
 
 * Developed prototypes of *TLS Encrypted Client Hello* (ECH) in BoringSSL.
   ECH enables clients to encrypt sensitive fields such as the desired server name, which are sent in cleartext by default.
+    * Completed C and Go server prototypes for draft 09 in [CL 45285](https://boringssl-review.googlesource.com/c/boringssl/+/45285).
+    * Contributed to ECH's specification in [eight PRs](https://github.com/tlswg/draft-ietf-tls-esni/pulls?q=is%3Apr+is%3Aclosed+author%3Admcardle).
     * Added GREASE support for drafts 08 and 09 in [CL 40204](https://boringssl-review.googlesource.com/c/boringssl/+/40204) and [CL 44784](https://boringssl-review.googlesource.com/c/boringssl/+/44784).
       First defined in [RFC 8701](https://datatracker.ietf.org/doc/rfc8701/), GREASE staves off ecosystem ossification by enabling clients to send fake ECH data to servers that do not support it; passive middleboxes cannot tell the difference.
       Thus, passive adversaries cannot selectively block ECH traffic without blocking GREASEd non-ECH traffic.
     * Implemented backend server for draft 09 in [CL 43924](https://boringssl-review.googlesource.com/c/boringssl/+/43924).
-    * Completed C and Go server prototypes for draft 09 in [CL 45285](https://boringssl-review.googlesource.com/c/boringssl/+/45285).
-    * Contributed to ECH's specification in [eight PRs](https://github.com/tlswg/draft-ietf-tls-esni/pulls?q=is%3Apr+is%3Aclosed+author%3Admcardle).
 
 * Developed prototypes of [RFC 9180: Hybrid Public Key Encryption](https://www.rfc-editor.org/rfc/rfc9180.html) (HPKE) in BoringSSL.
     * Contributed C implementation of draft-irtf-cfrg-hpke-04 in [CL 41304](https://boringssl-review.googlesource.com/c/boringssl/+/41304).
