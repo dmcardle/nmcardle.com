@@ -23,8 +23,8 @@ dan-abstract: |
 
 # Experience
 
-## \[Stealth Startup\]
-Software Engineer | Cambridge, MA | April 2023 -- Present
+## zeroRISC Inc.
+Software Engineer | Cambridge, MA | April 2023 -- September 2023
 
 ### OpenTitan
 
