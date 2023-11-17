@@ -23,6 +23,11 @@ dan-abstract: |
 
 # Experience
 
+## Google
+Software Engineer | Cambridge, MA | October 2023 -- Present
+
+* Contributing to privacy-preserving advertising APIs within Chrome's [Privacy Sandbox](https://developer.chrome.com/docs/privacy-sandbox/).
+
 ## zeroRISC Inc.
 Software Engineer | Cambridge, MA | April 2023 -- September 2023
 
@@ -41,10 +46,10 @@ Software Engineer | Cambridge, MA | April 2023 -- September 2023
 * Added a "chip info" struct at a fixed location in the ROM (PRs [#18100](https://github.com/lowRISC/opentitan/pull/18100) and [#18254](https://github.com/lowRISC/opentitan/pull/18254)).
   This change is intended to aid debugging when the ROM crashes.
   For instance, if the ROM silently failed on a physical chip, we could dump the chip info via JTAG and determine which Git revision the software came from.
-* Currently developing "ROM\_EXT bootstrap" feature, a recovery mode for reprogramming the flash via the SPI interface after manufacturing.
+* Developed "ROM\_EXT bootstrap" feature, a recovery mode for reprogramming the flash via the SPI interface after manufacturing.
   * Refactored existing ROM bootstrap into a library to enable code reuse (PR [#19155](https://github.com/lowRISC/opentitan/pull/19155)).
-  * Implementing new ROM\_EXT bootstrap with access controls that protect the flash regions that contain ROM\_EXT (WIP PR [#18929](https://github.com/lowRISC/opentitan/pull/18929)).
-  * Also implementing a fuzzer that throws SPI commands at the bootstrap library (PR [#19194](https://github.com/lowRISC/opentitan/pull/19194)).
+  * Implemented new ROM\_EXT bootstrap with access controls that protect the flash regions that contain ROM\_EXT (PR [#18929](https://github.com/lowRISC/opentitan/pull/18929)).
+  * Wrote a fuzzer that throws SPI commands at the bootstrap library (PR [#19194](https://github.com/lowRISC/opentitan/pull/19194)).
 
 <!--
 * Bazel work
