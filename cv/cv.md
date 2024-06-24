@@ -28,6 +28,13 @@ Software Engineer | Cambridge, MA | October 2023 -- Present
 
 * Contributing to privacy-preserving advertising APIs within Chrome's [Privacy Sandbox](https://developer.chrome.com/docs/privacy-sandbox/).
 
+Open-source contributions:
+
+* Fixed two bugs in Clang's Thread Safety Analysis
+  ([llvm/llvm-project#95290](https://github.com/llvm/llvm-project/pull/95290)).
+* Added a subcommand to Rclone that enables git-annex to interact with rclone remotes
+  ([rclone/cmd/gitannex/](https://github.com/rclone/rclone/tree/master/cmd/gitannex)).
+
 ## zeroRISC Inc.
 Software Engineer | Cambridge, MA | April 2023 -- September 2023
 
