@@ -1,0 +1,32 @@
+module(
+    name = "nmcardle",
+    repo_name = "com_nmcardle",
+)
+
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+PANDOC_VERSION = "3.6.4"
+
+[
+    http_archive(
+        name = "pandoc_" + target,
+        build_file_content = "exports_files(glob(['**']))",
+        integrity = integrity,
+        strip_prefix = prefix,
+        url = "https://github.com/jgm/pandoc/releases/download/{version}/pandoc-{version}-{target}.{ext}".format(version = PANDOC_VERSION, target = target, ext = ext),
+    )
+    for (target, prefix, ext, integrity) in [
+        ("arm64-macOS", "pandoc-{}-arm64/bin".format(PANDOC_VERSION), "zip", "sha256-iK8X8Yha+ssl9wzkyMREKP622oYLbPaQ4w2neZhFbH8="),
+        ("linux-amd64", "pandoc-{}/bin".format(PANDOC_VERSION), "tar.gz", "sha256-Xe9uH/U145e+zOKS7pd2epRzBhULn7FIgAO2esNBfF4"),
+    ]
+]
+
+http_archive(
+    name = "pandoc_ext",
+    build_file_content = "exports_files(glob(['**']))",
+    url = "https://github.com/pandoc-ext/diagram/archive/refs/tags/v1.2.0.tar.gz",
+    integrity = "sha256-1xq/BP0DOEpUsR4R5twmsR7ZcYe0wljd+r0vItCqTdg=",
+    strip_prefix = "diagram-1.2.0",
+)

@@ -8,8 +8,8 @@ Assuming Debian 11.
 
 ```sh
 sudo apt install texlive texlive-latex-extra cm-super
-go get github.com/bazelbuild/bazelisk
-go get github.com/bazelbuild/buildtools/buildifier
+go install github.com/bazelbuild/bazelisk@latest
+go install github.com/bazelbuild/buildtools/buildifier@latest
 ```
 
 ## To build

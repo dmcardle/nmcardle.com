@@ -12,6 +12,24 @@
 \usepackage[T1]{fontenc}
 \usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
 
+% https://github.com/jgm/pandoc/blob/01b54593cc0fdefda723716d4ede7172c14684cd/data/templates/common.latex#L100
+
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
 \usepackage[dvipsnames]{xcolor}
 \PassOptionsToPackage{hyphens}{url}\usepackage[colorlinks = true,
             linkcolor = blue,
