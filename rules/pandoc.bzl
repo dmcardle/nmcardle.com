@@ -3,7 +3,7 @@ def _pandoc_impl(ctx):
 
     args = ctx.actions.args()
     args.add("--standalone")
-    args.add("--embed-resources") # Use `data` URIs when emitting HTML.
+    args.add("--embed-resources")  # Use `data` URIs when emitting HTML.
     args.add("--verbose")
     args.add("--pdf-engine=lualatex")
     args.add("--lua-filter")
@@ -30,7 +30,7 @@ def _pandoc_impl(ctx):
         },
         env = {
             # Without PATH defined, pandoc will look for `pdflatex` in the cwd.
-            "PATH": ":".join(["/usr/bin", "/Library/TeX/texbin", "/opt/homebrew/bin"])
+            "PATH": ":".join(["/usr/bin", "/Library/TeX/texbin", "/opt/homebrew/bin"]),
         },
     )
 
@@ -53,5 +53,5 @@ def pandoc(**kwargs):
             "@bazel_tools//src/conditions:darwin_arm64": "@pandoc_arm64-macOS//:pandoc",
             "@bazel_tools//src/conditions:linux_x86_64": "@pandoc_linux-amd64//:pandoc",
         }),
-        **kwargs,
+        **kwargs
     )
