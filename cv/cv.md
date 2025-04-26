@@ -24,21 +24,26 @@ dan-abstract: |
 # Experience
 
 ## Google
-Software Engineer | Cambridge, MA | October 2023 -- Present
+### Software Engineer | Cambridge, MA | October 2023 -- Present
 
-* Contributing to privacy-preserving advertising APIs within Chrome's [Privacy Sandbox](https://developer.chrome.com/docs/privacy-sandbox/).
+Within the [Privacy Sandbox](https://privacysandbox.com), I've focused on designing and implementing utility-improving, privacy-preserving features for the Private Aggregation API.
+
+* Design work mainly consisted of internal design docs, [explainer](https://github.com/patcg-individual-drafts/private-aggregation-api/blob/main/README.md) updates, and defining requirements in the [spec](https://patcg-individual-drafts.github.io/private-aggregation-api/). [[commits](https://github.com/patcg-individual-drafts/private-aggregation-api/commits/main/?author=dmcardle)]
+* Implemented features in Chromium repo. [[CLs](https://chromium-review.googlesource.com/q/status:merged+owner:dmcardle@chromium.org)]
+* Features:
+  * Increased contribution limit for Protected Audience callers. [[Chromestatus entry](https://chromestatus.com/feature/5114676393017344)]
+  * Added `maxContributions` parameter for Shared Storage callers. [[Chromestatus entry](https://chromestatus.com/feature/5189366316793856)]
+  * [WIP] Specification and implementation of *Named Budgets* feature.
 
 Open-source contributions:
 
-* Fixed two bugs in Clang's Thread Safety Analysis
-  ([llvm/llvm-project#95290](https://github.com/llvm/llvm-project/pull/95290)).
-* Added a subcommand to Rclone that enables git-annex to interact with rclone remotes
-  ([rclone/cmd/gitannex/](https://github.com/rclone/rclone/tree/master/cmd/gitannex)).
+* [Rclone](https://rclone.org/): Created and maintained the `gitannex` subcommand (see the [code](https://github.com/rclone/rclone/tree/master/cmd/gitannex)).
+* Clang: [WIP]: Fixed two bugs in Clang's Thread Safety Analysis ([llvm/llvm-project#95290](https://github.com/llvm/llvm-project/pull/95290)).
 
 ## zeroRISC Inc.
-Software Engineer | Cambridge, MA | April 2023 -- September 2023
+### Software Engineer | Cambridge, MA | April 2023 -- September 2023
 
-### OpenTitan
+#### OpenTitan
 
 * Optimized CRC32 implementation, achieving a 28x speedup.
   * Developed an on-device perftest to measure performance baseline, then rewrote the C implementation with inline assembly instructions from RISC-V's [bitmanip](https://github.com/riscv/riscv-bitmanip/raw/main-history/bitmanip-0.93.pdf) spec (PR [#17989](https://github.com/lowRISC/opentitan/pull/17989)).
@@ -72,9 +77,9 @@ Software Engineer | Cambridge, MA | April 2023 -- September 2023
 -->
 
 ## Google
-Software Engineer | Cambridge, MA | October 2018 -- March 2023
+### Software Engineer | Cambridge, MA | October 2018 -- March 2023
 
-### OpenTitan
+#### OpenTitan
 
 * Developed Python, TCL, and Bazel tooling to splice [OTP](https://docs.opentitan.org/hw/ip/otp_ctrl/) (one-time programmable memory) images into pre-built FPGA bitstreams (PR [#15163](https://github.com/lowRISC/opentitan/pull/15163)).
   This enabled more comprehensive end-to-end tests and saved >1 hour of build time per test.
@@ -93,7 +98,7 @@ Software Engineer | Cambridge, MA | October 2018 -- March 2023
   The key insight is that the time spent building bitstreams dominates the time spent running tests.
   By bisecting only on commits with cached bitstreams, we can run what would be an all-day bisect session in an hour.
 
-### Chrome
+#### Chrome
 
 * Developed prototypes of *TLS Encrypted Client Hello* (ECH) in BoringSSL.
   ECH enables clients to encrypt sensitive fields such as the desired server name, which are sent in cleartext by default.
@@ -122,16 +127,14 @@ Software Engineer | Cambridge, MA | October 2018 -- March 2023
 * Hosted an intern who implemented [RFC 8914: Extended DNS Errors](https://www.rfc-editor.org/rfc/rfc8914.html) in Chrome's net stack.
 
 ## Draper Laboratory
-
-Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 -- October 2018
+### Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 -- October 2018
 
 * Technical work on DoD projects with a focus on formal methods and cybersecurity.
 * Specific topics include formally-verified software, static taint analysis, and fuzzing.
 * Audited Adam Chlipala's Spring 2018 *Formal Reasoning about Programs* at MIT.
 
 ## Architecture Technology Corporation
-
-Software Engineer | Ithaca, NY | August 2015 -- February 2018
+### Software Engineer | Ithaca, NY | August 2015 -- February 2018
 
 * Cybersecurity R&D for DoD customers and technical proposal writing.
 * Authored winning Phase II SBIR proposal and managed two-year development effort.
@@ -140,16 +143,14 @@ Software Engineer | Ithaca, NY | August 2015 -- February 2018
 * Technical work included Linux/FreeBSD kernel hacking and modifying the LLVM compiler.
 
 ## State University of New York at Buffalo
-
-Adjunct Professor | Buffalo, NY | June 2015 -- August 2015
+### Adjunct Professor | Buffalo, NY | June 2015 -- August 2015
 
 * Taught CSE 305: Introduction to Programming Languages.
     * Developed lectures and coursework teaching a variety of programming paradigms.
     * Focused on Haskell programming language and the Lambda calculus.
 
 ## Syracuse University
-
-Graduate Teaching Assistant | Syracuse, NY | August 2013 -- May 2014
+### Graduate Teaching Assistant | Syracuse, NY | August 2013 -- May 2014
 
 * CIS 252: Introduction to Computer Science (Spring 2014).
     * Graded papers, held office hours, and led two lab sessions per week in Haskell language.
@@ -157,8 +158,7 @@ Graduate Teaching Assistant | Syracuse, NY | August 2013 -- May 2014
     * Graded papers, held office hours, and led a weekly recitation.
 
 ## Metis Consulting Group
-
-Intern & Software Engineer | Syracuse, NY | May 2011 -- August 2014
+### Intern & Software Engineer | Syracuse, NY | May 2011 -- August 2014
 
 * Responsible for web application development projects, specializing in travel.
 * Tech stack included ColdFusion, PHP, Microsoft SQL Server, and JavaScript.
