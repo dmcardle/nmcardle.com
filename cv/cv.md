@@ -31,14 +31,14 @@ Within the [Privacy Sandbox](https://privacysandbox.com), I've focused on design
 * Design work mainly consisted of internal design docs, [explainer](https://github.com/patcg-individual-drafts/private-aggregation-api/blob/main/README.md) updates, and defining requirements in the [spec](https://patcg-individual-drafts.github.io/private-aggregation-api/). [[commits](https://github.com/patcg-individual-drafts/private-aggregation-api/commits/main/?author=dmcardle)]
 * Implemented features in Chromium repo. [[CLs](https://chromium-review.googlesource.com/q/status:merged+owner:dmcardle@chromium.org)]
 * Features:
-  * Increased contribution limit for Protected Audience callers. [[Chromestatus entry](https://chromestatus.com/feature/5114676393017344)]
-  * Added `maxContributions` parameter for Shared Storage callers. [[Chromestatus entry](https://chromestatus.com/feature/5189366316793856)]
+  * Increased contribution limit for Protected Audience callers. [[Chromestatus](https://chromestatus.com/feature/5114676393017344)]
+  * Added `maxContributions` parameter for Shared Storage callers. [[Chromestatus](https://chromestatus.com/feature/5189366316793856)]
   * [WIP] Specification and implementation of *Named Budgets* feature.
 
 Open-source contributions:
 
 * [Rclone](https://rclone.org/): Created and maintained the `gitannex` subcommand (see the [code](https://github.com/rclone/rclone/tree/master/cmd/gitannex)).
-* Clang: [WIP]: Fixed two bugs in Clang's Thread Safety Analysis ([llvm/llvm-project#95290](https://github.com/llvm/llvm-project/pull/95290)).
+* [WIP] Clang: Fixed two bugs in Clang's Thread Safety Analysis ([llvm/llvm-project#95290](https://github.com/llvm/llvm-project/pull/95290)).
 
 ## zeroRISC Inc.
 ### Software Engineer | Cambridge, MA | April 2023 -- September 2023
