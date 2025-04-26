@@ -10,7 +10,7 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \usepackage[T1]{fontenc}
-\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage[top=1in, bottom=1in, left=1.25in, right=1.25in]{geometry}
 
 % https://github.com/jgm/pandoc/blob/01b54593cc0fdefda723716d4ede7172c14684cd/data/templates/common.latex#L100
 
