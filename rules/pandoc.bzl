@@ -2,6 +2,13 @@ def _pandoc_impl(ctx):
     out_file = ctx.actions.declare_file("{}.{}".format(ctx.label.name, ctx.attr.out_format))
 
     args = ctx.actions.args()
+
+    if ctx.attr.out_format == "pdf":
+        # Specify input format to work around issue where pandoc converts
+        # apostrophes to curly variants that don't exist in the TeX font.
+        args.add("-f")
+        args.add("markdown-smart")
+
     args.add("--standalone")
     args.add("--embed-resources")  # Use `data` URIs when emitting HTML.
     args.add("--verbose")
