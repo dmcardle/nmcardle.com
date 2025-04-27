@@ -19,5 +19,12 @@ echo
 echo "::Extracting tarfile."
 tar -xvf "$TAR_FILE"
 
+# This works around a longstanding issue I've had with `firebase deploy` where
+# it succeeds without updating the hosted files. I suspect it's looking at file
+# timestamps instead of comparing their contents.
+echo
+echo "::Touching all files."
+find public/ -exec touch {} \+
+
 echo
 echo "::Run [firebase deploy] when you're ready."
