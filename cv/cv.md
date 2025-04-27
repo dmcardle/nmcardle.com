@@ -164,19 +164,16 @@ Open-source contributions:
 * Responsible for web application development projects, specializing in travel.
 * Tech stack included ColdFusion, PHP, Microsoft SQL Server, and JavaScript.
 
-<!-- SUNY Geneseo -->
 
 # Education
 
 ## Master of Science | Computer Science and Engineering
-
-State University of New York at Buffalo | Buffalo, NY | 2015
+### State University of New York at Buffalo | Buffalo, NY | 2015
 
 * Contributed to published research on adding real-time capabilities to Standard ML, a functional programming language.
 
 ## Bachelor of Arts | Computer Science
-
-State University of New York at Geneseo | Geneseo, NY | 2013
+### State University of New York at Geneseo | Geneseo, NY | 2013
 
 * Multiple semesters of Directed Studies focused on Document Image Analysis.
 * Presented *Stompbox* framework for real-time simulation of analog audio effects at GREAT Day (Geneseo Recognizing Excellence, Achievement, and Talent).
