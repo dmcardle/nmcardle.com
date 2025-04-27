@@ -14,8 +14,9 @@ email: d@nmcardle.com
 phone: (315) 317-6220
 
 dan-abstract: |
-    A generalist software engineer with 8+ years' experience in security, systems software, and cryptography, I enjoy finding security vulnerabilities in low-level code by writing fuzzers, performing static analysis, and manual inspection.
-    Recently, I developed infrastructure that enabled JTAG-based end-to-end hardware verification of OpenTitan, an open-source silicon root-of-trust chip.
+    A generalist software engineer with 10+ years' experience in security and privacy, I enjoy bug-hunting in low-level code and contributing to open-source software.
+    Recently, I've developed private advertising technology in Chrome while working in Google's [Privacy Sandbox](https://privacysandbox.com).
+    Prior to that, I wrote bare-metal C for [OpenTitan](https://opentitan.org/) and developed novel e2e testing infrastructure.
     I've contributed to IETF specifications in the TLS and DNS spaces by developing prototypes of draft revisions, which supported the evaluation of their feasibility and correctness.
     In the defense arena, I developed a PoC that generates VMs with unique calling conventions by modifying LLVM's X86 codegen and FreeBSD's kernel and userspace.
 
@@ -26,18 +27,18 @@ dan-abstract: |
 ## Google
 ### Software Engineer | Cambridge, MA | October 2023 -- Present
 
-Within the [Privacy Sandbox](https://privacysandbox.com), I've focused on designing and implementing utility-improving, privacy-preserving features for the Private Aggregation API.
+Within the [Privacy Sandbox](https://privacysandbox.com), I've focused on designing and implementing features for the **Private Aggregation API** that improve utility while preserving user privacy.
+On the design side, I've written internal design docs, [explainer](https://github.com/patcg-individual-drafts/private-aggregation-api/blob/main/README.md) updates, and defined requirements in the API's [specification](https://patcg-individual-drafts.github.io/private-aggregation-api/) (relevant [commits](https://github.com/patcg-individual-drafts/private-aggregation-api/commits/main/?author=dmcardle)).
+Feature implementations live in the Chromium repo (relevant [CLs](https://chromium-review.googlesource.com/q/status:merged+owner:dmcardle@chromium.org)).
 
-* Design work mainly consisted of internal design docs, [explainer](https://github.com/patcg-individual-drafts/private-aggregation-api/blob/main/README.md) updates, and defining requirements in the [spec](https://patcg-individual-drafts.github.io/private-aggregation-api/). [[commits](https://github.com/patcg-individual-drafts/private-aggregation-api/commits/main/?author=dmcardle)]
-* Implemented features in Chromium repo. [[CLs](https://chromium-review.googlesource.com/q/status:merged+owner:dmcardle@chromium.org)]
-* Features:
-  * Increased contribution limit for Protected Audience callers. [[Chromestatus](https://chromestatus.com/feature/5114676393017344)]
-  * Added `maxContributions` parameter for Shared Storage callers. [[Chromestatus](https://chromestatus.com/feature/5189366316793856)]
-  * [WIP] Specification and implementation of *Named Budgets* feature.
+* [Feature](https://chromestatus.com/feature/5114676393017344): increase contribution limit to 100 for Protected Audience callers.
+* [Feature](https://chromestatus.com/feature/5189366316793856): per-context contribution limits for Shared Storage callers.
+* [WIP] Feature: Named Budgets (see preexisting [explainer](https://github.com/patcg-individual-drafts/private-aggregation-api/blob/main/named_budgets.md)).
+* [WIP] Feature: Global contribution limits (see [issue #81](https://github.com/patcg-individual-drafts/private-aggregation-api/issues/81#issuecomment-2091524214)).
 
 Open-source contributions:
 
-* [Rclone](https://rclone.org/): Created and maintained the `gitannex` subcommand (see the [code](https://github.com/rclone/rclone/tree/master/cmd/gitannex)).
+* [Rclone](https://rclone.org/): Created and maintained the [gitannex](https://github.com/rclone/rclone/tree/master/cmd/gitannex) subcommand.
 * [WIP] Clang: Fixed two bugs in Clang's Thread Safety Analysis ([llvm/llvm-project#95290](https://github.com/llvm/llvm-project/pull/95290)).
 
 ## zeroRISC Inc.
@@ -137,7 +138,7 @@ Open-source contributions:
 ### Software Engineer | Ithaca, NY | August 2015 -- February 2018
 
 * Cybersecurity R&D for DoD customers and technical proposal writing.
-* Authored winning Phase II SBIR proposal and managed two-year development effort.
+* Authored winning Phase II SBIR proposal for [SWARM](https://www.sbir.gov/awards/164047) project and managed development effort.
 * Proposal work led to a number of patents.
 * Supervised interns developing interactive security coursework.
 * Technical work included Linux/FreeBSD kernel hacking and modifying the LLVM compiler.
