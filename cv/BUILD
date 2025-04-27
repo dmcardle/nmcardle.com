@@ -5,6 +5,7 @@ filegroup(
     srcs = [
         ":dan_mcardle_cv_html",
         ":dan_mcardle_cv_pdf",
+        ":dan_mcardle_resume_html",
     ],
     visibility = ["//:__pkg__"],
 )
@@ -24,4 +25,11 @@ pandoc(
     srcs = ["cv.md"],
     out_format = "pdf",
     template = "template.latex",
+)
+
+pandoc(
+    name = "dan_mcardle_resume_html",
+    srcs = ["resume.md"],
+    out_format = "html",
+    template = "template.html",
 )
