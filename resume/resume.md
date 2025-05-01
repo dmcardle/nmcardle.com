@@ -8,7 +8,8 @@ urlcolor: OliveGreen
 colorlinks: True
 
 my-name: Dan McArdle
-personal-site: https://da.nmcardle.com/resume
+resume-url: https://da.nmcardle.com/resume
+cv-url: https://da.nmcardle.com/cv
 github-url: https://github.com/dmcardle
 email: d@nmcardle.com
 phone: (315) 317-6220
