@@ -2,8 +2,6 @@
 title: Dan McArdle
 lang: en-US
 
-is-resume: true
-
 # LaTeX variables
 documentclass: article
 urlcolor: OliveGreen
