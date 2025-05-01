@@ -7,10 +7,6 @@ This repo is built with Bazel.
 1. Install the Nix package manager
 1. Run `nix-shell --pure`
 
-```sh
-sudo apt install texlive texlive-latex-extra cm-super
-```
-
 ## To build
 
 ```sh
