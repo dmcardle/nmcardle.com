@@ -11,8 +11,16 @@ mkShell {
     libtool
     pandoc
     python3
-    texliveFull
     which
+
+    # https://nixos.wiki/wiki/TexLive
+    (texlive.combine {
+      inherit (texlive)
+        scheme-small
+        collection-fontsrecommended
+        sectsty
+        titlesec;
+    })
   ];
 
   shellHook = ''
