@@ -121,8 +121,23 @@
       margin-bottom: 0.5em
   }
 
+  @media print {
+      @page { margin: 0; }
+      body {
+          font-size: 0.8em;
+      }
+      #top .name {
+          font-size: 2Rem;
+      }
+      h1 {
+          font-size: 1.5Rem;
+          margin-top: 0;
+          margin-bottom: 0;
+      }
+  }
+
   /* When viewport <= 1250px */
-  @media (width <= 750px) {
+  @media (width <= 750px) and not print {
       #top, h2 {
           flex-direction: column;
       }
