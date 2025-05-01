@@ -35,6 +35,9 @@ Feature implementations live in the Chromium repo (relevant [CLs](https://chromi
 * [Feature](https://chromestatus.com/feature/5189366316793856): per-context contribution limits for Shared Storage callers.
 * [WIP] Feature: Named Budgets (see preexisting [explainer](https://github.com/patcg-individual-drafts/private-aggregation-api/blob/main/named_budgets.md)).
 * [WIP] Feature: Global contribution limits (see [issue #81](https://github.com/patcg-individual-drafts/private-aggregation-api/issues/81#issuecomment-2091524214)).
+* Received two peer bonuses for self-driven 20% work:
+  * Invented an efficient fuzzer for SQLite's built-in recovery module: <https://crrev.com/c/5153917>
+  * Untangled cookie access logic with algebraic data types: <https://crrev.com/c/5178770>
 
 Open-source contributions:
 
@@ -98,6 +101,12 @@ Open-source contributions:
 * Designed and implemented `bitstream_bisect.py`, a tool that accelerates `git bisect` (see the design proposal in issue [#16406](https://github.com/lowRISC/opentitan/issues/16406) and implementation in PR [#16701](https://github.com/lowRISC/opentitan/pull/16701)).
   The key insight is that the time spent building bitstreams dominates the time spent running tests.
   By bisecting only on commits with cached bitstreams, we can run what would be an all-day bisect session in an hour.
+* Received a peer bonus for discovering and fixing a subtle build caching bug
+  * <https://github.com/lowRISC/opentitan/pull/16863>
+  * <https://github.com/lowRISC/opentitan/pull/16893>
+* Received a peer bonus for various improvements to developer quality-of-life.
+  * Created a script that generates clangd-compatible `compile_commands.json` containing multi-platform compile commands from Bazel: [generate_compilation_db.py](https://cs.opensource.google/opentitan/opentitan/+/master:util/generate_compilation_db.py;drc=30d7e787c753caaa03fe68a4a70da1bbcbc1d96f).
+  * Enabled semantic codesearch for the OpenTitan repo at <https://cs.opensource.google/opentitan>.
 
 #### Chrome
 
@@ -126,6 +135,9 @@ Open-source contributions:
       Filed [crbug 1128999](https://bugs.chromium.org/p/chromium/issues/detail?id=1128999) and added an idempotency check to gurl_fuzzer in [CL 2414615](https://chromium-review.googlesource.com/c/chromium/src/+/2414615).
 
 * Hosted an intern who implemented [RFC 8914: Extended DNS Errors](https://www.rfc-editor.org/rfc/rfc8914.html) in Chrome's net stack.
+* Received a peer bonus for large-scale refactor that was required to fix unintuitive behavior in `WTF::HashMap::at()`: <https://crbug.com/1058527>
+* Received a peer bonus for discovering a non-idempotency in the `GURL` parser: <https://crbug.com/1128999>
+* Received a peer bonus for implementing DNS padding in the [Intra](https://getintra.org/) app: <https://github.com/Jigsaw-Code/outline-go-tun2socks/pull/39>
 
 ## Draper Laboratory
 ### Software Engineer / Member of Technical Staff | Cambridge, MA | March 2018 -- October 2018

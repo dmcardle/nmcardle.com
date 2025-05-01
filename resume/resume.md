@@ -28,7 +28,8 @@ dan-abstract: |
 ## <employer>Google</employer> <job-role>SWE</job-role> <job-proj>Privacy Sandbox</job-proj> <job-loc>Cambridge, MA</job-loc> <job-dates>Oct. 2023--Present</job-dates>
 
 * Contributed to the [Private Aggregation API](https://patcg-individual-drafts.github.io/private-aggregation-api)
-* Designed and implemented features that improve utility without sacrificing user privacy
+* Designed and launched two privacy-preserving, utility-improving features in Chrome
+* Received two peer bonuses for self-driven 20% work in fuzzers and code health
 
 ## <employer>zeroRISC Inc.</employer> <job-role>SWE</job-role> <job-proj>OpenTitan</job-proj> <job-loc>Cambridge, MA</job-loc> <job-dates>Apr. 2023--Sept. 2023</job-dates>
 
@@ -44,6 +45,8 @@ dan-abstract: |
 * Developed glue code that enabled e2e tests to be written in terms of GDB & OpenOCD
 * Implemented e2e tests that relied on splicing and testing infra
 * Optimized memory functions and achieved a 1.5-5x speedup
+* Received a peer bonus for discovering and fixing a subtle build caching bug
+* Received a peer bonus for various improvements to developer quality-of-life
 
 ### <job-proj>Chrome</job-proj>
 
@@ -51,6 +54,7 @@ dan-abstract: |
 * Created BoringSSL's first implementation of HPKE [[RFC 9180](https://datatracker.ietf.org/doc/rfc9180/)]
 * Conducted an [experiment](https://chromestatus.com/feature/5948056459542528) to support development of the HTTPS RR [[RFC 9460](https://www.rfc-editor.org/rfc/rfc9460.html)]
 * Analyzed solutions for "authenticated embeds" in post-third-party-cookie world
+* Received three peer bonuses for self-driven 20% work
 
 ## <employer>Draper Laboratory</employer> <job-role>Security Programmer</job-role> <job-loc>Cambridge, MA</job-loc> <job-dates>Mar. 2018–Oct. 2018</job-dates>
 
