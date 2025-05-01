@@ -2,10 +2,6 @@
 <meta charset="utf-8" name="viewport" content="width=device-width">
 <head>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-
 <style>
   /* When viewport <= 1250px */
   @media (width <= 750px) {
@@ -211,10 +207,14 @@
   </div>
 </div>
 
-<div id="abstract" class="justify">$dan-abstract$</div>
+<div id="abstract">$dan-abstract$</div>
 
 $body$
 </body>
+
+<!-- Omit the `<link rel="preconnect">` tags recommended by Google Fonts because
+     pandoc will just inline the stylesheet below. -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
 
 <script>
   window.onload = function() {
