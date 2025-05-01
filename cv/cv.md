@@ -14,11 +14,11 @@ email: d@nmcardle.com
 phone: (315) 317-6220
 
 dan-abstract: |
-    A generalist software engineer with 10+ years' experience in security and privacy, I enjoy bug-hunting in low-level code and contributing to open-source software.
-    Recently, I've developed private advertising technology in Chrome while working in Google's [Privacy Sandbox](https://privacysandbox.com).
-    Prior to that, I wrote bare-metal C for [OpenTitan](https://opentitan.org/) and developed novel e2e testing infrastructure.
-    I've contributed to IETF specifications in the TLS and DNS spaces by developing prototypes of draft revisions, which supported the evaluation of their feasibility and correctness.
-    In the defense arena, I developed a PoC that generates VMs with unique calling conventions by modifying LLVM's X86 codegen and FreeBSD's kernel and userspace.
+    A generalist software engineer with 10+ years' experience in security and privacy, I enjoy designing and implementing new features, bug-hunting in low-level code, and contributing to open-source software.
+    I currently work in Google's [Privacy Sandbox](https://privacysandbox.com), where I've been building private advertising technology in Chrome.
+    Before that, I wrote bare-metal C for [OpenTitan](https://opentitan.org/) and developed novel e2e testing infrastructure.
+    I've contributed to IETF specifications in the TLS and DNS spaces by implementing prototypes of draft revisions in order to evaluate feasibility.
+    In the defense arena, I authored a winning Phase II SBIR proposal and created a system based on FreeBSD and LLVM that generates VMs with unique calling conventions throughout their kernel and userspace.
 
 ---
 
