@@ -1,12 +1,13 @@
-#!/usr/bin/env sh
+#!/usr/bin/env nix-shell
+#!nix-shell -i bash --pure shell.nix
 
 set -e
 
 if [ -e public/ ]; then
-    if [ -z "${NMCARDLE_DESTRUCTIVE}" ]; then
-        echo "Error: public/ dir already exists. Define NMCARDLE_DESTRUCTIVE env"
-        echo "var to enable this script to delete public/."
-        exit 1
+    if [ "$1" != "--destructive" ]; then
+        echo "Error: public/ dir already exists. Pass --destructive to" >&2
+        echo "enable this script to delete public/." >&2
+        exit 1 # Exit with a non-zero status code to indicate failure
     fi
     rm -rf public/
 fi
