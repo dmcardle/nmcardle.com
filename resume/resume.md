@@ -71,7 +71,7 @@ dan-abstract: |
 
 # Education
 
-## <span>University at Buffalo</span> <job-role>M.S.</job-role> <span>Computer Science & Engineering</span> <job-loc>Buffalo, NY</job-loc> <job-dates>2015</job-dates>
+## <span>University at Buffalo</span> <job-role>M.S.</job-role> <span>Computer Science & Eng.</span> <job-loc>Buffalo, NY</job-loc> <job-dates>2015</job-dates>
 
 * Graduate coursework in Programming Languages and Computer Vision
 * Contributed to published research on adding real-time capabilities to Standard ML
