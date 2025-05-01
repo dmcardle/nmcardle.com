@@ -4,12 +4,11 @@ This repo is built with Bazel.
 
 ## Prerequisites
 
-Assuming Debian 11.
+1. Install the Nix package manager
+1. Run `nix-shell --pure`
 
 ```sh
 sudo apt install texlive texlive-latex-extra cm-super
-go install github.com/bazelbuild/bazelisk@latest
-go install github.com/bazelbuild/buildtools/buildifier@latest
 ```
 
 ## To build
