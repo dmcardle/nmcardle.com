@@ -36,10 +36,7 @@ def _pandoc_impl(ctx):
         execution_requirements = {
             "no-sandbox": "",
         },
-        env = {
-            # Without PATH defined, pandoc will look for `pdflatex` in the cwd.
-            "PATH": ":".join(["/usr/bin", "/Library/TeX/texbin", "/opt/homebrew/bin"]),
-        },
+        use_default_shell_env = True,
     )
 
     return [DefaultInfo(files = depset([out_file]))]
