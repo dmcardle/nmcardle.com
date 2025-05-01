@@ -4,6 +4,7 @@ pkg_tar(
     name = "release",
     srcs = [
         "//cv",
+        "//resume",
         "//static:all_files",
     ],
     package_dir = "public",

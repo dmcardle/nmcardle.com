@@ -17,7 +17,7 @@
       },
       {
         "source": "/resume",
-        "destination": "/cv/dan_mcardle_resume_html.html"
+        "destination": "/resume/dan_mcardle_resume_html.html"
       }
     ],
     "headers": [ {

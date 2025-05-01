@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<meta charset="utf-8" name="viewport" content="width=device-width">
+<head>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+<style>
+  /* When viewport <= 1250px */
+  @media (width <= 750px) {
+      #top {
+          flex-direction: column !important;
+      }
+      h2 {
+          flex-direction: column;
+      }
+      h2 > *:not(:first-child) {
+        padding-left: 0.3em;
+      }
+      h2 > *:not(:first-child)::before {
+        color: #888;
+        content: " :: ";
+      }
+  }
+
+  @media (width > 750px) {
+      h2 > *:not(:first-child) {
+        padding-left: 0.3em;
+      }
+      h2 > *:not(:first-child):not(job-loc)::before {
+        color: #888;
+        content: " :: ";
+      }
+  }
+  #top div {
+      text-align: center;
+  }
+  #top .name {
+      color: #444;
+      font-size: min(6vw, 3Rem);
+  }
+
+  .name, h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 400;
+      font-style: normal;
+  }
+
+  body {
+      font-family: sans-serif;
+      min-width: 20Rem;
+      max-width: min(45Rem, 85%);
+      margin: auto;
+      font-size: 1Rem;
+      text-wrap: pretty;
+      color: #222;
+      background-color: #ffe;
+  }
+  #top a, #abstract a {
+      font-weight: inherit;
+  }
+  a {
+      color: #268bd2;
+      text-decoration: none;
+  }
+  a:hover {
+      text-decoration: underline;
+  }
+
+  h2, h3 {
+      margin-bottom: 0.2em;
+  }
+  ul {
+      margin-top: 0.2em;
+      margin-bottom: 0.5em
+  }
+
+  h1 {
+      color: #555;
+  }
+  h2, h3, h4 {
+      color: #444;
+  }
+
+  h2 > * {
+      flex-shrink: 0;
+  }
+  h2 > *:not(:first-child) {
+      font-size: 0.7em;
+  }
+  h2 > :first-child {
+      color: #2aa198;
+  }
+  h2 > job-role {
+      color: #b58900;
+  }
+
+  h2 {
+    display:flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    job-loc {
+        flex: 1;
+        text-align: right;
+    }
+    job-dates {
+        text-align: right;
+    }
+    job-role::before, job-proj::before, job-dates::before {
+        color: #444;
+        content: " :: ";
+    }
+  }
+  job-proj {
+      color: #c50;
+  }
+  h3 job-proj {
+      padding-left: 0.5em;
+  }
+
+  h2 > small {
+  text-align: right;
+  }
+
+  /* h2, h3 { */
+  /* } */
+  /* h3:before { content: "> "; } */
+
+  /* Pandoc insists on emitting the title itself. */
+  #title-block-header {
+      display: none;
+  }
+
+  /* Name and contact block. */
+  #top {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      margin-top: 2Rem;
+  }
+  #top > .name {
+      flex-grow: 1;
+      font-weight: bold;
+      font-size: 3Rem;
+  }
+  #top > div {
+      flex-grow: 1;
+      margin: auto;
+      font-size: 1Rem;
+  }
+
+  /* Fancy horizontal line over h2 */
+  h1 {
+      display: flex;
+      flex-direction: row;
+      font-size: 2Rem;
+  }
+  h1:before, h1:after {
+      content: "";
+      flex: 1 0;
+      border-bottom: 1px double;
+      margin: auto;
+  }
+  h1:before {
+      margin-right: 1Rem;
+  }
+  h1:after {
+      margin-left: 1Rem;
+  }
+
+  h2 {
+      font-weight: bold;
+      margin-bottom: 0;
+  }
+  h2 + p {
+      margin-top: 0.25Rem;
+  }
+
+  h2 > small {
+      font-size: 1.1Rem;
+  }
+
+  /* Tighten up headings in resume mode. */
+  $if(is-resume)$
+  h3, h4 {
+      margin-top: 0.15Rem;
+  }
+  $endif$
+
+  todo {
+      background-color: yellow;
+  }
+  .right {
+      text-align: right;
+  }
+  #abstract {
+      text-align: justify;
+  }
+</style>
+</head>
+
+<body class="libre-baskerville-regular">
+<div id="top">
+  <div class="name">$my-name$</div>
+  <div>
+    <div><a href="$personal-site$">$personal-site$</a></div>
+    <div><a href="$github-url$">$github-url$</a></div>
+    <div><a href="mailto:$email$">$email$</a> <span style="color: #888">::</span> <a href="tel:$phone$">$phone$</a></div>
+  </div>
+</div>
+
+<div id="abstract" class="justify">$dan-abstract$</div>
+
+$body$
+</body>
+
+<script>
+  window.onload = function() {
+      // Modify all links to open in a new tab.
+      document.querySelectorAll("a").forEach((link) => {
+          link.setAttribute("target", "_blank");
+      });
+  };
+</script>
