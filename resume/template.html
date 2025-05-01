@@ -38,7 +38,6 @@
           flex-grow: 1;
           margin: auto;
       }
-      div {text-align: center;}
   }
 
   #abstract {text-align: justify;}
@@ -138,6 +137,9 @@
       #top, h2 {
           flex-direction: column;
       }
+      #top div {
+          text-align: center;
+      }
       h2 > *:not(:first-child) {
         padding-left: 0.3em;
       }
@@ -147,6 +149,9 @@
       }
   }
   @media (width > 7in) {
+      #top div {
+          text-align: right;
+      }
       h2 > *:not(:first-child) {
         padding-left: 0.3em;
       }
