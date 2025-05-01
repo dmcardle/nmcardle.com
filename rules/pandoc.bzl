@@ -3,18 +3,19 @@ def _pandoc_impl(ctx):
 
     args = ctx.actions.args()
 
-    if ctx.attr.out_format == "pdf":
+    args.add("--standalone")
+    args.add("--embed-resources")  # Use `data` URIs when emitting HTML.
+    args.add("--verbose")
+
+    if ctx.attr.out_format == "pdf" and ctx.attr.use_lua:
+        args.add("--pdf-engine=lualatex")
+        args.add("--lua-filter")
+        args.add_all(ctx.files._pandoc_ext)
+
         # Specify input format to work around issue where pandoc converts
         # apostrophes to curly variants that don't exist in the TeX font.
         args.add("-f")
         args.add("markdown-smart")
-
-    args.add("--standalone")
-    args.add("--embed-resources")  # Use `data` URIs when emitting HTML.
-    args.add("--verbose")
-    args.add("--pdf-engine=lualatex")
-    args.add("--lua-filter")
-    args.add_all(ctx.files._pandoc_ext)
 
     if ctx.files.template:
         args.add("--template")
@@ -47,6 +48,7 @@ _pandoc_rule = rule(
     implementation = _pandoc_impl,
     attrs = {
         "pandoc_bin": attr.label(allow_single_file = True),
+        "use_lua": attr.bool(default = False),
         "_pandoc_ext": attr.label(default = "@pandoc_ext//:_extensions/diagram/diagram.lua", allow_single_file = True),
         "srcs": attr.label_list(allow_files = True),
         "template": attr.label(allow_single_file = True),
