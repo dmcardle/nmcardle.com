@@ -50,7 +50,7 @@ dan-abstract: |
 
 ### <job-proj>Chrome</job-proj>
 
-* Implemented early drafts of TLS Encrypted Client Hello in BoringSSL [[draft-ietf-tls-esni/](https://datatracker.ietf.org/doc/draft-ietf-tls-esni/)]
+* Implemented early drafts of TLS Encrypted Client Hello in BoringSSL [[draft-ietf-tls-esni](https://datatracker.ietf.org/doc/draft-ietf-tls-esni/)]
 * Created BoringSSL's first implementation of HPKE [[RFC 9180](https://datatracker.ietf.org/doc/rfc9180/)]
 * Conducted an [experiment](https://chromestatus.com/feature/5948056459542528) to support development of the HTTPS RR [[RFC 9460](https://www.rfc-editor.org/rfc/rfc9460.html)]
 * Analyzed solutions for "authenticated embeds" in post-third-party-cookie world
