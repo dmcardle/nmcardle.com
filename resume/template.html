@@ -16,15 +16,28 @@
       padding-bottom: 3em;
 
       /*** Color scheme. ***/
-      background-color: #ffe;
-      color: #222;
-      #top .name {color: #444;}
-      a {color: #268bd2;}
-      h1 {color: #555;}
-      h2, h3, h4 {color: #444;}
-      h2 > :first-child {color: #2aa198;}
-      h2 > job-role {color: #b58900;}
-      job-proj {color: #c50;}
+      &:not(.dark-theme) {
+          background-color: #ffe;
+          color: #222;
+          #top .name {color: #444;}
+          a {color: #268bd2;}
+          h1 {color: #555;}
+          h2, h3, h4 {color: #444;}
+          h2 > :first-child {color: #2aa198;}
+          h2 > job-role {color: #b58900;}
+          job-proj {color: #c50;}
+      }
+      &.dark-theme {
+          background-color: #228;
+          color: #ddd;
+          #top .name {color: #bbb;}
+          a {color: #ff8;}
+          h1 {color: #ccc;}
+          h2, h3, h4 {color: #bbb;}
+          h2 > :first-child {color: #4cb;}
+          h2 > job-role {color: #da2;}
+          job-proj {color: #d61;}
+      }
       todo {background-color: yellow;}
   }
 
@@ -41,6 +54,9 @@
       & > div {
           flex-grow: 1;
           margin: auto;
+      }
+      #theme-btn {
+          cursor: pointer;
       }
   }
 
@@ -139,6 +155,9 @@
           font-size: 1.1Rem;
           margin-top: 0.2em;
       }
+      *:has(> #theme-btn) {
+          display: none;
+      }
   }
 
   @media (width <= 7in) {
@@ -179,6 +198,10 @@
       <a href="$resume-url$">Resume</a>
       <span style="color: #888">::</span>
       <a href="$cv-url$">CV</a>
+      <span>
+        <span style="color: #888">::</span>
+        <span id="theme-btn">💡</a>
+      </span>
     </div>
     <div><a href="$github-url$">$github-url$</a></div>
     <div><a href="mailto:$email$">$email$</a> <span style="color: #888">::</span> <a href="tel:$phone$">$phone$</a></div>
@@ -199,6 +222,26 @@ $body$
       // Modify all links to open in a new tab.
       document.querySelectorAll("a").forEach((link) => {
           link.setAttribute("target", "_blank");
+      });
+
+      const body = document.querySelector("body");
+      const theme_btn = document.querySelector("#theme-btn");
+
+      let is_light_theme = true;
+
+      theme_btn.onclick = (() => {
+          const was_light_theme = is_light_theme;
+
+          is_light_theme = !is_light_theme;
+
+          theme_btn.innerText = was_light_theme ? '🌒' : '💡';
+
+          const dark_theme_name = 'dark-theme';
+          if (was_light_theme) {
+              body.classList.add(dark_theme_name);
+          } else {
+              body.classList.remove(dark_theme_name);
+          }
       });
   };
 </script>
