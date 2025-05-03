@@ -17,6 +17,7 @@
 
       /*** Color scheme. ***/
       &:not(.dark-theme) {
+          transition: all 0.5s ease-out;
           background-color: #ffe;
           color: #222;
           #top .name {color: #444;}
@@ -28,6 +29,7 @@
           job-proj {color: #c50;}
       }
       &.dark-theme {
+          transition: all 0.2s ease-out;
           background-color: #1f1f45;
           color: #ddd;
           #top .name {color: #e6e6e6;}
