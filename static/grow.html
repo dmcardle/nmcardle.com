@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>nmcardle</title>
+
+    <style media="screen">
+      html {
+          font-size: 14pt;
+      }
+      body {
+          background-color: #222;
+          color: #ccc;
+          font-family: sans-serif;
+          font-size: medium;
+          text-wrap: pretty;
+      }
+
+      #container {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+
+          #game {
+              flex: 2;
+              max-width: 30rem;
+              min-width: 66%;
+
+              margin: 1rem;
+
+              svg {
+                  background-color: black;
+              }
+          }
+          .description {
+              flex: 1;
+
+              max-width: 40rem;
+              margin: auto;
+
+              display: flex;
+              flex-direction: row;
+              flex-wrap: wrap;
+
+              .blurb {
+                  flex: 3;
+                  min-width: 20em;
+                  margin-right: 1em;
+                  margin-bottom: 0.5em;
+                  text-align: justify;
+                  text-indent: 1rem;
+              }
+
+              .blurb:nth-of-type(1) {
+                  text-indent: 0rem;
+              }
+
+              .controlsContainer {
+                  flex: 1;
+
+                  margin-top: 0.5em;
+                  margin-bottom: 0.5em;
+                  margin-right: 1em;
+
+                  font-size: 0.75rem;
+                  text-align: right;
+                  color: #cfc;
+
+                  .control {
+                      display: flex;
+                      flex-direction: row;
+                      flex-wrap: wrap;
+
+                      label {
+                          flex: 10;
+                          min-width: 10rem;
+                      }
+                      input {
+                          flex: 8;
+                      }
+                  }
+              }
+          }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="game">
+        <svg id="gameSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        </svg>
+      </div>
+
+      <div class="description">
+        <div class="blurb">
+          This page simulates a biologically-inspired system with a few simple
+          rules. It begins with a single cell. Over time, cells repeatedly
+          decide whether to <i>grow</i> and whether to <i>split</i>. The nearby
+          sliders adjust the probability of each action occurring.
+        </div>
+
+        <div class="controlsContainer">
+          <div class="control">
+            <label for="growChanceRange">Grow chance: <span id="growChanceLabel"></span>%</label>
+            <input id="growChanceRange" name="grow_chance" type="range" min="0" max="100" step="1" value="90" />
+          </div>
+          <div class="control">
+            <label for="splitChanceRange">Split chance: <span id="splitChanceLabel"></span>%</label>
+            <input id="splitChanceRange" name="split_chance" type="range" min="0" max="100" step="1" value="75" />
+          </div>
+        </div>
+
+        <div class="blurb">
+          When a cell splits, it creates a new cell pointed in a slightly
+          different direction. Decreasing the maximum turn angle causes straighter
+          lines. Cells may get stuck growing into a wall if they're not permitted
+          to turn.
+        </div>
+
+        <div class="controlsContainer">
+          <div class="control">
+              <label for="maxTurnRange">Max turn angle: <span id="maxTurnLabel"></span>°</label>
+            <input id="maxTurnRange" name="max_turn" type="range" min="5" max="180" step="5" value="30" />
+          </div>
+        </div>
+
+        <div class="blurb">
+          Only the youngest cells get to grow or split. The threshold age at which
+          cells become dormant is defined as a percentile on the age distribution
+          at any given time. Increasing the threshold means more cells will be
+          active.
+        </div>
+
+        <div class="controlsContainer">
+          <div class="control">
+            <label for="dormancyAgePercentileRange">Age threshold: <span id="dormancyAgePercentileLabel"></span>%ile</label>
+            <input id="dormancyAgePercentileRange" name="grow_age" type="range" min="1" max="20" step="1" value="4" />
+          </div>
+        </div>
+
+        <div class="blurb">
+          Cells leave a signal in the location they were created. This effectively
+          broadcasts their presence so that others won't grow or split on top of
+          them. Increasing the decay rate enables faster regrowth, but also makes
+          it more likely that cells will grow on top of each other.
+        </div>
+
+        <div class="controlsContainer">
+          <div class="control">
+            <label for="signalDecayRateRange">Signal decay rate: <span id="signalDecayRateLabel"></span> / frame</label>
+            <input id="signalDecayRateRange" name="signal_decay_rate" type="range" min="1" max="50" step="1" value="5" />
+          </div>
+          <div class="control">
+            <label for="showSignalsCheckbox">Show signals</label>
+            <input id="showSignalsCheckbox" type="checkbox" />
+          </div>
+        </div>
+
+        <div class="blurb">
+          When cells reach a fixed maximum age, they die.
+        </div>
+
+        <div class="controlsContainer">
+        </div>
+      </div>
+    </div>
+
+    <script src="js/grow.js"></script>
+  </body>
+</html>

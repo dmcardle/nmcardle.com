@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Image Mutator</title>
+    <script>
+      window.onload = function() {
+          const image_elem = document.querySelector("#image");
+
+          function mutate_image() {
+              const data_url_prefix = "data:image/png;base64,";
+              const data_url = image_elem.src;
+              if (!data_url.startsWith(data_url_prefix)) {
+                  console.error("Data URL does not begin with expected prefix.");
+                  console.error("Actual prefix: " + data_url.substring(0, data_url_prefix.length));
+                  return;
+              }
+
+              const data = data_url.substring(data_url_prefix.length);
+              const index = Math.floor(Math.random() * data.length);
+              const head = data.substring(0, index);
+              const tail = data.substring(index + 1);
+
+              const b64_digit = data[index];
+
+              const mutated_data = head + 'F' + tail;
+              const mutated_url = data_url_prefix + mutated_data;
+              image_elem.src = mutated_url;
+              console.log("Mutated image at index " + index);
+
+              window.setTimeout(mutate_image, 100);
+          }
+
+          window.addEventListener('paste', (event) => {
+              const files = event.clipboardData.files;
+              if (files.length !== 1) {
+                  console.error("Expected exactly one file in clipboard data.");
+                  return;
+              }
+              if (files[0].type !== "image/png") {
+                  console.error("Expected image/png.");
+                  return;
+              }
+              const image = files[0];
+
+              // Convert image to base64.
+              const reader = new FileReader();
+              reader.addEventListener("load", () => {
+                  const canvas_image = new Image();
+                  canvas_image.src = reader.result;
+
+                  canvas_image.onload = () => {
+                      console.log(canvas_image);
+
+                      const ctx = document.getElementById('canvas').getContext('2d');
+                      ctx.drawImage(canvas_image, 0, 0);
+                  };
+
+                  //image_elem.src = reader.result;
+                  //mutate_image();
+              }, false);
+              reader.readAsDataURL(image);
+          });
+      };
+    </script>
+  </head>
+  <body>
+    <h1>Image Mutator</h1>
+    <div>
+      <img id="image" />
+
+      <canvas id="canvas" width=1024 height=768></canvas>
+    </div>
+  </body>
+
+  <style>
+    #canvas {
+        width: 100%;
+        height: 100%;
+    }
+  </style>
+</html>
