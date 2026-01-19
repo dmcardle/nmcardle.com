@@ -15,7 +15,6 @@
           color: #ccc;
           font-family: sans-serif;
           font-size: medium;
-          text-wrap: pretty;
       }
 
       #container {
@@ -51,6 +50,7 @@
                   margin-right: 1em;
                   margin-bottom: 0.5em;
                   text-align: justify;
+                  text-wrap: pretty;
                   text-indent: 1rem;
               }
 
@@ -98,8 +98,8 @@
         <div class="blurb">
           This page simulates a biologically-inspired system with a few simple
           rules. It begins with a single cell. Over time, cells repeatedly
-          decide whether to <i>grow</i> and whether to <i>split</i>. The nearby
-          sliders adjust the probability of each action occurring.
+          decide whether to <i>grow</i> and/or <i>split</i>. The nearby sliders
+          adjust the probability of each action occurring.
         </div>
 
         <div class="controlsContainer">
@@ -115,9 +115,8 @@
 
         <div class="blurb">
           When a cell splits, it creates a new cell pointed in a slightly
-          different direction. Decreasing the maximum turn angle causes straighter
-          lines. Cells may get stuck growing into a wall if they're not permitted
-          to turn.
+          different direction. Decreasing the maximum turn angle causes cells to
+          grow in straighter lines.
         </div>
 
         <div class="controlsContainer">
@@ -128,10 +127,10 @@
         </div>
 
         <div class="blurb">
-          Only the youngest cells get to grow or split. The threshold age at which
-          cells become dormant is defined as a percentile on the age distribution
-          at any given time. Increasing the threshold means more cells will be
-          active.
+          Only the youngest cells get to grow or split. After a certain age,
+          cells become dormant. This threshold age is defined as a percentile on
+          the distribution of cell ages at any given time. Increasing the
+          threshold means more cells will be active.
         </div>
 
         <div class="controlsContainer">
@@ -161,9 +160,6 @@
 
         <div class="blurb">
           When cells reach a fixed maximum age, they die.
-        </div>
-
-        <div class="controlsContainer">
         </div>
       </div>
     </div>
