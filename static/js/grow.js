@@ -1,6 +1,11 @@
-const kMaxNumObjects = 1 << 14
-const kMaxTtl = 1 << 9;
 const kSvgNs = "http://www.w3.org/2000/svg";
+const kMaxU16 = 0xffff;
+
+const kMaxNumObjects = 1 << 13;
+const kMaxTtl = 1 << 9;
+
+const kSignalThresh = 16;
+const kSignalAttack = 32;
 
 class CoralPolyp {
     constructor(svg, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
@@ -104,9 +109,9 @@ class CoralPolyp {
             }
 
             const isOccupiedIndex = CoralPolyp.getIsOccupiedIndex(this.x2, this.y2);
-            console.assert(isOccupiedMatrix[isOccupiedIndex] < 1 << 16);
-            if (isOccupiedMatrix[isOccupiedIndex] < 1 << 16) {
-                isOccupiedMatrix[isOccupiedIndex] += Math.floor(kMaxTtl / 16);
+            console.assert(isOccupiedMatrix[isOccupiedIndex] <= kMaxU16);
+            if (isOccupiedMatrix[isOccupiedIndex] <= kMaxU16 - kSignalAttack) {
+                isOccupiedMatrix[isOccupiedIndex] += kSignalAttack;
             }
         }
 
@@ -118,11 +123,13 @@ class CoralPolyp {
                 const newY2 = this.y2 + 2 * Math.sin(angle);
 
                 const isOccupiedIndex = CoralPolyp.getIsOccupiedIndex(newX2, newY2);
-                if (isOccupiedMatrix[isOccupiedIndex] > kMaxTtl / 32) {
+                if (isOccupiedMatrix[isOccupiedIndex] > kSignalThresh) {
                     continue;
                 }
-                console.assert(isOccupiedMatrix[isOccupiedIndex] < 1 << 16);
-                isOccupiedMatrix[isOccupiedIndex] += Math.floor(kMaxTtl / 16);
+                console.assert(isOccupiedMatrix[isOccupiedIndex] <= kMaxU16);
+                if (isOccupiedMatrix[isOccupiedIndex] <= kMaxU16 - kSignalAttack) {
+                    isOccupiedMatrix[isOccupiedIndex] += kSignalAttack;
+                }
 
                 let newPolyp = new CoralPolyp(
                     this.svg,
@@ -207,18 +214,6 @@ class AdjustableVariables {
 function buildThunks() {
     const svg = document.getElementById("gameSvg");
 
-    // const paramsString = window.location.search;
-    // const searchParams = new URLSearchParams(paramsString);
-    // const debugMode = searchParams.get("debug");
-    // if (debugMode) {
-    //     const text = document.createElementNS(kSvgNs, "text");
-    //     text.setAttribute("x", 0);
-    //     text.setAttribute("y", 0);
-    //     text.setAttribute("stroke", "red");
-    //     text.innerText = "DEBUG";
-    //     svg.appendChild(text);
-    // }
-
     let animationPaused = false;
 
     let polyps = [];
@@ -253,10 +248,12 @@ function buildThunks() {
         frameCount = (frameCount + 1) & (1 << 12);
 
         if (frameCount === 0) {
-            let maxValue;
-            if (adjustableVariables.showSignals) {
-                maxValue = Math.max(...isOccupiedMatrix);
-            }
+            // let maxValue;
+            // if (adjustableVariables.showSignals) {
+            //     maxValue = Math.max(...isOccupiedMatrix);
+            // }
+
+            const kMaxSignalLog = Math.log(kMaxU16);
 
             const decayRate = Math.floor(adjustableVariables.signalDecayRate);
             for (let i = 0; i < isOccupiedMatrix.length; ++i) {
@@ -267,9 +264,10 @@ function buildThunks() {
                 }
 
                 if (adjustableVariables.showSignals) {
-                    const value = isOccupiedMatrix[i];
-                    const scaledR = 255 * (value / maxValue);
-                    const scaledB = 128 * (value / maxValue);
+                    const signalLog = Math.log(isOccupiedMatrix[i]);
+
+                    const scaledR = 255 * (signalLog / kMaxSignalLog);
+                    const scaledB = 128 * (signalLog / kMaxSignalLog);
 
                     isOccupiedRects[i].setAttribute(
                         "stroke",
