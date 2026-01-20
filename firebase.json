@@ -18,6 +18,10 @@
       {
         "source": "/resume",
         "destination": "/resume/dan_mcardle_resume_html.html"
+      },
+      {
+        "source": "/grow",
+        "destination": "/grow.html"
       }
     ],
     "headers": [ {
