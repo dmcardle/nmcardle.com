@@ -262,6 +262,8 @@ function buildThunks() {
             for (let i = 0; i < isOccupiedMatrix.length; ++i) {
                 if (isOccupiedMatrix[i] > decayRate) {
                     isOccupiedMatrix[i] -= decayRate;
+                } else {
+                    isOccupiedMatrix[i] = 0;
                 }
 
                 if (adjustableVariables.showSignals) {
