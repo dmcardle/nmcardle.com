@@ -1,7 +1,7 @@
 const kSvgNs = "http://www.w3.org/2000/svg";
 const kMaxU16 = 0xffff;
 
-const kMaxNumObjects = 1 << 13;
+const kMaxNumObjects = 1 << 14;
 const kMaxTtl = 1 << 9;
 
 const kSignalThresh = 16;
