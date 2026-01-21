@@ -14,7 +14,7 @@ fi
 
 echo "::Building release tarfile."
 TAR_FILE="$(bazelisk cquery --output=files //:release)"
-bazelisk build //:release
+bazelisk build --action_env=PATH="$PATH" //:release
 
 echo
 echo "::Extracting tarfile."
