@@ -7,24 +7,51 @@ const kMaxTtl = 1 << 9;
 const kSignalThresh = 16;
 const kSignalAttack = 32;
 
+class SvgElementPool {
+    // newFunc :: SvgElementPool -> ()
+    // reuseFunc :: T -> ()
+    // retireFunc :: T -> ()
+    constructor(newFunc, reuseFunc, retireFunc) {
+        this._newFunc = newFunc;
+        this._reuseFunc = reuseFunc;
+        this._retireFunc = retireFunc;
+        // Stack of retired objects.
+        this._storageStack = [];
+    }
+
+    getNewOrUsed() {
+        if (this._storageStack.length === 0) {
+            return this._newFunc(this);
+        }
+        const reusedObj = this._storageStack.pop();
+        this._reuseFunc(reusedObj);
+        return reusedObj;
+    }
+
+    retire(obj) {
+        this._retireFunc(obj);
+        // console.assert(this._storageStack.length <= kMaxNumObjects);
+        this._storageStack.push(obj);
+        if (this._storageStack.length > kMaxNumObjects) {
+            console.log(`Over capacity by ${this._storageStack.length - kMaxNumObjects}`);
+        }
+    }
+}
+
 class CoralPolyp {
-    constructor(svg, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
-        const line = document.createElementNS(kSvgNs, "line");
-
-        // Permanent attributes that won't be updated by `flushLine()`.
-        line.setAttribute("stroke-width", ".2px");
-
-        svg.appendChild(line);
-
-        this.svg = svg;
+    constructor(pool, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
+        this.pool = pool;
         this.adjustableVariables = adjustableVariables;
-        this.elem = line;
-        this.ttl = kMaxTtl;
         this.angle = angle;
 
+        const line = document.createElementNS(kSvgNs, "line");
+        // Permanent attributes that won't be updated by `flush()`.
+        line.setAttribute("stroke-width", ".2px");
+        this.elem = line;
         // Used to reduce the number of expensive `setAttribute()` calls for
         // color attributes.
-        this.needFlush = true;
+        this.needsFlush = true;
+        this.ttl = kMaxTtl;
 
         // Register getters and setters for fields that defer setting the
         // `needsFlush` bit as an optimization. These fields don't need to be
@@ -59,7 +86,10 @@ class CoralPolyp {
             });
         }
 
-        (this.x1 = x1), (this.y1 = y1), (this.x2 = x2), (this.y2 = y2);
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
 
         this.r = r;
         this.g = g;
@@ -131,18 +161,12 @@ class CoralPolyp {
                     isOccupiedMatrix[isOccupiedIndex] += kSignalAttack;
                 }
 
-                let newPolyp = new CoralPolyp(
-                    this.svg,
-                    this.adjustableVariables,
-                    angle,
-                    0,
-                    255,
-                    0,
-                    this.x2,
-                    this.y2,
-                    this.x2 + 0.4 * Math.cos(angle),
-                    this.y2 + 0.4 * Math.sin(angle),
-                );
+                let newPolyp = this.pool.getNewOrUsed();
+                newPolyp.angle = angle;
+                newPolyp.x1 = this.x2;
+                newPolyp.y1 = this.y2;
+                newPolyp.x2 = this.x2 + 0.4 * Math.cos(angle);
+                newPolyp.y2 = this.y2 + 0.4 * Math.sin(angle),
 
                 polyps.push(newPolyp);
 
@@ -220,8 +244,38 @@ function buildThunks() {
 
     const adjustableVariables = new AdjustableVariables();
 
-    const isOccupiedMatrix = new Uint16Array(100 * 100);
+    const newPolypFunc = (pool) => {
+        const polyp = new CoralPolyp(
+            pool,
+            adjustableVariables,
+            /*angle=*/(3 * Math.PI) / 2,
+            /*r=*/ 0,
+            /*g=*/ 255,
+            /*b=*/ 0,
+            /*x1=*/ 50,
+            /*y1=*/ 100,
+            /*x2=*/ 50,
+            /*y2=*/ 98,
+        );
+        svg.appendChild(polyp.elem);
+        return polyp;
+    };
+    const reusePolypFunc = (polyp) => {
+        polyp.ttl = kMaxTtl;
 
+        polyp.r = 0;
+        polyp.g = 255;
+        polyp.b = 0;
+
+        polyp.needsFlush = true;
+        polyp.flush();
+    };
+    const retirePolypFunc = (polyp) => {
+        polyp.elem.setAttribute('stroke', undefined);
+    };
+    const polypPool = new SvgElementPool(newPolypFunc, reusePolypFunc, retirePolypFunc)
+
+    const isOccupiedMatrix = new Uint16Array(100 * 100);
     const isOccupiedRects = new Array();
 
     for (let x = 0; x < 100; ++x) {
@@ -284,7 +338,7 @@ function buildThunks() {
         // Maybe initialize.
         if (polyps.length === 0) {
             const first = new CoralPolyp(
-                svg,
+                polypPool,
                 adjustableVariables,
                 /*angle=*/(3 * Math.PI) / 2,
                 /*r=*/ 0,
@@ -316,7 +370,7 @@ function buildThunks() {
 
         polyps = polyps.filter((b) => {
             if (b.ttl <= 0 || !b.isInBounds()) {
-                svg.removeChild(b.elem);
+                polypPool.retire(b);
                 return false;
             }
             return true;
@@ -326,7 +380,7 @@ function buildThunks() {
         if (polyps.length > kMaxNumObjects) {
             const kNumToKill = polyps.length - kMaxNumObjects;
             for (let i = 0; i < kNumToKill; ++i) {
-                svg.removeChild(polyps[i].elem);
+                polypPool.retire(polyps[i]);
             }
             polyps = polyps.slice(polyps.length - kMaxNumObjects);
         }
