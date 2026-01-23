@@ -1,193 +1,121 @@
-const kSvgNs = "http://www.w3.org/2000/svg";
 const kMaxU16 = 0xffff;
-
-const kMaxNumObjects = 1 << 14;
+const kMaxNumObjects = 1 << 16;
 const kMaxTtl = 1 << 9;
 
-const kSignalThresh = 16;
-const kSignalAttack = 32;
+const kGrowthMagnitude = 2;
+const kSplitMagnitude = 2;
 
-class SvgElementPool {
-    // newFunc :: SvgElementPool -> ()
-    // reuseFunc :: T -> ()
-    // retireFunc :: T -> ()
-    constructor(newFunc, reuseFunc, retireFunc) {
-        this._newFunc = newFunc;
-        this._reuseFunc = reuseFunc;
-        this._retireFunc = retireFunc;
-        // Stack of retired objects.
-        this._storageStack = [];
-    }
-
-    getNewOrUsed() {
-        if (this._storageStack.length === 0) {
-            return this._newFunc(this);
-        }
-        const reusedObj = this._storageStack.pop();
-        this._reuseFunc(reusedObj);
-        return reusedObj;
-    }
-
-    retire(obj) {
-        this._retireFunc(obj);
-        // console.assert(this._storageStack.length <= kMaxNumObjects);
-        this._storageStack.push(obj);
-        if (this._storageStack.length > kMaxNumObjects) {
-            console.log(`Over capacity by ${this._storageStack.length - kMaxNumObjects}`);
-        }
-    }
-}
+const kSignalThresh = 1 << 9;
+const kSignalAttack = 1 << 5;
+const kMaxSignalLog = Math.log(kMaxU16);
+const kSignalSquareSideLen = 100;
 
 class CoralPolyp {
-    constructor(pool, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
-        this.pool = pool;
-        this.adjustableVariables = adjustableVariables;
-        this.angle = angle;
-
-        const line = document.createElementNS(kSvgNs, "line");
-        // Permanent attributes that won't be updated by `flush()`.
-        line.setAttribute("stroke-width", ".2px");
-        this.elem = line;
-        // Used to reduce the number of expensive `setAttribute()` calls for
-        // color attributes.
-        this.needsFlush = true;
+    constructor(ctx, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
         this.ttl = kMaxTtl;
 
-        // Register getters and setters for fields that defer setting the
-        // `needsFlush` bit as an optimization. These fields don't need to be
-        // updated as frequently because they are less visually important.
-        for (const fieldName of ["r", "g", "b"]) {
-            const backingFieldName = "_" + fieldName;
-            Object.defineProperty(this, fieldName, {
-                get() {
-                    return this[backingFieldName];
-                },
-                set(x) {
-                    this[backingFieldName] = x;
-                    if (this.ttl % 32 === 0) {
-                        this.needsFlush = true;
-                    }
-                },
-            });
-        }
-
-        // Register getters and setters for fields that immediately set the
-        // needsFlush bit.
-        for (const fieldName of ["x1", "y1", "x2", "y2"]) {
-            const backingFieldName = "_" + fieldName;
-            Object.defineProperty(this, fieldName, {
-                get() {
-                    return this[backingFieldName];
-                },
-                set(x) {
-                    this[backingFieldName] = x;
-                    this.elem.setAttribute(fieldName, x);
-                },
-            });
-        }
-
+        this.ctx = ctx;
+        this.adjustableVariables = adjustableVariables;
+        this.angle = angle;
+        this.r = r;
+        this.g = g;
+        this.b = b;
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
-
-        this.r = r;
-        this.g = g;
-        this.b = b;
-
-        this.flush();
     }
 
-    // Copies information from `line`'s top-level convenience attributes to its
-    // SVG element. For instance, `line.x1` will be copied to the `x1` attribute
-    // of `line.elem`.
-    flush() {
-        // The needsFlush bit helps us avoid calling the expensive `setAttribute()`
-        // function when it's unnecessary. It's slow, but still faster than
-        // `setAttributeNS(null, ...)`.
-        if (!this.needsFlush) {
-            return;
-        }
-
-        const brightness = this.ttl * this.ttl / (kMaxTtl * kMaxTtl);
-        this.elem.setAttribute(
-            "stroke",
-            `rgb(${this.r * brightness}, ${this.g * brightness}, ${this.b * brightness})`,
-        );
-
-        this.needsFlush = false;
+    draw() {
+        const ctx = this.ctx;
+        const r = Math.floor(this.r);
+        const g = Math.floor(this.g);
+        const b = Math.floor(this.b);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = `rgb(${r} ${g} ${b})`;
+        ctx.beginPath();
+        ctx.moveTo(this.x1, this.y1);
+        ctx.lineTo(this.x2, this.y2);
+        ctx.closePath();
+        ctx.stroke();
     }
 
     // Makes this individual polyp either grow or split. The `polyps` parameter
     // is a reference to an array of other polyps. Splitting will insert two new
     // instances into the `polyps` array.
-    act(polyps, isOccupiedMatrix) {
-        const kChanceGrow = this.adjustableVariables.growChance;
-        const kChanceSplit = this.adjustableVariables.splitChance;
-        const kMaxTurn = this.adjustableVariables.maxTurn / 360 * 2 * Math.PI;
-
-        if (Math.random() < kChanceGrow) {
+    act(polyps, signalMatrix) {
+        if (Math.random() < this.adjustableVariables.growChance) {
+            // Speculatively grow in the current direction, but undo it if we
+            // grow out of bounds.
             let oldX2 = this.x2;
             let oldY2 = this.y2;
+            this.x2 += kGrowthMagnitude * Math.cos(this.angle);
+            this.y2 += kGrowthMagnitude * Math.sin(this.angle);
 
-            this.x2 += 0.1 * Math.cos(this.angle);
-            this.y2 += 0.1 * Math.sin(this.angle);
-
-            if (!this.isInBounds()) {
+            const signalMatrixIndex = CoralPolyp.getIsOccupiedIndex(this.x2, this.y2);
+            if (this.isInBounds() && signalMatrix[signalMatrixIndex] <= kSignalThresh) {
+                // Increase the signal at the new endpoint.
+                console.assert(signalMatrix[signalMatrixIndex] <= kMaxU16);
+                if (signalMatrix[signalMatrixIndex] <= kMaxU16 - kSignalAttack) {
+                    signalMatrix[signalMatrixIndex] += kSignalAttack;
+                }
+            } else {
                 this.x2 = oldX2;
                 this.y2 = oldY2;
             }
-
-            const isOccupiedIndex = CoralPolyp.getIsOccupiedIndex(this.x2, this.y2);
-            console.assert(isOccupiedMatrix[isOccupiedIndex] <= kMaxU16);
-            if (isOccupiedMatrix[isOccupiedIndex] <= kMaxU16 - kSignalAttack) {
-                isOccupiedMatrix[isOccupiedIndex] += kSignalAttack;
-            }
         }
 
-        if (Math.random() < kChanceSplit) {
-            const kNumChildren = 1;
-            for (let i = 0; i < kNumChildren; ++i) {
-                const angle = this.angle + (2 * Math.random() - 1) * kMaxTurn;
-                const newX2 = this.x2 + 2 * Math.cos(angle);
-                const newY2 = this.y2 + 2 * Math.sin(angle);
+        if (Math.random() < this.adjustableVariables.splitChance) {
+            // Choose the child's angle based on our angle.
+            const maxTurn = this.adjustableVariables.maxTurn / 360 * 2 * Math.PI;
+            const newAngle = this.angle + (2 * Math.random() - 1) * maxTurn;
 
-                const isOccupiedIndex = CoralPolyp.getIsOccupiedIndex(newX2, newY2);
-                if (isOccupiedMatrix[isOccupiedIndex] > kSignalThresh) {
-                    continue;
-                }
-                console.assert(isOccupiedMatrix[isOccupiedIndex] <= kMaxU16);
-                if (isOccupiedMatrix[isOccupiedIndex] <= kMaxU16 - kSignalAttack) {
-                    isOccupiedMatrix[isOccupiedIndex] += kSignalAttack;
-                }
+            const child = new CoralPolyp(
+                this.ctx,
+                this.adjustableVariables,
+                newAngle,
+                /*r=*/ 0,
+                /*g=*/ 255,
+                /*b=*/ 0,
+                /*x1=*/ this.x2,
+                /*y1=*/ this.y2,
+                /*x2=*/ this.x2 + kSplitMagnitude * Math.cos(newAngle),
+                /*y2=*/ this.y2 + kSplitMagnitude * Math.sin(newAngle),
+            );
 
-                let newPolyp = this.pool.getNewOrUsed();
-                newPolyp.angle = angle;
-                newPolyp.x1 = this.x2;
-                newPolyp.y1 = this.y2;
-                newPolyp.x2 = this.x2 + 0.4 * Math.cos(angle);
-                newPolyp.y2 = this.y2 + 0.4 * Math.sin(angle),
+            const signalMatrixIndex = CoralPolyp.getIsOccupiedIndex(child.x2, child.y2);
+            if (child.isInBounds() && signalMatrix[signalMatrixIndex] <= kSignalThresh) {
+                polyps.push(child);
 
-                polyps.push(newPolyp);
-
-                if (!newPolyp.isInBounds()) {
-                    newPolyp.ttl = 0;
+                if (signalMatrix[signalMatrixIndex] <= kMaxU16 - kSignalAttack) {
+                    signalMatrix[signalMatrixIndex] += kSignalAttack;
                 }
             }
         }
     }
 
     static getIsOccupiedIndex(x, y) {
-        const clampedX2 = Math.max(0, Math.min(Math.round(x), 99));
-        const clampedY2 = Math.max(0, Math.min(Math.round(y), 99));
-        const isOccupiedIndex = clampedX2 * 100 + clampedY2;
-        return Math.max(0, Math.min(isOccupiedIndex, 100 * 100 - 1));
+        const clampTo = (lo, hi, a) => {
+            if (a < lo) return lo;
+            if (a > hi) return hi;
+            return a;
+        }
+        const clampedX = clampTo(0, 1000, x);
+        const clampedY = clampTo(0, 1000, y);
+
+        // Convert coordinates to a `signalSquareSideLen**2` grid.
+        const scaledX = Math.floor(clampedX / 10);
+        const scaledY = Math.floor(clampedY / 10);
+
+        const index = scaledX * kSignalSquareSideLen + scaledY;
+        const clampedIndex = clampTo(0, kSignalSquareSideLen ** 2, index);
+        return clampedIndex;
     }
 
     isInBounds() {
-        for (const fieldName of ["_x1", "_y1", "_x2", "_y2"]) {
+        for (const fieldName of ["x1", "y1", "x2", "y2"]) {
             const value = this[fieldName];
-            if (value < 0 || value > 100) {
+            if (value < 0 || value > 1000) {
                 return false;
             }
         }
@@ -236,7 +164,8 @@ class AdjustableVariables {
 }
 
 function buildThunks() {
-    const svg = document.getElementById("gameSvg");
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
     let animationPaused = false;
 
@@ -244,117 +173,70 @@ function buildThunks() {
 
     const adjustableVariables = new AdjustableVariables();
 
-    const newPolypFunc = (pool) => {
-        const polyp = new CoralPolyp(
-            pool,
-            adjustableVariables,
-            /*angle=*/(3 * Math.PI) / 2,
-            /*r=*/ 0,
-            /*g=*/ 255,
-            /*b=*/ 0,
-            /*x1=*/ 50,
-            /*y1=*/ 100,
-            /*x2=*/ 50,
-            /*y2=*/ 98,
-        );
-        svg.appendChild(polyp.elem);
-        return polyp;
-    };
-    const reusePolypFunc = (polyp) => {
-        polyp.ttl = kMaxTtl;
-
-        polyp.r = 0;
-        polyp.g = 255;
-        polyp.b = 0;
-
-        polyp.needsFlush = true;
-        polyp.flush();
-    };
-    const retirePolypFunc = (polyp) => {
-        polyp.elem.setAttribute('stroke', undefined);
-    };
-    const polypPool = new SvgElementPool(newPolypFunc, reusePolypFunc, retirePolypFunc)
-
-    const isOccupiedMatrix = new Uint16Array(100 * 100);
-    const isOccupiedRects = new Array();
-
-    for (let x = 0; x < 100; ++x) {
-        for (let y = 0; y < 100; ++y) {
-            const rect = document.createElementNS(kSvgNs, "rect");
-            rect.setAttribute("x", x);
-            rect.setAttribute("y", y);
-            rect.setAttribute("width", 1);
-            rect.setAttribute("height", 1);
-
-            isOccupiedRects.push(rect);
-            svg.appendChild(rect);
-        }
-    }
+    const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
 
     let frameCount = 0;
-    let didHideSignals = false;
 
     function animate() {
         if (animationPaused) {
             return;
         }
-
         frameCount = (frameCount + 1) & (1 << 12);
 
-        if (frameCount === 0) {
-            // let maxValue;
-            // if (adjustableVariables.showSignals) {
-            //     maxValue = Math.max(...isOccupiedMatrix);
-            // }
-
-            const kMaxSignalLog = Math.log(kMaxU16);
-
+        // Decay the signal in `signalMatrix`.
+        for (let i = 0; i < signalMatrix.length; ++i) {
             const decayRate = Math.floor(adjustableVariables.signalDecayRate);
-            for (let i = 0; i < isOccupiedMatrix.length; ++i) {
-                if (isOccupiedMatrix[i] > decayRate) {
-                    isOccupiedMatrix[i] -= decayRate;
-                } else {
-                    isOccupiedMatrix[i] = 0;
-                }
-
-                if (adjustableVariables.showSignals) {
-                    const signalLog = Math.log(isOccupiedMatrix[i]);
-
-                    const scaledR = 255 * (signalLog / kMaxSignalLog);
-                    const scaledB = 128 * (signalLog / kMaxSignalLog);
-
-                    isOccupiedRects[i].setAttribute(
-                        "stroke",
-                        `rgb(${scaledR}, 0, ${scaledB})`,
-                    );
-                } else if (!didHideSignals) {
-                    isOccupiedRects[i].setAttribute("stroke", "rgb(0, 0, 0)");
-                }
+            if (signalMatrix[i] > decayRate) {
+                signalMatrix[i] -= decayRate;
+            } else {
+                signalMatrix[i] = 0;
             }
+        }
 
-            didHideSignals = !adjustableVariables.showSignals;
+        ctx.clearRect(0, 0, 1000, 1000);
+
+        if (adjustableVariables.showSignals) {
+            for (let i = 0; i < signalMatrix.length; ++i) {
+                const x = Math.floor(i / kSignalSquareSideLen);
+                const y = i % kSignalSquareSideLen;
+
+                console.assert(x >= 0);
+                console.assert(x <= kSignalSquareSideLen);
+                console.assert(y >= 0);
+                console.assert(y <= kSignalSquareSideLen);
+
+                const signal = signalMatrix[i];
+                const signalLog = signal === 0 ? 0 : Math.log(signal);
+                const signalLogScaled = signalLog / kMaxSignalLog;
+                const scaledR = Math.floor(255 * signalLogScaled);
+                const scaledB = Math.floor(255 * signalLogScaled);
+                const color = `rgb(${scaledR} 0 ${scaledB} / 90%)`;
+
+                ctx.fillStyle = color;
+                ctx.fillRect(x * 10, y * 10, 10, 10);
+            }
         }
 
         // Maybe initialize.
         if (polyps.length === 0) {
             const first = new CoralPolyp(
-                polypPool,
+                ctx,
                 adjustableVariables,
                 /*angle=*/(3 * Math.PI) / 2,
                 /*r=*/ 0,
                 /*g=*/ 255,
                 /*b=*/ 0,
-                /*x1=*/ 50,
-                /*y1=*/ 100,
-                /*x2=*/ 50,
-                /*y2=*/ 98,
+                /*x1=*/ 500,
+                /*y1=*/ 1000,
+                /*x2=*/ 500,
+                /*y2=*/ 980,
             );
 
-            for (let i = 0; i < isOccupiedMatrix.length; ++i) {
-                isOccupiedMatrix[i] = 0;
+            for (let i = 0; i < signalMatrix.length; ++i) {
+                signalMatrix[i] = 0;
             }
 
-            isOccupiedMatrix[CoralPolyp.getIsOccupiedIndex(first.x2, first.y2)] = 1;
+            signalMatrix[CoralPolyp.getIsOccupiedIndex(first.x2, first.y2)] = 1;
 
             polyps = [first];
         }
@@ -365,38 +247,24 @@ function buildThunks() {
             i < polyps.length;
             ++i
         ) {
-            polyps[i].act(polyps, isOccupiedMatrix);
+            polyps[i].act(polyps, signalMatrix);
         }
 
-        polyps = polyps.filter((b) => {
-            if (b.ttl <= 0 || !b.isInBounds()) {
-                polypPool.retire(b);
-                return false;
-            }
-            return true;
-        });
+        polyps = polyps.filter((b) => b.ttl > 0 && b.isInBounds());
 
         // Cull the oldest polyps when we've reached capacity.
         if (polyps.length > kMaxNumObjects) {
-            const kNumToKill = polyps.length - kMaxNumObjects;
-            for (let i = 0; i < kNumToKill; ++i) {
-                polypPool.retire(polyps[i]);
-            }
             polyps = polyps.slice(polyps.length - kMaxNumObjects);
         }
 
-        // Update each polyp's color and flush its attributes to the
-        // corresponding SVG element.
         polyps.forEach((b) => {
-            b.ttl -= 1;
+            b.ttl--;
 
-            if (b.ttl % 32 == 0) {
-                b.r = Math.min(b.r + 32, 255);
-                b.g = Math.max(b.g - 32, 0);
-                b.b = Math.max(50, 255 - Math.floor((255 * b.ttl) / kMaxTtl));
-            }
+            b.r = Math.min(64, (b.r + 0.25));
+            b.g = Math.max(0, (b.g - 4));
+            b.b = Math.min(64, (b.b + 0.1));
 
-            b.flush();
+            b.draw();
         });
 
         window.requestAnimationFrame(animate);
@@ -419,30 +287,9 @@ function buildThunks() {
         }
     }
 
-    // Transform mouse coordinates into SVG coordinates.
-    function transformMouseToSvgCoordinates(x, y, svg) {
-        let point = svg.createSVGPoint();
-        point.x = event.clientX;
-        point.y = event.clientY;
-        return point.matrixTransform(svg.getScreenCTM().inverse());
-    }
-
-    function handleMouseOrTouchMove(event) {
-        let mousePoint = transformMouseToSvgCoordinates(
-            event.clientX,
-            event.clientY,
-            svg,
-        );
-        if (!isFinite(mousePoint.x) || !isFinite(mousePoint.y)) {
-            return;
-        }
-    }
-
     return {
         onload: onload,
         onkeydown: onkeydown,
-        onmousemove: handleMouseOrTouchMove,
-        ontouchmove: handleMouseOrTouchMove,
     };
 }
 
