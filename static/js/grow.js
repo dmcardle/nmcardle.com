@@ -2,11 +2,12 @@ const kMaxU16 = 0xffff;
 const kMaxNumObjects = 1 << 16;
 const kMaxTtl = 1 << 9;
 
-const kGrowthMagnitude = 2;
+const kGrowthMagnitude = 1;
 const kSplitMagnitude = 2;
 
-const kSignalThresh = 1 << 9;
-const kSignalAttack = 1 << 5;
+const kGrowSignalThresh = 1 << 9;
+const kSplitSignalThresh = 1 << 8;
+const kSignalAttack = 1 << 4;
 const kMaxSignalLog = Math.log(kMaxU16);
 const kSignalSquareSideLen = 100;
 
@@ -27,10 +28,11 @@ class CoralPolyp {
     }
 
     draw() {
+        const brightness = this.ttl ** 2 / kMaxTtl ** 2;
         const ctx = this.ctx;
-        const r = Math.floor(this.r);
-        const g = Math.floor(this.g);
-        const b = Math.floor(this.b);
+        const r = Math.floor(this.r * brightness);
+        const g = Math.floor(this.g * brightness);
+        const b = Math.floor(this.b * brightness);
         ctx.lineWidth = 2;
         ctx.strokeStyle = `rgb(${r} ${g} ${b})`;
         ctx.beginPath();
@@ -53,7 +55,7 @@ class CoralPolyp {
             this.y2 += kGrowthMagnitude * Math.sin(this.angle);
 
             const signalMatrixIndex = CoralPolyp.getIsOccupiedIndex(this.x2, this.y2);
-            if (this.isInBounds() && signalMatrix[signalMatrixIndex] <= kSignalThresh) {
+            if (this.isInBounds() && signalMatrix[signalMatrixIndex] <= kGrowSignalThresh) {
                 // Increase the signal at the new endpoint.
                 console.assert(signalMatrix[signalMatrixIndex] <= kMaxU16);
                 if (signalMatrix[signalMatrixIndex] <= kMaxU16 - kSignalAttack) {
@@ -84,7 +86,7 @@ class CoralPolyp {
             );
 
             const signalMatrixIndex = CoralPolyp.getIsOccupiedIndex(child.x2, child.y2);
-            if (child.isInBounds() && signalMatrix[signalMatrixIndex] <= kSignalThresh) {
+            if (child.isInBounds() && signalMatrix[signalMatrixIndex] <= kSplitSignalThresh) {
                 polyps.push(child);
 
                 if (signalMatrix[signalMatrixIndex] <= kMaxU16 - kSignalAttack) {
@@ -175,13 +177,10 @@ function buildThunks() {
 
     const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
 
-    let frameCount = 0;
-
     function animate() {
         if (animationPaused) {
             return;
         }
-        frameCount = (frameCount + 1) & (1 << 12);
 
         // Decay the signal in `signalMatrix`.
         for (let i = 0; i < signalMatrix.length; ++i) {
@@ -260,9 +259,11 @@ function buildThunks() {
         polyps.forEach((b) => {
             b.ttl--;
 
-            b.r = Math.min(64, (b.r + 0.25));
-            b.g = Math.max(0, (b.g - 4));
-            b.b = Math.min(64, (b.b + 0.1));
+            if (b.ttl % 16 === 0) {
+                b.r = Math.min(64, (b.r + 2));
+                b.g = Math.max(0, (b.g - 12));
+                b.b = Math.min(64, (b.b + 1));
+            }
 
             b.draw();
         });
