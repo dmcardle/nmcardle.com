@@ -33,8 +33,11 @@ class CoralPolyp {
         const r = Math.floor(this.r * brightness);
         const g = Math.floor(this.g * brightness);
         const b = Math.floor(this.b * brightness);
+        const strokeStyle = `rgb(${r} ${g} ${b})`;
+        ctx.strokeStyle = strokeStyle;
+
         ctx.lineWidth = 2;
-        ctx.strokeStyle = `rgb(${r} ${g} ${b})`;
+
         ctx.beginPath();
         ctx.moveTo(this.x1, this.y1);
         ctx.lineTo(this.x2, this.y2);
