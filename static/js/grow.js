@@ -355,13 +355,13 @@ function buildThunks() {
             if (gl) {
                 // Scale coordinates to [-1, 1].
                 // FIXME Do this with a projection matrix?
-                positionArray[kNumPositionFields*i+0] = b.x1 / 500 - 1;
-                positionArray[kNumPositionFields*i+1] = b.y1 / 500 - 1;
-                positionArray[kNumPositionFields*i+2] = b.x2 / 500 - 1;
-                positionArray[kNumPositionFields*i+3] = b.y2 / 500 - 1;
+                positionArray[kNumPositionFields * i + 0] = b.x1 / 500 - 1;
+                positionArray[kNumPositionFields * i + 1] = (2 - b.y1 / 500) - 1;
+                positionArray[kNumPositionFields * i + 2] = b.x2 / 500 - 1;
+                positionArray[kNumPositionFields * i + 3] = (2 - b.y2 / 500) - 1;
 
-                ttlArray[2*i+0] = b.ttl;
-                ttlArray[2*i+1] = b.ttl;
+                ttlArray[2 * i + 0] = b.ttl;
+                ttlArray[2 * i + 1] = b.ttl;
             }
         });
 
@@ -385,6 +385,7 @@ function buildThunks() {
                 /*offset=*/0,
             );
             gl.enableVertexAttribArray(positionAttributeLocation);
+
 
             // Connect `ttlArray` to the `vertexPos` shader parameter.
             gl.bindBuffer(gl.ARRAY_BUFFER, ttlBuffer);
