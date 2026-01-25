@@ -1,5 +1,18 @@
 "use strict";
 
+const kMaxU16 = 0xffff;
+const kMaxNumObjects = 1 << 17;
+const kMaxTtl = 1 << 9;
+
+const kGrowthMagnitude = 1;
+const kSplitMagnitude = 2;
+
+const kGrowSignalThresh = 1 << 9;
+const kSplitSignalThresh = 1 << 8;
+const kSignalAttack = 1 << 4;
+const kMaxSignalLog = Math.log(kMaxU16);
+const kSignalSquareSideLen = 100;
+
 const kNumPositionFields = 4; // x1, y1, x2, y2
 
 class GlState {
@@ -104,9 +117,15 @@ out vec4 aColor;
 void main() {
   gl_Position = vec4(vertexPos[0], vertexPos[1], 0, 1);
 
-  float brightness = (vertexTtl * vertexTtl) / (512.0 * 512.0);
+  // Over a line's lifetime, the ttlScaled decreases from a maximum of 1 to a
+  // minimum of 0.
+  float ttlScaled = (vertexTtl * vertexTtl) / (512.0 * 512.0);
 
-  aColor = vec4(0, brightness, 0, 1);
+  float r = 0.3 * (1.0 - ttlScaled);
+  float g = ttlScaled;
+  float b = 0.0;
+
+  aColor = vec4(r, g, b, 1);
 }
 `;
 
@@ -124,24 +143,12 @@ void main() {
 
 }
 
-const kMaxU16 = 0xffff;
-const kMaxNumObjects = 1 << 16;
-const kMaxTtl = 1 << 9;
-
-const kGrowthMagnitude = 1;
-const kSplitMagnitude = 2;
-
-const kGrowSignalThresh = 1 << 9;
-const kSplitSignalThresh = 1 << 8;
-const kSignalAttack = 1 << 4;
-const kMaxSignalLog = Math.log(kMaxU16);
-const kSignalSquareSideLen = 100;
-
 class CoralPolyp {
-    constructor(ctx, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
+    constructor(ctx2d, glState, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
         this.ttl = kMaxTtl;
 
-        this.ctx = ctx;
+        this.ctx2d = ctx2d;
+        this.glState = glState;
         this.adjustableVariables = adjustableVariables;
         this.angle = angle;
         this.r = r;
@@ -155,7 +162,7 @@ class CoralPolyp {
 
     draw2d() {
         const brightness = this.ttl ** 2 / kMaxTtl ** 2;
-        const ctx = this.ctx;
+        const ctx = this.ctx2d;
         const r = Math.floor(this.r * brightness);
         const g = Math.floor(this.g * brightness);
         const b = Math.floor(this.b * brightness);
@@ -202,7 +209,8 @@ class CoralPolyp {
             const newAngle = this.angle + (2 * Math.random() - 1) * maxTurn;
 
             const child = new CoralPolyp(
-                this.ctx,
+                this.ctx2d,
+                this.glState,
                 this.adjustableVariables,
                 newAngle,
                 /*r=*/ 0,
@@ -353,6 +361,7 @@ function buildThunks() {
         if (polyps.length === 0) {
             const first = new CoralPolyp(
                 ctx,
+                glState,
                 adjustableVariables,
                     /*angle=*/(3 * Math.PI) / 2,
                     /*r=*/ 0,
