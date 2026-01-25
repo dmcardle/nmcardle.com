@@ -1,6 +1,100 @@
 "use strict";
 
-const vertexShaderSource = `#version 300 es
+const kNumPositionFields = 4; // x1, y1, x2, y2
+
+class GlState {
+    constructor() {
+        const gl = document.getElementById("gameGl").getContext("webgl2");
+        if (!gl) {
+            return;
+        }
+
+        gl.canvas.width = gl.canvas.clientWidth;
+        gl.canvas.height = gl.canvas.clientHeight;
+        gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+
+        const vertexShader = GlState.#createShader(gl, gl.VERTEX_SHADER, GlState.#vertexShaderSource);
+        const fragmentShader = GlState.#createShader(gl, gl.FRAGMENT_SHADER, GlState.#fragmentShaderSource);
+        const program = GlState.#createProgram(gl, vertexShader, fragmentShader);
+
+        const vao = gl.createVertexArray();
+        gl.bindVertexArray(vao);
+
+        this.gl = gl;
+        this.program = program;
+        this.positionBuffer = gl.createBuffer();
+        this.ttlBuffer = gl.createBuffer();
+        this.positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
+        this.ttlArray = new Float32Array(kMaxNumObjects * 2);
+    }
+
+    isEnabled() {
+        return this.gl !== null;
+    }
+
+    render(numLines) {
+        const gl = this.gl;
+
+        gl.clearColor(0, 0, 0, 0); // RGBA
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.useProgram(this.program);
+
+        // Connect `positionArray` to the `vertexPos` shader parameter.
+        this.#configureShaderParam("vertexPos", gl.FLOAT, 2, this.positionBuffer, this.positionArray);
+        this.#configureShaderParam("vertexTtl", gl.FLOAT, 1, this.ttlBuffer, this.ttlArray);
+
+        gl.drawArrays(gl.LINES,
+                      /*first=*/0,
+                      /*count=*/numLines * 2);
+    }
+
+    #configureShaderParam(name, type, numPerVertex, glBuffer, array) {
+        const gl = this.gl;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+
+        const paramIndex = gl.getAttribLocation(this.program, name);
+        gl.vertexAttribPointer(
+            paramIndex,
+            /*size=*/numPerVertex,
+            type,
+            /*normalize=*/false,
+            /*stride=*/0,
+            /*offset=*/0,
+        );
+        gl.enableVertexAttribArray(paramIndex);
+    }
+
+    static #createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (!success) {
+            const log = gl.getShaderInfoLog(shader);
+            gl.deleteShader(shader);
+            throw new Error("createShader() failed:\n" + log);
+        }
+        return shader;
+    }
+
+    static #createProgram(gl, vertexShader, fragmentShader) {
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        const success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (!success) {
+            const log = gl.getProgramInfoLog(program);
+            gl.deleteProgram(program);
+            throw new Error("createProgram() failed:\n" + log);
+        }
+        return program;
+    }
+
+    static #vertexShaderSource = `#version 300 es
  
 in vec2 vertexPos;
 in float vertexTtl;
@@ -16,7 +110,7 @@ void main() {
 }
 `;
 
-const fragmentShaderSource = `#version 300 es
+    static #fragmentShaderSource = `#version 300 es
  
 precision highp float;
  
@@ -28,31 +122,6 @@ void main() {
 }
 `;
 
-function createShader(gl, type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (!success) {
-        const log = gl.getShaderInfoLog(shader);
-        gl.deleteShader(shader);
-        throw new Error("createShader() failed:\n" + log);
-    }
-    return shader;
-}
-
-function createProgram(gl, vertexShader, fragmentShader) {
-    const program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    const success = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (!success) {
-        const log = gl.getProgramInfoLog(program);
-        gl.deleteProgram(program);
-        throw new Error("createProgram() failed:\n" + log);
-    }
-    return program;
 }
 
 const kMaxU16 = 0xffff;
@@ -234,33 +303,10 @@ function buildThunks() {
 
     let polyps = [];
 
-    const gl = document.getElementById("gameGl").getContext("webgl2");
+    const glState = new GlState();
+    console.assert(glState.isEnabled());
+
     const ctx = contextParam === "no-2d" ? null : document.getElementById("game").getContext("2d");
-    let positionArray, ttlArray;
-    let positionBuffer, ttlBuffer;
-    let program;
-    let vao;
-
-    const kNumPositionFields = 4; // x1, y1, x2, y2
-
-    if (gl) {
-        gl.canvas.width = gl.canvas.clientWidth;
-        gl.canvas.height = gl.canvas.clientHeight;
-        gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
-
-        positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
-        ttlArray = new Float32Array(kMaxNumObjects * 2);
-
-        let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-        let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-        program = createProgram(gl, vertexShader, fragmentShader);
-
-        vao = gl.createVertexArray();
-        gl.bindVertexArray(vao);
-
-        positionBuffer = gl.createBuffer();
-        ttlBuffer = gl.createBuffer();
-    }
 
     function animateFunc() {
         if (animationPaused) {
@@ -352,7 +398,10 @@ function buildThunks() {
                 b.b = Math.min(64, (b.b + 1));
             }
 
-            if (gl) {
+            if (glState.isEnabled()) {
+                const positionArray = glState.positionArray;
+                const ttlArray = glState.ttlArray;
+
                 // Scale coordinates to [-1, 1].
                 // FIXME Do this with a projection matrix?
                 positionArray[kNumPositionFields * i + 0] = b.x1 / 500 - 1;
@@ -365,46 +414,8 @@ function buildThunks() {
             }
         });
 
-        if (gl) {
-            gl.clearColor(0, 0, 0, 0); // RGBA
-            gl.clear(gl.COLOR_BUFFER_BIT);
-
-            gl.useProgram(program);
-
-            // Connect `positionArray` to the `vertexPos` shader parameter.
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, positionArray, gl.STATIC_DRAW);
-
-            const positionAttributeLocation = gl.getAttribLocation(program, "vertexPos");
-            gl.vertexAttribPointer(
-                positionAttributeLocation,
-                /*size=*/2, // Two floats per vertex (x, y)
-                gl.FLOAT,
-                /*normalize=*/false,
-                /*stride=*/0,
-                /*offset=*/0,
-            );
-            gl.enableVertexAttribArray(positionAttributeLocation);
-
-
-            // Connect `ttlArray` to the `vertexPos` shader parameter.
-            gl.bindBuffer(gl.ARRAY_BUFFER, ttlBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, ttlArray, gl.STATIC_DRAW);
-
-            const ttlAttributeLocation = gl.getAttribLocation(program, "vertexTtl");
-            gl.vertexAttribPointer(
-                ttlAttributeLocation,
-                /*size=*/1,
-                gl.FLOAT,
-                /*normalize=*/false,
-                /*stride=*/0,
-                /*offset=*/0,
-            );
-            gl.enableVertexAttribArray(ttlAttributeLocation);
-
-            gl.drawArrays(gl.LINES,
-                          /*first=*/0,
-                          /*count=*/polyps.length * 2);
+        if (glState.isEnabled()) {
+            glState.render(/*numLines=*/polyps.length);
         }
 
         if (ctx) {
