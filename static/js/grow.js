@@ -329,16 +329,15 @@ function buildThunks() {
     const glState = new GlState(canvasGl);
 
     if (forceBothCanvases) {
-        canvas2d.style.setProperty("max-width", "33%");
-        canvasGl.style.setProperty("max-width", "33%");
-
+        canvasGl.style.setProperty("border", "1px solid red");
     } else if (!glState.isEnabled() || forceCanvas2d) {
         console.log("Using Canvas 2D");
-        canvasGl.style.setProperty("display", "none");
+        canvasGl.parentElement.removeChild(canvasGl);
+        canvasGl = null;
         glState.disable();
     } else {
         console.log("Using WebGL");
-        canvas2d.style.setProperty("display", "none");
+        canvas2d.parentElement.removeChild(canvas2d);
         ctx2d = null;
     }
 

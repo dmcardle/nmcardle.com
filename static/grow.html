@@ -23,18 +23,21 @@
           flex-wrap: wrap;
           justify-content: center;
 
-          .game {
-              flex: 1;
+          #gameContainer {
+              flex: 0;
 
-              max-width: 66%;
-              aspect-ratio: 1/1;
-              max-height: 1000px;
-              margin: 1em;
+              div {
+                  canvas {
+                      width: 1000px;
+                      margin: 1rem;
+                      aspect-ratio: 1/1;
 
-              background-color: black;
+                      background-color: black;
+                  }
+              }
           }
           .description {
-              flex: 1.2;
+              flex: 1;
 
               max-width: 40rem;
               margin: auto;
@@ -88,10 +91,16 @@
   </head>
   <body>
     <div id="container">
-      <canvas id="game" class="game" width=1000 height=1000 ></canvas>
-      <canvas id="gameGl" class="game" width=1000 height=1000 ></canvas>
+      <div id="gameContainer">
+        <div>
+          <canvas id="game" class="game" width=1000 height=1000 ></canvas>
+        </div>
+        <div>
+          <canvas id="gameGl" class="game" width=1000 height=1000 ></canvas>
+        </div>
+      </div>
 
-      <div class="description">
+      <div id="description" class="description">
         <div class="blurb">
           This page simulates a biologically-inspired system with a few simple
           rules. It begins with a single cell. Over time, cells repeatedly
@@ -99,7 +108,7 @@
           adjust the probability of each action occurring.
         </div>
 
-        <div class="controlsContainer">
+        <div id="controlsContainer" class="controlsContainer">
           <div class="control">
             <label for="growChanceRange">Grow chance: <span id="growChanceLabel"></span>%</label>
             <input id="growChanceRange" name="grow_chance" type="range" min="0" max="100" step="1" value="70" />
