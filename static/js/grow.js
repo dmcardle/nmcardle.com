@@ -2,10 +2,17 @@
 
 const vertexShaderSource = `#version 300 es
  
-in vec4 a_position;
+in vec2 vertexPos;
+in float vertexTtl;
+
+out vec4 aColor;
  
 void main() {
-  gl_Position = a_position;
+  gl_Position = vec4(vertexPos[0], vertexPos[1], 0, 1);
+
+  float brightness = (vertexTtl * vertexTtl) / (512.0 * 512.0);
+
+  aColor = vec4(0, brightness, 0, 1);
 }
 `;
 
@@ -13,39 +20,40 @@ const fragmentShaderSource = `#version 300 es
  
 precision highp float;
  
+in vec4 aColor;
 out vec4 outColor;
  
 void main() {
-  outColor = vec4(1, 0, 0, 1);
+  outColor = aColor;
 }
 `;
 
 function createShader(gl, type, source) {
-    var shader = gl.createShader(type);
+    const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (success) {
-        return shader;
+    const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    if (!success) {
+        const log = gl.getShaderInfoLog(shader);
+        gl.deleteShader(shader);
+        throw new Error("createShader() failed:\n" + log);
     }
-
-    console.log(gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
+    return shader;
 }
+
 function createProgram(gl, vertexShader, fragmentShader) {
-    var program = gl.createProgram();
+    const program = gl.createProgram();
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
-    var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (success) {
-        return program;
+    const success = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (!success) {
+        const log = gl.getProgramInfoLog(program);
+        gl.deleteProgram(program);
+        throw new Error("createProgram() failed:\n" + log);
     }
-
-    console.log(gl.getProgramInfoLog(program));
-    gl.deleteProgram(program);
+    return program;
 }
-
 
 const kMaxU16 = 0xffff;
 const kMaxNumObjects = 1 << 16;
@@ -230,43 +238,34 @@ function buildThunks() {
     let polyps = [];
     const gl = document.getElementById("gameGl").getContext("webgl2");
     const ctx = document.getElementById("game").getContext("2d");
-    let positions;
+    let positionArray, ttlArray;
+    let positionBuffer, ttlBuffer;
     let program;
     let vao;
 
+    const kNumPositionFields = 4; // x1, y1, x2, y2
+
     if (gl) {
+        const kSizeOfFloat = 4;
+
         console.log("WEBGL2")
 
         gl.canvas.width = gl.canvas.clientWidth;
         gl.canvas.height = gl.canvas.clientHeight;
         gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
-        positions = new Float32Array(kMaxNumObjects * 4); // x1, y1, x2, y2
+        positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
+        ttlArray = new Float32Array(kMaxNumObjects * 2);
 
         let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
         let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
         program = createProgram(gl, vertexShader, fragmentShader);
 
-
-        let positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-        // Create a vertex array object (attribute state)
         vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
-        let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-
-        gl.enableVertexAttribArray(positionAttributeLocation);
-
-        // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-        var size = 2;          // 2 components per iteration
-        var type = gl.FLOAT;   // the data is 32bit floats
-        var normalize = false; // don't normalize the data
-        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-        var offset = 0;        // start at the beginning of the buffer
-        gl.vertexAttribPointer(
-            positionAttributeLocation, size, type, normalize, stride, offset);
+        positionBuffer = gl.createBuffer();
+        ttlBuffer = gl.createBuffer();
     }
 
     function animateFunc() {
@@ -362,23 +361,55 @@ function buildThunks() {
             if (gl) {
                 // Scale coordinates to [-1, 1].
                 // FIXME Do this with a projection matrix?
-                positions[4*i+0] = b.x1 / 500 - 1;
-                positions[4*i+1] = b.y1 / 500 - 1;
-                positions[4*i+2] = b.x2 / 500 - 1;
-                positions[4*i+3] = b.y2 / 500 - 1;
+                positionArray[kNumPositionFields*i+0] = b.x1 / 500 - 1;
+                positionArray[kNumPositionFields*i+1] = b.y1 / 500 - 1;
+                positionArray[kNumPositionFields*i+2] = b.x2 / 500 - 1;
+                positionArray[kNumPositionFields*i+3] = b.y2 / 500 - 1;
+
+                ttlArray[2*i+0] = b.ttl;
+                ttlArray[2*i+1] = b.ttl;
             }
         });
 
         if (gl) {
-            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
             gl.clearColor(0, 0, 0, 0); // RGBA
             gl.clear(gl.COLOR_BUFFER_BIT);
 
             gl.useProgram(program);
-            gl.bindVertexArray(vao);
 
-            gl.drawArrays(gl.LINES, 0, polyps.length * 2);
+            // Connect `positionArray` to the `vertexPos` shader parameter.
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, positionArray, gl.STATIC_DRAW);
+
+            const positionAttributeLocation = gl.getAttribLocation(program, "vertexPos");
+            gl.vertexAttribPointer(
+                positionAttributeLocation,
+                /*size=*/2, // Two floats per vertex (x, y)
+                gl.FLOAT,
+                /*normalize=*/false,
+                /*stride=*/0,
+                /*offset=*/0,
+            );
+            gl.enableVertexAttribArray(positionAttributeLocation);
+
+            // Connect `ttlArray` to the `vertexPos` shader parameter.
+            gl.bindBuffer(gl.ARRAY_BUFFER, ttlBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, ttlArray, gl.STATIC_DRAW);
+
+            const ttlAttributeLocation = gl.getAttribLocation(program, "vertexTtl");
+            gl.vertexAttribPointer(
+                ttlAttributeLocation,
+                /*size=*/1,
+                gl.FLOAT,
+                /*normalize=*/false,
+                /*stride=*/0,
+                /*offset=*/0,
+            );
+            gl.enableVertexAttribArray(ttlAttributeLocation);
+
+            gl.drawArrays(gl.LINES,
+                          /*first=*/0,
+                          /*count=*/polyps.length * 2);
         }
 
         polyps.forEach((p) => { p.draw(); });
