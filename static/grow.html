@@ -23,13 +23,19 @@
           flex-wrap: wrap;
           justify-content: center;
 
-          #game {
-              max-width: 1000px;
-              min-width: 66%;
+          .game {
+              flex: 1;
+
+              canvas {
+                  max-width: 500px;
+                  max-height: 500px;
+                  margin: 1em;
+                  border: 1px solid white;
+
+                  background-color: black;
+              }
 
               margin: 1rem;
-
-              background-color: black;
           }
           .description {
               flex: 1;
@@ -87,7 +93,10 @@
   <body>
     <div id="container">
 
-      <canvas id="game" width=1000 height=1000 ></canvas>
+      <div class="game">
+        <canvas id="game" width=1000 height=1000 ></canvas>
+        <canvas id="gameGl" width=1000 height=1000 ></canvas>
+      </div>
 
       <div class="description">
         <div class="blurb">

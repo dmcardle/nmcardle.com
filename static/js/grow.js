@@ -1,3 +1,52 @@
+"use strict";
+
+const vertexShaderSource = `#version 300 es
+ 
+in vec4 a_position;
+ 
+void main() {
+  gl_Position = a_position;
+}
+`;
+
+const fragmentShaderSource = `#version 300 es
+ 
+precision highp float;
+ 
+out vec4 outColor;
+ 
+void main() {
+  outColor = vec4(1, 0, 0, 1);
+}
+`;
+
+function createShader(gl, type, source) {
+    var shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    if (success) {
+        return shader;
+    }
+
+    console.log(gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+}
+function createProgram(gl, vertexShader, fragmentShader) {
+    var program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (success) {
+        return program;
+    }
+
+    console.log(gl.getProgramInfoLog(program));
+    gl.deleteProgram(program);
+}
+
+
 const kMaxU16 = 0xffff;
 const kMaxNumObjects = 1 << 16;
 const kMaxTtl = 1 << 9;
@@ -169,18 +218,58 @@ class AdjustableVariables {
 }
 
 function buildThunks() {
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
+    const paramsString = window.location.search;
+    const searchParams = new URLSearchParams(paramsString);
+    const enableGl = searchParams.get("gl");
+
+    const adjustableVariables = new AdjustableVariables();
+    const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
 
     let animationPaused = false;
 
     let polyps = [];
+    const gl = document.getElementById("gameGl").getContext("webgl2");
+    const ctx = document.getElementById("game").getContext("2d");
+    let positions;
+    let program;
+    let vao;
 
-    const adjustableVariables = new AdjustableVariables();
+    if (gl) {
+        console.log("WEBGL2")
 
-    const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
+        gl.canvas.width = gl.canvas.clientWidth;
+        gl.canvas.height = gl.canvas.clientHeight;
+        gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
-    function animate() {
+        positions = new Float32Array(kMaxNumObjects * 4); // x1, y1, x2, y2
+
+        let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+        let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        program = createProgram(gl, vertexShader, fragmentShader);
+
+
+        let positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+        // Create a vertex array object (attribute state)
+        vao = gl.createVertexArray();
+        gl.bindVertexArray(vao);
+
+        let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+
+        gl.enableVertexAttribArray(positionAttributeLocation);
+
+        // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+        var size = 2;          // 2 components per iteration
+        var type = gl.FLOAT;   // the data is 32bit floats
+        var normalize = false; // don't normalize the data
+        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        var offset = 0;        // start at the beginning of the buffer
+        gl.vertexAttribPointer(
+            positionAttributeLocation, size, type, normalize, stride, offset);
+    }
+
+    function animateFunc() {
         if (animationPaused) {
             return;
         }
@@ -195,7 +284,9 @@ function buildThunks() {
             }
         }
 
-        ctx.clearRect(0, 0, 1000, 1000);
+        if (ctx) {
+            ctx.clearRect(0, 0, 1000, 1000);
+        }
 
         if (adjustableVariables.showSignals) {
             for (let i = 0; i < signalMatrix.length; ++i) {
@@ -224,14 +315,14 @@ function buildThunks() {
             const first = new CoralPolyp(
                 ctx,
                 adjustableVariables,
-                /*angle=*/(3 * Math.PI) / 2,
-                /*r=*/ 0,
-                /*g=*/ 255,
-                /*b=*/ 0,
-                /*x1=*/ 500,
-                /*y1=*/ 1000,
-                /*x2=*/ 500,
-                /*y2=*/ 980,
+                    /*angle=*/(3 * Math.PI) / 2,
+                    /*r=*/ 0,
+                    /*g=*/ 255,
+                    /*b=*/ 0,
+                    /*x1=*/ 500,
+                    /*y1=*/ 1000,
+                    /*x2=*/ 500,
+                    /*y2=*/ 980,
             );
 
             for (let i = 0; i < signalMatrix.length; ++i) {
@@ -259,7 +350,7 @@ function buildThunks() {
             polyps = polyps.slice(polyps.length - kMaxNumObjects);
         }
 
-        polyps.forEach((b) => {
+        polyps.forEach((b, i) => {
             b.ttl--;
 
             if (b.ttl % 16 === 0) {
@@ -268,14 +359,35 @@ function buildThunks() {
                 b.b = Math.min(64, (b.b + 1));
             }
 
-            b.draw();
+            if (gl) {
+                // Scale coordinates to [-1, 1].
+                // FIXME Do this with a projection matrix?
+                positions[4*i+0] = b.x1 / 500 - 1;
+                positions[4*i+1] = b.y1 / 500 - 1;
+                positions[4*i+2] = b.x2 / 500 - 1;
+                positions[4*i+3] = b.y2 / 500 - 1;
+            }
         });
 
-        window.requestAnimationFrame(animate);
+        if (gl) {
+            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+            gl.clearColor(0, 0, 0, 0); // RGBA
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            gl.useProgram(program);
+            gl.bindVertexArray(vao);
+
+            gl.drawArrays(gl.LINES, 0, polyps.length * 2);
+        }
+
+        polyps.forEach((p) => { p.draw(); });
+
+        window.requestAnimationFrame(animateFunc);
     }
 
     function onload() {
-        window.requestAnimationFrame(animate);
+        window.requestAnimationFrame(animateFunc);
     }
 
     function onkeydown(event) {
@@ -286,7 +398,7 @@ function buildThunks() {
 
             animationPaused = !animationPaused;
             if (!animationPaused) {
-                window.requestAnimationFrame(animate);
+                window.requestAnimationFrame(animateFunc);
             }
         }
     }
