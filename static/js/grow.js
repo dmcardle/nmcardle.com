@@ -84,7 +84,7 @@ class CoralPolyp {
         this.y2 = y2;
     }
 
-    draw() {
+    draw2d() {
         const brightness = this.ttl ** 2 / kMaxTtl ** 2;
         const ctx = this.ctx;
         const r = Math.floor(this.r * brightness);
@@ -228,7 +228,7 @@ class AdjustableVariables {
 function buildThunks() {
     const paramsString = window.location.search;
     const searchParams = new URLSearchParams(paramsString);
-    const enableGl = searchParams.get("gl");
+    const contextParam = searchParams.get("context");
 
     const adjustableVariables = new AdjustableVariables();
     const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
@@ -236,8 +236,9 @@ function buildThunks() {
     let animationPaused = false;
 
     let polyps = [];
+
     const gl = document.getElementById("gameGl").getContext("webgl2");
-    const ctx = document.getElementById("game").getContext("2d");
+    const ctx = contextParam === "no-2d" ? null : document.getElementById("game").getContext("2d");
     let positionArray, ttlArray;
     let positionBuffer, ttlBuffer;
     let program;
@@ -412,7 +413,9 @@ function buildThunks() {
                           /*count=*/polyps.length * 2);
         }
 
-        polyps.forEach((p) => { p.draw(); });
+        if (ctx) {
+            polyps.forEach((p) => { p.draw2d(); });
+        }
 
         window.requestAnimationFrame(animateFunc);
     }
