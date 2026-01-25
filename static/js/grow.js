@@ -112,20 +112,11 @@ class GlState {
 in vec2 vertexPos;
 in float vertexTtl;
 
-out vec4 aColor;
+out float ttl;
  
 void main() {
   gl_Position = vec4(vertexPos[0], vertexPos[1], 0, 1);
-
-  // Over a line's lifetime, the ttlScaled decreases from a maximum of 1 to a
-  // minimum of 0.
-  float ttlScaled = (vertexTtl * vertexTtl) / (512.0 * 512.0);
-
-  float r = 0.3 * (1.0 - ttlScaled);
-  float g = ttlScaled;
-  float b = 0.0;
-
-  aColor = vec4(r, g, b, 1);
+  ttl = vertexTtl;
 }
 `;
 
@@ -133,11 +124,19 @@ void main() {
  
 precision highp float;
  
-in vec4 aColor;
+in float ttl;
 out vec4 outColor;
  
 void main() {
-  outColor = aColor;
+  // Over a line's lifetime, the ttlScaled decreases from a maximum of 1 to a
+  // minimum of 0.
+  float ttlScaled = (ttl * ttl) / (512.0 * 512.0);
+
+  float r = 0.3 * (1.0 - ttlScaled);
+  float g = ttlScaled;
+  float b = 0.0;
+
+  outColor = vec4(r, g, b, 1);
 }
 `;
 
