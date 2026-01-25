@@ -247,10 +247,6 @@ function buildThunks() {
     const kNumPositionFields = 4; // x1, y1, x2, y2
 
     if (gl) {
-        const kSizeOfFloat = 4;
-
-        console.log("WEBGL2")
-
         gl.canvas.width = gl.canvas.clientWidth;
         gl.canvas.height = gl.canvas.clientHeight;
         gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
