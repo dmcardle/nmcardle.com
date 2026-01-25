@@ -1,7 +1,7 @@
 "use strict";
 
 const kMaxU16 = 0xffff;
-const kMaxNumObjects = 1 << 17;
+const kMaxNumObjects = 1 << 16;
 const kMaxTtl = 1 << 9;
 
 const kGrowthMagnitude = 1;
@@ -16,8 +16,8 @@ const kSignalSquareSideLen = 100;
 const kNumPositionFields = 4; // x1, y1, x2, y2
 
 class GlState {
-    constructor() {
-        const gl = document.getElementById("gameGl").getContext("webgl2");
+    constructor(canvasGl) {
+        const gl = canvasGl.getContext("webgl2");
         if (!gl) {
             return;
         }
@@ -43,6 +43,10 @@ class GlState {
 
     isEnabled() {
         return this.gl !== null;
+    }
+
+    disable() {
+        this.gl = null;
     }
 
     render(numLines) {
@@ -161,20 +165,20 @@ class CoralPolyp {
 
     draw2d() {
         const brightness = this.ttl ** 2 / kMaxTtl ** 2;
-        const ctx = this.ctx2d;
+        const ctx2d = this.ctx2d;
         const r = Math.floor(this.r * brightness);
         const g = Math.floor(this.g * brightness);
         const b = Math.floor(this.b * brightness);
         const strokeStyle = `rgb(${r} ${g} ${b})`;
-        ctx.strokeStyle = strokeStyle;
+        ctx2d.strokeStyle = strokeStyle;
 
-        ctx.lineWidth = 2;
+        ctx2d.lineWidth = 2;
 
-        ctx.beginPath();
-        ctx.moveTo(this.x1, this.y1);
-        ctx.lineTo(this.x2, this.y2);
-        ctx.closePath();
-        ctx.stroke();
+        ctx2d.beginPath();
+        ctx2d.moveTo(this.x1, this.y1);
+        ctx2d.lineTo(this.x2, this.y2);
+        ctx2d.closePath();
+        ctx2d.stroke();
     }
 
     // Makes this individual polyp either grow or split. The `polyps` parameter
@@ -301,7 +305,42 @@ class AdjustableVariables {
 function buildThunks() {
     const paramsString = window.location.search;
     const searchParams = new URLSearchParams(paramsString);
-    const contextParam = searchParams.get("context");
+    const renderParam = searchParams.get("render");
+
+    let forceBothCanvases = false;
+    let forceCanvas2d = false;
+    switch (renderParam) {
+        case null:
+            break;
+        case "both":
+            forceBothCanvases = true;
+            break;
+        case "2d":
+            forceCanvas2d = true;
+            break;
+        default:
+            console.error("Unknown ?render value: " + renderParam);
+    }
+
+    const canvas2d = document.getElementById("game");
+    let ctx2d = canvas2d.getContext("2d");
+
+    const canvasGl = document.getElementById("gameGl");
+    const glState = new GlState(canvasGl);
+
+    if (forceBothCanvases) {
+        canvas2d.style.setProperty("max-width", "33%");
+        canvasGl.style.setProperty("max-width", "33%");
+
+    } else if (!glState.isEnabled() || forceCanvas2d) {
+        console.log("Using Canvas 2D");
+        canvasGl.style.setProperty("display", "none");
+        glState.disable();
+    } else {
+        console.log("Using WebGL");
+        canvas2d.style.setProperty("display", "none");
+        ctx2d = null;
+    }
 
     const adjustableVariables = new AdjustableVariables();
     const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
@@ -309,11 +348,6 @@ function buildThunks() {
     let animationPaused = false;
 
     let polyps = [];
-
-    const glState = new GlState();
-    console.assert(glState.isEnabled());
-
-    const ctx = contextParam === "no-2d" ? null : document.getElementById("game").getContext("2d");
 
     function animateFunc() {
         if (animationPaused) {
@@ -330,36 +364,36 @@ function buildThunks() {
             }
         }
 
-        if (ctx) {
-            ctx.clearRect(0, 0, 1000, 1000);
-        }
+        if (ctx2d) {
+            ctx2d.clearRect(0, 0, 1000, 1000);
 
-        if (adjustableVariables.showSignals) {
-            for (let i = 0; i < signalMatrix.length; ++i) {
-                const x = Math.floor(i / kSignalSquareSideLen);
-                const y = i % kSignalSquareSideLen;
+            if (adjustableVariables.showSignals) {
+                for (let i = 0; i < signalMatrix.length; ++i) {
+                    const x = Math.floor(i / kSignalSquareSideLen);
+                    const y = i % kSignalSquareSideLen;
 
-                console.assert(x >= 0);
-                console.assert(x <= kSignalSquareSideLen);
-                console.assert(y >= 0);
-                console.assert(y <= kSignalSquareSideLen);
+                    console.assert(x >= 0);
+                    console.assert(x <= kSignalSquareSideLen);
+                    console.assert(y >= 0);
+                    console.assert(y <= kSignalSquareSideLen);
 
-                const signal = signalMatrix[i];
-                const signalLog = signal === 0 ? 0 : Math.log(signal);
-                const signalLogScaled = signalLog / kMaxSignalLog;
-                const scaledR = Math.floor(255 * signalLogScaled);
-                const scaledB = Math.floor(255 * signalLogScaled);
-                const color = `rgb(${scaledR} 0 ${scaledB} / 90%)`;
+                    const signal = signalMatrix[i];
+                    const signalLog = signal === 0 ? 0 : Math.log(signal);
+                    const signalLogScaled = signalLog / kMaxSignalLog;
+                    const scaledR = Math.floor(255 * signalLogScaled);
+                    const scaledB = Math.floor(255 * signalLogScaled);
+                    const color = `rgb(${scaledR} 0 ${scaledB} / 90%)`;
 
-                ctx.fillStyle = color;
-                ctx.fillRect(x * 10, y * 10, 10, 10);
+                    ctx2d.fillStyle = color;
+                    ctx2d.fillRect(x * 10, y * 10, 10, 10);
+                }
             }
         }
 
         // Maybe initialize.
         if (polyps.length === 0) {
             const first = new CoralPolyp(
-                ctx,
+                ctx2d,
                 glState,
                 adjustableVariables,
                     /*angle=*/(3 * Math.PI) / 2,
@@ -426,7 +460,7 @@ function buildThunks() {
             glState.render(/*numLines=*/polyps.length);
         }
 
-        if (ctx) {
+        if (ctx2d) {
             polyps.forEach((p) => { p.draw2d(); });
         }
 
