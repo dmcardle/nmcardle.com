@@ -175,13 +175,10 @@ class CoralPolyp {
     }
 
     isInBounds() {
-        for (const fieldName of ["x1", "y1", "x2", "y2"]) {
-            const value = this[fieldName];
-            if (value < 0 || value > 1000) {
-                return false;
-            }
-        }
-        return true;
+        return (this.x1 >= 0 && this.x1 <= 1000) &&
+            (this.y1 >= 0 && this.y1 <= 1000) &&
+            (this.x2 >= 0 && this.x2 <= 1000) &&
+            (this.y2 >= 0 && this.y2 <= 1000);
     }
 }
 
