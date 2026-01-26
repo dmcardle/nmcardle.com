@@ -15,26 +15,59 @@ const kSignalSquareSideLen = 100;
 
 const kNumPositionFields = 4; // x1, y1, x2, y2
 
+const kLinesVertexShaderSource = `#version 300 es
+
+in vec2 vertexPos;
+in float vertexTtl;
+
+out float ttl;
+
+void main() {
+  gl_Position = vec4(vertexPos[0] / 500.0 - 1.0,
+                     (2.0 - vertexPos[1] / 500.0) - 1.0,
+                     0,
+                     1);
+  ttl = vertexTtl;
+}
+`;
+const kLinesFragmentShaderSource = `#version 300 es
+
+precision highp float;
+
+in float ttl;
+out vec4 outColor;
+
+void main() {
+  // Over a line's lifetime, the ttlScaled decreases from a maximum of 1 to a
+  // minimum of 0.
+  float ttlScaled = (ttl * ttl) / (512.0 * 512.0);
+
+  float r = 0.3 * (1.0 - ttlScaled);
+  float g = ttlScaled;
+  float b = 0.0;
+
+  outColor = vec4(r, g, b, 1);
+}
+`;
+
 class GlState {
-    constructor(gl) {
+    constructor(gl, vertexShader, fragmentShader) {
         this.gl = gl;
         if (!gl) {
             return;
         }
 
-        const vertexShader = GlState.#createShader(gl, gl.VERTEX_SHADER, GlState.#vertexShaderSource);
-        const fragmentShader = GlState.#createShader(gl, gl.FRAGMENT_SHADER, GlState.#fragmentShaderSource);
-        const program = GlState.#createProgram(gl, vertexShader, fragmentShader);
+        const vertexShaderObj = GlState.#createShader(gl, gl.VERTEX_SHADER, vertexShader);
+        const fragmentShaderObj = GlState.#createShader(gl, gl.FRAGMENT_SHADER, fragmentShader);
+        const program = GlState.#createProgram(gl, vertexShaderObj, fragmentShaderObj);
 
         const vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
         this.program = program;
-        this.positionBuffer = gl.createBuffer();
-        this.ttlBuffer = gl.createBuffer();
-        this.positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
-        this.ttlArray = new Float32Array(kMaxNumObjects * 2);
     }
+
+    renderTimeConfigShaderParams() { }
 
     isEnabled() {
         return this.gl !== null;
@@ -47,21 +80,16 @@ class GlState {
     render(numLines) {
         const gl = this.gl;
 
-        gl.clearColor(0, 0, 0, 0); // RGBA
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
         gl.useProgram(this.program);
 
-        // Connect `positionArray` to the `vertexPos` shader parameter.
-        this.#configureShaderParam("vertexPos", gl.FLOAT, 2, this.positionBuffer, this.positionArray);
-        this.#configureShaderParam("vertexTtl", gl.FLOAT, 1, this.ttlBuffer, this.ttlArray);
+        this.renderTimeConfigShaderParams();
 
         gl.drawArrays(gl.LINES,
                       /*first=*/0,
                       /*count=*/numLines * 2);
     }
 
-    #configureShaderParam(name, type, numPerVertex, glBuffer, array) {
+    configureShaderParam(name, type, numPerVertex, glBuffer, array) {
         const gl = this.gl;
 
         gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer);
@@ -105,51 +133,29 @@ class GlState {
         }
         return program;
     }
-
-    static #vertexShaderSource = `#version 300 es
- 
-in vec2 vertexPos;
-in float vertexTtl;
-
-out float ttl;
- 
-void main() {
-  gl_Position = vec4(vertexPos[0] / 500.0 - 1.0,
-                     (2.0 - vertexPos[1] / 500.0) - 1.0,
-                     0,
-                     1);
-  ttl = vertexTtl;
 }
-`;
 
-    static #fragmentShaderSource = `#version 300 es
- 
-precision highp float;
- 
-in float ttl;
-out vec4 outColor;
- 
-void main() {
-  // Over a line's lifetime, the ttlScaled decreases from a maximum of 1 to a
-  // minimum of 0.
-  float ttlScaled = (ttl * ttl) / (512.0 * 512.0);
+class GlStateLines extends GlState {
+    constructor(gl, vertexShader, fragmentShader) {
+        super(gl, vertexShader, fragmentShader);
+        this.positionBuffer = gl.createBuffer();
+        this.ttlBuffer = gl.createBuffer();
+        this.positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
+        this.ttlArray = new Float32Array(kMaxNumObjects * 2);
+    }
 
-  float r = 0.3 * (1.0 - ttlScaled);
-  float g = ttlScaled;
-  float b = 0.0;
-
-  outColor = vec4(r, g, b, 1);
-}
-`;
-
+    renderTimeConfigShaderParams() {
+        // Connect `positionArray` to the `vertexPos` shader parameter.
+        this.configureShaderParam("vertexPos", this.gl.FLOAT, 2, this.positionBuffer, this.positionArray);
+        this.configureShaderParam("vertexTtl", this.gl.FLOAT, 1, this.ttlBuffer, this.ttlArray);
+    }
 }
 
 class CoralPolyp {
-    constructor(ctx2d, glState, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
+    constructor(ctx2d, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
         this.ttl = kMaxTtl;
 
         this.ctx2d = ctx2d;
-        this.glState = glState;
         this.adjustableVariables = adjustableVariables;
         this.angle = angle;
         this.r = r;
@@ -211,7 +217,6 @@ class CoralPolyp {
 
             const child = new CoralPolyp(
                 this.ctx2d,
-                this.glState,
                 this.adjustableVariables,
                 newAngle,
                 /*r=*/ 0,
@@ -342,7 +347,7 @@ function buildThunks() {
         ctx2d = null;
     }
 
-    const glState = new GlState(gl);
+    const glStateLines = new GlStateLines(gl, kLinesVertexShaderSource, kLinesFragmentShaderSource);
 
     const adjustableVariables = new AdjustableVariables();
     const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
@@ -396,7 +401,6 @@ function buildThunks() {
         if (polyps.length === 0) {
             const first = new CoralPolyp(
                 ctx2d,
-                glState,
                 adjustableVariables,
                     /*angle=*/(3 * Math.PI) / 2,
                     /*r=*/ 0,
@@ -442,9 +446,9 @@ function buildThunks() {
                 b.b = Math.min(64, (b.b + 1));
             }
 
-            if (glState.isEnabled()) {
-                const positionArray = glState.positionArray;
-                const ttlArray = glState.ttlArray;
+            if (gl) {
+                const positionArray = glStateLines.positionArray;
+                const ttlArray = glStateLines.ttlArray;
 
                 positionArray[kNumPositionFields * i + 0] = b.x1;
                 positionArray[kNumPositionFields * i + 1] = b.y1;
@@ -456,9 +460,13 @@ function buildThunks() {
             }
         });
 
-        if (glState.isEnabled()) {
-            glState.render(/*numLines=*/polyps.length);
+        if (gl) {
+            gl.clearColor(0, 0, 0, 0); // RGBA
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            glStateLines.render(/*numLines=*/polyps.length);
         }
+
 
         if (ctx2d) {
             polyps.forEach((p) => { p.draw2d(); });
