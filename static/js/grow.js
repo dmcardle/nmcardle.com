@@ -16,15 +16,11 @@ const kSignalSquareSideLen = 100;
 const kNumPositionFields = 4; // x1, y1, x2, y2
 
 class GlState {
-    constructor(canvasGl) {
-        const gl = canvasGl.getContext("webgl2");
+    constructor(gl) {
+        this.gl = gl;
         if (!gl) {
             return;
         }
-
-        gl.canvas.width = gl.canvas.clientWidth;
-        gl.canvas.height = gl.canvas.clientHeight;
-        gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
         const vertexShader = GlState.#createShader(gl, gl.VERTEX_SHADER, GlState.#vertexShaderSource);
         const fragmentShader = GlState.#createShader(gl, gl.FRAGMENT_SHADER, GlState.#fragmentShaderSource);
@@ -33,7 +29,6 @@ class GlState {
         const vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
-        this.gl = gl;
         this.program = program;
         this.positionBuffer = gl.createBuffer();
         this.ttlBuffer = gl.createBuffer();
@@ -119,7 +114,10 @@ in float vertexTtl;
 out float ttl;
  
 void main() {
-  gl_Position = vec4(vertexPos[0], vertexPos[1], 0, 1);
+  gl_Position = vec4(vertexPos[0] / 500.0 - 1.0,
+                     (2.0 - vertexPos[1] / 500.0) - 1.0,
+                     0,
+                     1);
   ttl = vertexTtl;
 }
 `;
@@ -245,7 +243,7 @@ class CoralPolyp {
         const clampedX = clampTo(0, 1000, x);
         const clampedY = clampTo(0, 1000, y);
 
-        // Convert coordinates to a `signalSquareSideLen**2` grid.
+        // Convert coordinates to a `kSignalSquareSideLen**2` grid.
         const scaledX = Math.floor(clampedX / 10);
         const scaledY = Math.floor(clampedY / 10);
 
@@ -326,20 +324,25 @@ function buildThunks() {
     let ctx2d = canvas2d.getContext("2d");
 
     const canvasGl = document.getElementById("gameGl");
-    const glState = new GlState(canvasGl);
+    let gl = canvasGl.getContext("webgl2");
 
     if (forceBothCanvases) {
+        canvas2d.style.setProperty("display", "block");
+        canvasGl.style.setProperty("display", "block");
         canvasGl.style.setProperty("border", "1px solid red");
-    } else if (!glState.isEnabled() || forceCanvas2d) {
+    } else if (!gl || forceCanvas2d) {
         console.log("Using Canvas 2D");
-        canvasGl.parentElement.removeChild(canvasGl);
-        canvasGl = null;
-        glState.disable();
+        canvas2d.style.setProperty("display", "block");
+        canvasGl.style.setProperty("display", "none");
+        gl = null;
     } else {
         console.log("Using WebGL");
-        canvas2d.parentElement.removeChild(canvas2d);
+        canvas2d.style.setProperty("display", "none");
+        canvasGl.style.setProperty("display", "block");
         ctx2d = null;
     }
+
+    const glState = new GlState(gl);
 
     const adjustableVariables = new AdjustableVariables();
     const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
@@ -443,12 +446,10 @@ function buildThunks() {
                 const positionArray = glState.positionArray;
                 const ttlArray = glState.ttlArray;
 
-                // Scale coordinates to [-1, 1].
-                // FIXME Do this with a projection matrix?
-                positionArray[kNumPositionFields * i + 0] = b.x1 / 500 - 1;
-                positionArray[kNumPositionFields * i + 1] = (2 - b.y1 / 500) - 1;
-                positionArray[kNumPositionFields * i + 2] = b.x2 / 500 - 1;
-                positionArray[kNumPositionFields * i + 3] = (2 - b.y2 / 500) - 1;
+                positionArray[kNumPositionFields * i + 0] = b.x1;
+                positionArray[kNumPositionFields * i + 1] = b.y1;
+                positionArray[kNumPositionFields * i + 2] = b.x2;
+                positionArray[kNumPositionFields * i + 3] = b.y2;
 
                 ttlArray[2 * i + 0] = b.ttl;
                 ttlArray[2 * i + 1] = b.ttl;
