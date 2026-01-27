@@ -67,7 +67,7 @@
               }
 
               .controlsContainer {
-                  flex: 1;
+                  flex: 1.5;
 
                   margin-top: 0.5em;
                   margin-bottom: 0.5em;
@@ -85,10 +85,43 @@
                       label {
                           flex: 10;
                           min-width: 10rem;
+                          margin-bottom: 0.8em;
                       }
                       input {
                           flex: 8;
                       }
+                      input[type=checkbox] {
+                          flex: 0;
+                      }
+                  }
+                  .checkboxControl {
+                      text-align: left;
+
+                      label {
+                          text-align: right !important;
+                          margin-bottom: 0em;
+                      }
+
+                      .control {
+                          margin-bottom: 0.8em;
+                      }
+                  }
+                  button {
+                      border-radius: 5px;
+                      min-height: 1.5rem;
+                      width: 100%;
+                      margin-bottom: 0.5rem;
+                  }
+                  .scaryButton {
+                      color: #ddd;
+                      background-color: #900;
+                  }
+                  .warningButton {
+                      background-color: #b71;
+                  }
+                  .lessScaryButton {
+                      color: black;
+                      background-color: #88f;
                   }
               }
           }
@@ -103,6 +136,7 @@
       </div>
 
       <div id="description" class="description">
+
         <div class="blurb">
           This page simulates a biologically-inspired system with a few simple
           rules. It begins with a single cell. Over time, cells repeatedly
@@ -112,12 +146,12 @@
 
         <div id="controlsContainer" class="controlsContainer">
           <div class="control">
-            <label for="growChanceRange">Grow chance: <span id="growChanceLabel"></span>%</label>
             <input id="growChanceRange" name="grow_chance" type="range" min="0" max="100" step="1" value="70" />
+            <label for="growChanceRange">Grow chance: <span id="growChanceLabel"></span>%</label>
           </div>
           <div class="control">
-            <label for="splitChanceRange">Split chance: <span id="splitChanceLabel"></span>%</label>
             <input id="splitChanceRange" name="split_chance" type="range" min="0" max="100" step="1" value="50" />
+            <label for="splitChanceRange">Split chance: <span id="splitChanceLabel"></span>%</label>
           </div>
         </div>
 
@@ -129,8 +163,8 @@
 
         <div class="controlsContainer">
           <div class="control">
-              <label for="maxTurnRange">Max turn angle: <span id="maxTurnLabel"></span>°</label>
             <input id="maxTurnRange" name="max_turn" type="range" min="5" max="180" step="5" value="25" />
+              <label for="maxTurnRange">Max turn angle: <span id="maxTurnLabel"></span>°</label>
           </div>
         </div>
 
@@ -143,8 +177,8 @@
 
         <div class="controlsContainer">
           <div class="control">
+            <input id="dormancyAgePercentileRange" name="grow_age" type="range" min="1" max="40" step="1" value="7" />
             <label for="dormancyAgePercentileRange">Age threshold: <span id="dormancyAgePercentileLabel"></span>%ile</label>
-            <input id="dormancyAgePercentileRange" name="grow_age" type="range" min="1" max="20" step="1" value="4" />
           </div>
         </div>
 
@@ -157,18 +191,36 @@
 
         <div class="controlsContainer">
           <div class="control">
-            <label for="signalDecayRateRange">Signal decay rate: <span id="signalDecayRateLabel"></span> / frame</label>
-            <input id="signalDecayRateRange" name="signal_decay_rate" type="range" min="1" max="50" step="1" value="4" />
+            <input id="signalDecayRateRange" name="signal_decay_rate" type="range" min="1" max="16" step="0.5" value="10" />
+            <label for="signalDecayRateRange">Signal decay rate: 2<sup><span id="signalDecayRateLabel"></span></sup> / frame</label>
           </div>
-          <div class="control">
-            <label for="showSignalsCheckbox">Show signals</label>
-            <input id="showSignalsCheckbox" type="checkbox" />
+          <div class="checkboxControl">
+            <div class="control">
+              <label for="showSignalsCheckbox">Show signals</label>
+              <input id="showSignalsCheckbox" type="checkbox" />
+            </div>
           </div>
         </div>
 
         <div class="blurb">
           When cells reach a fixed maximum age, they die.
         </div>
+
+        <div class="controlsContainer">
+          <div class="control">
+            <button id="resetUniverseButton" class="scaryButton">Kill All Cells Now</button>
+          </div>
+          <div class="control">
+            <button id="resetSignalsButton" class="lessScaryButton">Reset Signals</button>
+          </div>
+          <div class="control">
+            <button id="pauseUniverseButton" class="warningButton">
+              <div>Pause the Universe</div>
+              <div style="vertical-align:center; font-size: 0.9em">&lt;Space&gt;</div>
+          </button>
+          </div>
+        </div>
+
       </div>
     </div>
 

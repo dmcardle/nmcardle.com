@@ -5,11 +5,12 @@ const kMaxNumObjects = 1 << 16;
 const kMaxTtl = 1 << 9;
 
 const kGrowthMagnitude = 1;
-const kSplitMagnitude = 2;
+const kSplitMagnitude = 1;
 
-const kGrowSignalThresh = 1 << 9;
-const kSplitSignalThresh = 1 << 8;
-const kSignalAttack = 1 << 4;
+const kSignalAttack = 1 << 11;
+// It's *much* easier for cells to grow longer than it is for them to split.
+const kGrowSignalThresh = 1 << 15;
+const kSplitSignalThresh = 1 << 11;
 const kMaxSignalLog = Math.log(kMaxU16);
 const kSignalSquareSideLen = 100;
 
@@ -270,28 +271,25 @@ class PlantCell {
         ctx2d.stroke();
     }
 
-    // Makes this individual polyp either grow or split. The `polyps` parameter
-    // is a reference to an array of other polyps. Splitting will insert two new
-    // instances into the `polyps` array.
-    act(polyps, signalMatrix) {
+    // Makes this individual cell either grow or split. The `cells` parameter
+    // is a reference to an array of other cells. Splitting will insert two new
+    // instances into the `cells` array.
+    act(cells, signalMatrix) {
         if (Math.random() < this.adjustableVariables.growChance) {
-            // Speculatively grow in the current direction, but undo it if we
-            // grow out of bounds.
-            let oldX2 = this.x2;
-            let oldY2 = this.y2;
-            this.x2 += kGrowthMagnitude * Math.cos(this.angle);
-            this.y2 += kGrowthMagnitude * Math.sin(this.angle);
-
             const signalMatrixIndex = PlantCell.getIsOccupiedIndex(this.x2, this.y2);
-            if (this.isInBounds() && signalMatrix[signalMatrixIndex] <= kGrowSignalThresh) {
-                // Increase the signal at the new endpoint.
-                console.assert(signalMatrix[signalMatrixIndex] <= kMaxU16);
-                if (signalMatrix[signalMatrixIndex] <= kMaxU16 - kSignalAttack) {
-                    signalMatrix[signalMatrixIndex] += kSignalAttack;
+            if (signalMatrix[signalMatrixIndex] <= kGrowSignalThresh) {
+                this.x2 += kGrowthMagnitude * Math.cos(this.angle);
+                this.y2 += kGrowthMagnitude * Math.sin(this.angle);
+
+                if (this.isInBounds()) {
+                    // Increase the signal at the new endpoint.
+                    console.assert(signalMatrix[signalMatrixIndex] <= kMaxU16);
+                    if (signalMatrix[signalMatrixIndex] <= kMaxU16 - kSignalAttack) {
+                        signalMatrix[signalMatrixIndex] += kSignalAttack;
+                    }
+                } else {
+                    this.ttl = 0;
                 }
-            } else {
-                this.x2 = oldX2;
-                this.y2 = oldY2;
             }
         }
 
@@ -315,7 +313,7 @@ class PlantCell {
 
             const signalMatrixIndex = PlantCell.getIsOccupiedIndex(child.x2, child.y2);
             if (child.isInBounds() && signalMatrix[signalMatrixIndex] <= kSplitSignalThresh) {
-                polyps.push(child);
+                cells.push(child);
 
                 if (signalMatrix[signalMatrixIndex] <= kMaxU16 - kSignalAttack) {
                     signalMatrix[signalMatrixIndex] += kSignalAttack;
@@ -351,6 +349,10 @@ class PlantCell {
 }
 
 class AdjustableVariables {
+    resetSignalsRequested = false;
+    resetUniverseRequested = false;
+    pauseUniverseRequested = false;
+
     constructor() {
         const obj = this;
         const divisors = {
@@ -387,6 +389,28 @@ class AdjustableVariables {
             updateFunc();
             checkboxElem.oninput = updateFunc;
         }
+
+        const resetSignalsButton = document.getElementById("resetSignalsButton");
+        console.assert(resetSignalsButton);
+        resetSignalsButton.addEventListener("click", (event) => {
+            this.resetSignalsRequested = true;
+        });
+
+        const resetUniverseButton = document.getElementById("resetUniverseButton");
+        console.assert(resetUniverseButton);
+        resetUniverseButton.addEventListener("click", () => {
+            this.resetUniverseRequested = true;
+        });
+
+        const pauseUniverseButton = document.getElementById("pauseUniverseButton");
+        console.assert(pauseUniverseButton);
+        pauseUniverseButton.addEventListener("click", () => {
+            this.pauseUniverseRequested = !this.pauseUniverseRequested;
+
+            if (!this.pauseUniverseRequested) {
+                thunks.startAnimationFunc();
+            }
+        });
     }
 }
 
@@ -438,18 +462,57 @@ function buildThunks() {
     const adjustableVariables = new AdjustableVariables();
     const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
 
-    let animationPaused = false;
-
     let cells = [];
 
     function animateFunc() {
-        if (animationPaused) {
+        if (adjustableVariables.pauseUniverseRequested) {
             return;
+        }
+
+        if (adjustableVariables.resetSignalsRequested) {
+            adjustableVariables.resetSignalsRequested = false;
+
+            for (let i = 0; i < signalMatrix.length; ++i) {
+                signalMatrix[i] = 0;
+            }
+        }
+        if (adjustableVariables.resetUniverseRequested) {
+            adjustableVariables.resetUniverseRequested = false;
+
+            for (let i = 0; i < signalMatrix.length; ++i) {
+                signalMatrix[i] = 0;
+            }
+
+            cells = [];
+        }
+
+        // Maybe initialize.
+        if (cells.length === 0) {
+            const first = new PlantCell(
+                ctx2d,
+                adjustableVariables,
+                /*angle=*/(3 * Math.PI) / 2,
+                /*r=*/ 0,
+                /*g=*/ 255,
+                /*b=*/ 0,
+                /*x1=*/ 500,
+                /*y1=*/ 1000,
+                /*x2=*/ 500,
+                /*y2=*/ 980,
+            );
+
+            for (let i = 0; i < signalMatrix.length; ++i) {
+                signalMatrix[i] = 0;
+            }
+
+            signalMatrix[PlantCell.getIsOccupiedIndex(first.x2, first.y2)] = 1;
+
+            cells = [first];
         }
 
         // Decay the signal in `signalMatrix`.
         for (let i = 0; i < signalMatrix.length; ++i) {
-            const decayRate = Math.floor(adjustableVariables.signalDecayRate);
+            const decayRate = Math.floor(2 ** adjustableVariables.signalDecayRate);
             if (signalMatrix[i] > decayRate) {
                 signalMatrix[i] -= decayRate;
             } else {
@@ -492,57 +555,23 @@ function buildThunks() {
             glSignals.clear();
         }
 
-        // Maybe initialize.
-        if (cells.length === 0) {
-            const first = new PlantCell(
-                ctx2d,
-                adjustableVariables,
-                /*angle=*/(3 * Math.PI) / 2,
-                /*r=*/ 0,
-                /*g=*/ 255,
-                /*b=*/ 0,
-                /*x1=*/ 500,
-                /*y1=*/ 1000,
-                /*x2=*/ 500,
-                /*y2=*/ 980,
-            );
-
-            for (let i = 0; i < signalMatrix.length; ++i) {
-                signalMatrix[i] = 0;
-            }
-
-            signalMatrix[PlantCell.getIsOccupiedIndex(first.x2, first.y2)] = 1;
-
-            cells = [first];
-        }
-
-        // The youngest polyps are always at the end of the array.
-        for (
-            let i = Math.floor((1 - adjustableVariables.dormancyAgePercentile) * cells.length);
-            i < cells.length;
-            ++i
-        ) {
-            cells[i].act(cells, signalMatrix);
-        }
-
+        // The youngest cells are always at the end of the array.
+        const firstActiveCellIndex = Math.floor((1 - adjustableVariables.dormancyAgePercentile) * cells.length);
+        cells.slice(firstActiveCellIndex).forEach((c) => c.act(cells, signalMatrix));
         cells = cells.filter((b) => b.ttl > 0 && b.isInBounds());
-
-        // Cull the oldest polyps when we've reached capacity.
-        if (cells.length > kMaxNumObjects) {
-            cells = cells.slice(cells.length - kMaxNumObjects);
-        }
+        cells = cells.slice(0, kMaxNumObjects);
 
         cells.forEach((b, i) => {
             b.ttl--;
 
-            if (b.ttl % 16 === 0) {
+            if (glCells.isEnabled()) {
+                glCells.setCell(i, b)
+            }
+
+            if (ctx2d && b.ttl % 16 === 0) {
                 b.r = Math.min(64, (b.r + 2));
                 b.g = Math.max(0, (b.g - 12));
                 b.b = Math.min(64, (b.b + 1));
-            }
-
-            if (glCells.isEnabled()) {
-                glCells.setCell(i, b)
             }
         });
 
@@ -566,31 +595,31 @@ function buildThunks() {
         window.requestAnimationFrame(animateFunc);
     }
 
-    function onload() {
+    function startAnimationFunc() {
         window.requestAnimationFrame(animateFunc);
     }
 
-    function onkeydown(event) {
+    function onKeyDownFunc(event) {
         console.log(event);
 
         if (event.code === "Space") {
             event.preventDefault();
 
-            animationPaused = !animationPaused;
-            if (!animationPaused) {
-                window.requestAnimationFrame(animateFunc);
+            adjustableVariables.pauseUniverseRequested =
+                !adjustableVariables.pauseUniverseRequested;
+
+            if (!adjustableVariables.pauseUniverseRequested) {
+                window.requestAnimationFrame(startAnimationFunc);
             }
         }
     }
 
     return {
-        onload: onload,
-        onkeydown: onkeydown,
+        startAnimationFunc,
+        onKeyDownFunc,
     };
 }
 
 let thunks = buildThunks();
-window.onload = thunks.onload;
-window.onkeydown = thunks.onkeydown;
-window.onmousemove = thunks.onmousemove;
-window.ontouchmove = thunks.ontouchmove;
+window.onload = thunks.startAnimationFunc;
+window.onkeydown = thunks.onKeyDownFunc;
