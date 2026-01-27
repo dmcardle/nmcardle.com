@@ -13,8 +13,6 @@ const kSignalAttack = 1 << 4;
 const kMaxSignalLog = Math.log(kMaxU16);
 const kSignalSquareSideLen = 100;
 
-const kNumPositionFields = 4; // x1, y1, x2, y2
-
 class AbtractGlWrapper {
     constructor(gl, vertexShader, fragmentShader) {
         this.gl = gl;
@@ -92,7 +90,9 @@ class AbtractGlWrapper {
 }
 
 class GlPlantCells extends AbtractGlWrapper {
-    #positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
+    static #kNumPositionFields = 4; // x1, y1, x2, y2
+
+    #positionArray = new Float32Array(kMaxNumObjects * GlPlantCells.#kNumPositionFields);
     #ttlArray = new Float32Array(kMaxNumObjects * 2);
     #positionBuffer;
     #ttlBuffer;
@@ -114,10 +114,10 @@ class GlPlantCells extends AbtractGlWrapper {
         const positionArray = this.#positionArray;
         const ttlArray = this.#ttlArray;
 
-        positionArray[kNumPositionFields * i + 0] = cell.x1;
-        positionArray[kNumPositionFields * i + 1] = cell.y1;
-        positionArray[kNumPositionFields * i + 2] = cell.x2;
-        positionArray[kNumPositionFields * i + 3] = cell.y2;
+        positionArray[GlPlantCells.#kNumPositionFields * i + 0] = cell.x1;
+        positionArray[GlPlantCells.#kNumPositionFields * i + 1] = cell.y1;
+        positionArray[GlPlantCells.#kNumPositionFields * i + 2] = cell.x2;
+        positionArray[GlPlantCells.#kNumPositionFields * i + 3] = cell.y2;
 
         ttlArray[2 * i + 0] = cell.ttl;
         ttlArray[2 * i + 1] = cell.ttl;
@@ -440,7 +440,7 @@ function buildThunks() {
 
     let animationPaused = false;
 
-    let polyps = [];
+    let cells = [];
 
     function animateFunc() {
         if (animationPaused) {
@@ -493,7 +493,7 @@ function buildThunks() {
         }
 
         // Maybe initialize.
-        if (polyps.length === 0) {
+        if (cells.length === 0) {
             const first = new PlantCell(
                 ctx2d,
                 adjustableVariables,
@@ -513,26 +513,26 @@ function buildThunks() {
 
             signalMatrix[PlantCell.getIsOccupiedIndex(first.x2, first.y2)] = 1;
 
-            polyps = [first];
+            cells = [first];
         }
 
         // The youngest polyps are always at the end of the array.
         for (
-            let i = Math.floor((1 - adjustableVariables.dormancyAgePercentile) * polyps.length);
-            i < polyps.length;
+            let i = Math.floor((1 - adjustableVariables.dormancyAgePercentile) * cells.length);
+            i < cells.length;
             ++i
         ) {
-            polyps[i].act(polyps, signalMatrix);
+            cells[i].act(cells, signalMatrix);
         }
 
-        polyps = polyps.filter((b) => b.ttl > 0 && b.isInBounds());
+        cells = cells.filter((b) => b.ttl > 0 && b.isInBounds());
 
         // Cull the oldest polyps when we've reached capacity.
-        if (polyps.length > kMaxNumObjects) {
-            polyps = polyps.slice(polyps.length - kMaxNumObjects);
+        if (cells.length > kMaxNumObjects) {
+            cells = cells.slice(cells.length - kMaxNumObjects);
         }
 
-        polyps.forEach((b, i) => {
+        cells.forEach((b, i) => {
             b.ttl--;
 
             if (b.ttl % 16 === 0) {
@@ -555,12 +555,12 @@ function buildThunks() {
                 glSignals.render(kSignalSquareSideLen ** 2);
             }
 
-            glCells.render(polyps.length);
+            glCells.render(cells.length);
         }
 
 
         if (ctx2d) {
-            polyps.forEach((p) => { p.draw2d(); });
+            cells.forEach((p) => { p.draw2d(); });
         }
 
         window.requestAnimationFrame(animateFunc);
