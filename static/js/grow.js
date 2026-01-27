@@ -15,19 +15,18 @@ const kSignalSquareSideLen = 100;
 
 const kNumPositionFields = 4; // x1, y1, x2, y2
 
-class GlState {
+class AbtractGlWrapper {
     constructor(gl, vertexShader, fragmentShader) {
         this.gl = gl;
         if (!gl) {
             return;
         }
 
-        const vertexShaderObj = GlState.#createShader(gl, gl.VERTEX_SHADER, vertexShader);
-        const fragmentShaderObj = GlState.#createShader(gl, gl.FRAGMENT_SHADER, fragmentShader);
-        const program = GlState.#createProgram(gl, vertexShaderObj, fragmentShaderObj);
+        const vertexShaderObj = AbtractGlWrapper.#createShader(gl, gl.VERTEX_SHADER, vertexShader);
+        const fragmentShaderObj = AbtractGlWrapper.#createShader(gl, gl.FRAGMENT_SHADER, fragmentShader);
+        const program = AbtractGlWrapper.#createProgram(gl, vertexShaderObj, fragmentShaderObj);
 
         this.vao = gl.createVertexArray();
-
         this.program = program;
     }
 
@@ -35,10 +34,6 @@ class GlState {
 
     isEnabled() {
         return this.gl !== null;
-    }
-
-    disable() {
-        this.gl = null;
     }
 
     render(numObjects) {
@@ -96,23 +91,36 @@ class GlState {
     }
 }
 
-class GlStateLines extends GlState {
+class GlPlantCells extends AbtractGlWrapper {
+    #positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
+    #ttlArray = new Float32Array(kMaxNumObjects * 2);
+    #positionBuffer;
+    #ttlBuffer;
+
     constructor(gl) {
-        super(gl, GlStateLines.#kVertexShaderSource, GlStateLines.#kFragmentShaderSource);
-        this.positionBuffer = gl.createBuffer();
-        this.ttlBuffer = gl.createBuffer();
-        this.positionArray = new Float32Array(kMaxNumObjects * kNumPositionFields);
-        this.ttlArray = new Float32Array(kMaxNumObjects * 2);
+        super(gl, GlPlantCells.#kVertexShaderSource, GlPlantCells.#kFragmentShaderSource);
+        this.#positionBuffer = gl.createBuffer();
+        this.#ttlBuffer = gl.createBuffer();
     }
 
     renderTimeConfigShaderParams(numObjects) {
         // Connect `positionArray` to the `vertexPos` shader parameter.
-        this.configureShaderParam("vertexPos", this.gl.FLOAT, 2, this.positionBuffer, this.positionArray);
-        this.configureShaderParam("vertexTtl", this.gl.FLOAT, 1, this.ttlBuffer, this.ttlArray);
+        this.configureShaderParam("vertexPos", this.gl.FLOAT, 2, this.#positionBuffer, this.#positionArray);
+        this.configureShaderParam("vertexTtl", this.gl.FLOAT, 1, this.#ttlBuffer, this.#ttlArray);
+        this.gl.drawArrays(this.gl.LINES, /*first=*/0, /*count=*/numObjects * 2);
+    }
 
-        this.gl.drawArrays(this.gl.LINES,
-                      /*first=*/0,
-                      /*count=*/numObjects * 2);
+    setCell(i, cell) {
+        const positionArray = this.#positionArray;
+        const ttlArray = this.#ttlArray;
+
+        positionArray[kNumPositionFields * i + 0] = cell.x1;
+        positionArray[kNumPositionFields * i + 1] = cell.y1;
+        positionArray[kNumPositionFields * i + 2] = cell.x2;
+        positionArray[kNumPositionFields * i + 3] = cell.y2;
+
+        ttlArray[2 * i + 0] = cell.ttl;
+        ttlArray[2 * i + 1] = cell.ttl;
     }
 
     static #kVertexShaderSource = `#version 300 es
@@ -152,29 +160,31 @@ void main() {
 `;
 }
 
-class GlStateSignals extends GlState {
+class GlPlantSignals extends AbtractGlWrapper {
+    #isCleared = false;
+    #positionArray = new Float32Array(kSignalSquareSideLen ** 2 * 6); // (x, y) coordinates for each triangle
+    #signalsArray = new Float32Array(kSignalSquareSideLen ** 2 * 3);
+    #positionBuffer;
+    #signalsBuf;
+
     constructor(gl) {
-        super(gl, GlStateSignals.#kVertexShaderSource, GlStateSignals.#kFragmentShaderSource);
+        super(gl, GlPlantSignals.#kVertexShaderSource, GlPlantSignals.#kFragmentShaderSource);
 
-        this.positionBuffer = gl.createBuffer();
-        this.signalsBuf = gl.createBuffer();
-
-        this.positionArray = new Float32Array(kSignalSquareSideLen ** 2 * 6); // (x, y) coordinates for each triangle
-        this.signalsArray = new Float32Array(kSignalSquareSideLen ** 2 * 3);
+        this.#positionBuffer = gl.createBuffer();
+        this.#signalsBuf = gl.createBuffer();
     }
 
     renderTimeConfigShaderParams(numObjects) {
-        this.configureShaderParam("vertexPos", this.gl.FLOAT, 2, this.positionBuffer, this.positionArray);
-        this.configureShaderParam("vertexSignal", this.gl.FLOAT, 1, this.signalsBuf, this.signalsArray);
-
-        this.gl.drawArrays(this.gl.TRIANGLES,
-                      /*first=*/0,
-                      /*count=*/numObjects * 3);
+        this.configureShaderParam("vertexPos", this.gl.FLOAT, 2, this.#positionBuffer, this.#positionArray);
+        this.configureShaderParam("vertexSignal", this.gl.FLOAT, 1, this.#signalsBuf, this.#signalsArray);
+        this.gl.drawArrays(this.gl.TRIANGLES, /*first=*/0, /*count=*/numObjects * 3);
     }
 
     setSignal(i, x, y, signalLogScaled) {
-        const positionArray = this.positionArray;
-        const signalsArray = this.signalsArray;
+        this.#isCleared = false;
+
+        const positionArray = this.#positionArray;
+        const signalsArray = this.#signalsArray;
 
         positionArray[6 * i + 0] = x;
         positionArray[6 * i + 1] = y;
@@ -186,6 +196,15 @@ class GlStateSignals extends GlState {
         signalsArray[3 * i + 0] = signalLogScaled;
         signalsArray[3 * i + 1] = signalLogScaled;
         signalsArray[3 * i + 2] = signalLogScaled;
+    }
+
+    clear() {
+        if (this.#isCleared) {
+            return;
+        }
+        this.#positionArray.forEach((_, i) => { this.#positionArray[i] = 0; });
+        this.#signalsArray.forEach((_, i) => { this.#signalsArray[i] = 0; });
+        this.#isCleared = true;
     }
 
     static #kVertexShaderSource = `#version 300 es
@@ -217,7 +236,7 @@ void main() {
 `;
 }
 
-class CoralPolyp {
+class PlantCell {
     constructor(ctx2d, adjustableVariables, angle, r, g, b, x1, y1, x2, y2) {
         this.ttl = kMaxTtl;
 
@@ -263,7 +282,7 @@ class CoralPolyp {
             this.x2 += kGrowthMagnitude * Math.cos(this.angle);
             this.y2 += kGrowthMagnitude * Math.sin(this.angle);
 
-            const signalMatrixIndex = CoralPolyp.getIsOccupiedIndex(this.x2, this.y2);
+            const signalMatrixIndex = PlantCell.getIsOccupiedIndex(this.x2, this.y2);
             if (this.isInBounds() && signalMatrix[signalMatrixIndex] <= kGrowSignalThresh) {
                 // Increase the signal at the new endpoint.
                 console.assert(signalMatrix[signalMatrixIndex] <= kMaxU16);
@@ -281,7 +300,7 @@ class CoralPolyp {
             const maxTurn = this.adjustableVariables.maxTurn / 360 * 2 * Math.PI;
             const newAngle = this.angle + (2 * Math.random() - 1) * maxTurn;
 
-            const child = new CoralPolyp(
+            const child = new PlantCell(
                 this.ctx2d,
                 this.adjustableVariables,
                 newAngle,
@@ -294,7 +313,7 @@ class CoralPolyp {
                 /*y2=*/ this.y2 + kSplitMagnitude * Math.sin(newAngle),
             );
 
-            const signalMatrixIndex = CoralPolyp.getIsOccupiedIndex(child.x2, child.y2);
+            const signalMatrixIndex = PlantCell.getIsOccupiedIndex(child.x2, child.y2);
             if (child.isInBounds() && signalMatrix[signalMatrixIndex] <= kSplitSignalThresh) {
                 polyps.push(child);
 
@@ -395,7 +414,7 @@ function buildThunks() {
     let ctx2d = canvas2d.getContext("2d");
 
     const canvasGl = document.getElementById("gameGl");
-    let gl = canvasGl.getContext("webgl2");
+    let gl = canvasGl.getContext("webgl2", { antialias: true });
 
     if (forceBothCanvases) {
         canvas2d.style.setProperty("display", "block");
@@ -413,8 +432,8 @@ function buildThunks() {
         ctx2d = null;
     }
 
-    const glStateLines = new GlStateLines(gl);
-    const glStateSignals = new GlStateSignals(gl);
+    const glCells = new GlPlantCells(gl);
+    const glSignals = new GlPlantSignals(gl);
 
     const adjustableVariables = new AdjustableVariables();
     const signalMatrix = new Uint16Array(kSignalSquareSideLen ** 2);
@@ -465,35 +484,34 @@ function buildThunks() {
                     ctx2d.fillRect(x * 10, y * 10, 10, 10);
                 }
 
-                if (glStateSignals.isEnabled()) {
-                    glStateSignals.setSignal(i, x, y, signalLogScaled);
+                if (glSignals.isEnabled()) {
+                    glSignals.setSignal(i, x, y, signalLogScaled);
                 }
             }
         } else if (gl) {
-            glStateSignals.positionArray.forEach((_, i) => { glStateSignals.positionArray[i] = 0; });
-            glStateSignals.signalsArray.forEach((_, i) => { glStateSignals.signalsArray[i] = 0; });
+            glSignals.clear();
         }
 
         // Maybe initialize.
         if (polyps.length === 0) {
-            const first = new CoralPolyp(
+            const first = new PlantCell(
                 ctx2d,
                 adjustableVariables,
-                    /*angle=*/(3 * Math.PI) / 2,
-                    /*r=*/ 0,
-                    /*g=*/ 255,
-                    /*b=*/ 0,
-                    /*x1=*/ 500,
-                    /*y1=*/ 1000,
-                    /*x2=*/ 500,
-                    /*y2=*/ 980,
+                /*angle=*/(3 * Math.PI) / 2,
+                /*r=*/ 0,
+                /*g=*/ 255,
+                /*b=*/ 0,
+                /*x1=*/ 500,
+                /*y1=*/ 1000,
+                /*x2=*/ 500,
+                /*y2=*/ 980,
             );
 
             for (let i = 0; i < signalMatrix.length; ++i) {
                 signalMatrix[i] = 0;
             }
 
-            signalMatrix[CoralPolyp.getIsOccupiedIndex(first.x2, first.y2)] = 1;
+            signalMatrix[PlantCell.getIsOccupiedIndex(first.x2, first.y2)] = 1;
 
             polyps = [first];
         }
@@ -523,17 +541,8 @@ function buildThunks() {
                 b.b = Math.min(64, (b.b + 1));
             }
 
-            if (gl) {
-                const positionArray = glStateLines.positionArray;
-                const ttlArray = glStateLines.ttlArray;
-
-                positionArray[kNumPositionFields * i + 0] = b.x1;
-                positionArray[kNumPositionFields * i + 1] = b.y1;
-                positionArray[kNumPositionFields * i + 2] = b.x2;
-                positionArray[kNumPositionFields * i + 3] = b.y2;
-
-                ttlArray[2 * i + 0] = b.ttl;
-                ttlArray[2 * i + 1] = b.ttl;
+            if (glCells.isEnabled()) {
+                glCells.setCell(i, b)
             }
         });
 
@@ -543,10 +552,10 @@ function buildThunks() {
 
             // Signals should be rendered before the lines for visual appeal.
             if (adjustableVariables.showSignals) {
-                glStateSignals.render(kSignalSquareSideLen ** 2);
+                glSignals.render(kSignalSquareSideLen ** 2);
             }
 
-            glStateLines.render(polyps.length);
+            glCells.render(polyps.length);
         }
 
 
