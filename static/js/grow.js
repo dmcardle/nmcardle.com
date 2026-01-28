@@ -97,6 +97,7 @@ class GlPlantCells extends AbtractGlWrapper {
     #ttlArray = new Float32Array(kMaxNumObjects * 2);
     #positionBuffer;
     #ttlBuffer;
+    #baseColorVec3 = [0, 0, 0];
 
     constructor(gl) {
         super(gl, GlPlantCells.#kVertexShaderSource, GlPlantCells.#kFragmentShaderSource);
@@ -104,7 +105,15 @@ class GlPlantCells extends AbtractGlWrapper {
         this.#ttlBuffer = gl.createBuffer();
     }
 
+    setBaseColor(baseColorVec3) {
+        this.#baseColorVec3 = baseColorVec3;
+    }
+
     renderTimeConfigShaderParams(numObjects) {
+        const baseColorVec3 = this.#baseColorVec3;
+        const uBaseColorIndex = this.gl.getUniformLocation(this.program, "uBaseColor");
+        this.gl.uniform3f(uBaseColorIndex, baseColorVec3[0], baseColorVec3[1], baseColorVec3[2]);
+
         // Connect `positionArray` to the `vertexPos` shader parameter.
         this.configureShaderParam("vertexPos", this.gl.FLOAT, 2, this.#positionBuffer, this.#positionArray);
         this.configureShaderParam("vertexTtl", this.gl.FLOAT, 1, this.#ttlBuffer, this.#ttlArray);
@@ -130,6 +139,7 @@ in vec2 vertexPos;
 in float vertexTtl;
 
 out float ttl;
+out vec2 pos;
 
 void main() {
   gl_Position = vec4(vertexPos[0] / 500.0 - 1.0,
@@ -137,6 +147,7 @@ void main() {
                      0,
                      1);
   ttl = vertexTtl;
+  pos = vec2(gl_Position[0], gl_Position[1]);
 }
 `;
 
@@ -144,17 +155,27 @@ void main() {
 
 precision highp float;
 
+uniform vec3 uBaseColor;
+
 in float ttl;
+in vec2 pos;
 out vec4 outColor;
 
 void main() {
+  const float kMaxTtl = ${kMaxTtl.toFixed(3)};
+
+  float scalar = (ttl * ttl) / (kMaxTtl * kMaxTtl);
+
   // Over a line's lifetime, the ttlScaled decreases from a maximum of 1 to a
   // minimum of 0.
-  float ttlScaled = (ttl * ttl) / (512.0 * 512.0);
 
-  float r = 0.3 * (1.0 - ttlScaled);
-  float g = ttlScaled;
-  float b = 0.0;
+  float r = uBaseColor[0] / 255.0 * scalar;
+  float g = uBaseColor[1] / 255.0 * scalar + ((pos[0] + 1.0) / 2.0) * 0.8;
+  float b = uBaseColor[2] / 255.0 * scalar + ((pos[1] + 1.0) / 2.0) * 0.8;
+
+  r = max(min(r, 1.0), 0.001);
+  g = max(min(g, 1.0), 0.001);
+  b = max(min(b, 1.0), 0.001);
 
   outColor = vec4(r, g, b, 1);
 }
@@ -348,10 +369,32 @@ class PlantCell {
     }
 }
 
+// Parse a hex string of the form "#[0-9]{6}" in regex notation.
+function parseHexString(s) {
+    if (s.length === 0) {
+        return null;
+    }
+    if (s[0] !== '#') {
+        return null;
+    }
+    const hexString = s.slice(1);
+    if (hexString.length % 2 != 0) {
+        return null;
+    }
+    const bytes = [];
+    for (let i=0; i < hexString.length; i += 2) {
+        const hexByte = hexString.slice(i, i+2);
+        const byteValue = parseInt(hexByte, 16);
+        bytes.push(byteValue);
+    }
+    return bytes;
+}
+
 class AdjustableVariables {
     resetSignalsRequested = false;
     resetUniverseRequested = false;
     pauseUniverseRequested = false;
+    baseColorBytes;
 
     constructor() {
         const obj = this;
@@ -392,7 +435,7 @@ class AdjustableVariables {
 
         const resetSignalsButton = document.getElementById("resetSignalsButton");
         console.assert(resetSignalsButton);
-        resetSignalsButton.addEventListener("click", (event) => {
+        resetSignalsButton.addEventListener("click", () => {
             this.resetSignalsRequested = true;
         });
 
@@ -410,6 +453,22 @@ class AdjustableVariables {
             if (!this.pauseUniverseRequested) {
                 thunks.startAnimationFunc();
             }
+        });
+
+        const baseColorPicker = document.getElementById("baseColorPicker");
+        console.assert(baseColorPicker);
+        baseColorPicker.addEventListener("input", (event) => {
+            console.log("New color:", baseColorPicker.value)
+            this.baseColorBytes = parseHexString(baseColorPicker.value);
+        });
+        const originalColorValue = baseColorPicker.value;
+        this.baseColorBytes = parseHexString(originalColorValue);
+
+        const resetColorButton = document.getElementById("resetColorButton");
+        console.assert(resetColorButton);
+        resetColorButton.addEventListener("click", () => {
+            baseColorPicker.value = originalColorValue;
+            this.baseColorBytes = parseHexString(originalColorValue);
         });
     }
 }
@@ -560,6 +619,8 @@ function buildThunks() {
         cells.slice(firstActiveCellIndex).forEach((c) => c.act(cells, signalMatrix));
         cells = cells.filter((b) => b.ttl > 0 && b.isInBounds());
         cells = cells.slice(0, kMaxNumObjects);
+
+        glCells.setBaseColor(adjustableVariables.baseColorBytes);
 
         cells.forEach((b, i) => {
             b.ttl--;
