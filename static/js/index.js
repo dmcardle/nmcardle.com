@@ -168,24 +168,26 @@ function buildThunks() {
         blob.vy += Math.sin(angle) * accel;
       });
 
+      const friction = -0.5;
+
       const x = blob.x;
       const y = blob.y;
       const r = blob.r;
       if (x - r < 0) {
         blob.x = r;
-        blob.vx *= -0.9;
+        blob.vx *= friction;
       }
       if (x + r > 100) {
         blob.x = 100 - blob.r;
-        blob.vx *= -0.9;
+        blob.vx *= friction;
       }
       if (y - r < 0) {
         blob.y = blob.r;
-        blob.vy *= -0.9;
+        blob.vy *= friction;
       }
       if (y + r > 100) {
         blob.y = 100 - blob.r;
-        blob.vy *= -0.9;
+        blob.vy *= friction;
       }
 
       if (isNaN(blob.x)) debugger;
@@ -205,22 +207,24 @@ function buildThunks() {
   thunks.onkeydown = (event) => {
     console.log(event);
     if (event.code === "Space") {
+      event.preventDefault();
       animationPaused = !animationPaused;
 
       if (!animationPaused) {
         window.requestAnimationFrame(animate);
       }
     } else if (event.code === "KeyM") {
-      // TODO: Apply mass to the cursor.
+      event.preventDefault();
       mouseEnabled = !mouseEnabled;
       console.log("mouse enabled? " + mouseEnabled);
 
       if (mouseEnabled) {
-        mouseBlob.r = 10;
+        mouseBlob.r = 3;
       } else {
         mouseBlob.r = 0;
       }
     } else if (event.code === "KeyP") {
+      event.preventDefault();
       popLargestBlob(0);
     }
   };
