@@ -8,22 +8,60 @@
     <style media="screen">
       html, body {
           height: 100%;
+          background-color: black;
       }
       body {
           margin: 0;
       }
+      .text {
+          color: lightgreen;
+          font-family: "Menlo", monospace;
+          padding: 1em;
+          p {
+              margin-top: 0;
+          }
+
+          a {
+              color: lightblue;
+          }
+          ul {
+              margin-top: 0.25em;
+          }
+      }
       #game {
           overflow: hidden;
           background-color: black;
-          height: 100%;
           cursor: none;
       }
     </style>
   </head>
   <body>
+    <div class="text">
+      <p>
+        Welcome to outer space!
+        Gravity occasionally causes these planets to collide.
+        Press "m" to give your mouse mass.
+        Press "p" to pop the largest planet.
+        Spacebar pauses the simulation.
+        Scroll down for more.
+      </p>
+    </div>
     <div id="game">
       <svg id="gameSvg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       </svg>
+    </div>
+
+    <div class="text">
+      <p>
+        If you like this, check out <a href="/grow">/grow</a>.
+        If you didn't like it, then I doubt you'll enjoy my <a href="/resume">résumé</a>.
+        You can also find me on 
+        <a href="https://github.com/dmcardle">GitHub</a>
+        and
+        <a href="https://codeberg.org/dmcardle">Codeberg</a>.
+      </p>
+      <p>
+      </p>
     </div>
 
     <script src="js/index.js"></script>
