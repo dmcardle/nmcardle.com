@@ -1,7 +1,7 @@
 "use strict";
 
 const kMaxU16 = 0xffff;
-const kMaxNumObjects = 1 << 16;
+const kMaxNumObjects = 1 << 18;
 const kMaxTtl = 1 << 9;
 
 const kGrowthMagnitude = 1;
